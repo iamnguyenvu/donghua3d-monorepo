@@ -12,12 +12,11 @@ async function main() {
     where: { email: adminEmail },
   });
 
-  let adminId = '';
   if (!existingAdmin) {
     const salt = bcrypt.genSaltSync(10);
     const passwordHash = bcrypt.hashSync('admin123', salt);
 
-    const admin = await prisma.user.create({
+    await prisma.user.create({
       data: {
         email: adminEmail,
         password: passwordHash,
@@ -26,10 +25,8 @@ async function main() {
         veteranSince: new Date(),
       },
     });
-    adminId = admin.id;
     console.log(`✅ Admin user created: ${adminEmail} (password: admin123)`);
   } else {
-    adminId = existingAdmin.id;
     console.log(`ℹ️ Admin user already exists: ${adminEmail}`);
   }
 
