@@ -254,10 +254,16 @@ export default function LeaderboardAndTiers() {
                         <h3 className="text-sm font-bold text-white truncate group-hover:text-violet-300 transition-colors">{row.movie.title}</h3>
                         <span className="text-[10px] text-zinc-500 font-bold uppercase tracking-wider">{row.movie.studio} • {row.movie.releaseYear}</span>
                         <div className="flex items-center gap-2 mt-1">
-                          <span className="bg-amber-400/5 border border-amber-400/20 text-amber-400 font-sans font-extrabold text-[11px] px-2.5 py-0.5 rounded-lg flex items-center gap-1 shadow-sm">
-                            <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
-                            {row.movie.rating.toFixed(1)}
-                          </span>
+                          {row.movie.rating > 0 ? (
+                            <span className="bg-amber-400/5 border border-amber-400/20 text-amber-400 font-sans font-extrabold text-[11px] px-2.5 py-0.5 rounded-lg flex items-center gap-1 shadow-sm">
+                              <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
+                              {row.movie.rating.toFixed(1)}
+                            </span>
+                          ) : (
+                            <span className="bg-cyan-500/5 border border-cyan-500/20 text-cyan-300 font-sans font-extrabold text-[10px] px-2.5 py-0.5 rounded-lg uppercase tracking-wider shadow-sm select-none">
+                              1080P
+                            </span>
+                          )}
                           <span className="bg-violet-500/5 border border-violet-500/20 text-violet-300 font-sans font-extrabold text-[11px] px-2.5 py-0.5 rounded-lg shadow-sm">
                             {row.globalTier}-TIER
                           </span>

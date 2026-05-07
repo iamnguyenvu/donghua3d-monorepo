@@ -164,10 +164,16 @@ export default function Home() {
           <div className="flex items-center gap-3 text-sm text-zinc-300 font-semibold flex-wrap">
             <span className="text-violet-400 font-bold tracking-wider uppercase">{heroMovie.studio}</span>
             <span className="text-zinc-600">•</span>
-            <span className="flex items-center gap-1.5 text-amber-400 bg-amber-400/5 px-2.5 py-0.5 rounded-lg border border-amber-400/20">
-              <Star className="w-4 h-4 fill-amber-400 text-amber-400" />
-              {heroMovie.rating.toFixed(1)} / 10
-            </span>
+            {heroMovie.rating > 0 ? (
+              <span className="flex items-center gap-1.5 text-amber-400 bg-amber-400/5 px-2.5 py-0.5 rounded-lg border border-amber-400/20">
+                <Star className="w-4 h-4 fill-amber-400 text-amber-400" />
+                {heroMovie.rating.toFixed(1)} / 10
+              </span>
+            ) : (
+              <span className="flex items-center gap-1.5 text-violet-300 bg-violet-500/5 px-2.5 py-0.5 rounded-lg border border-violet-500/20 text-xs font-extrabold uppercase tracking-wider">
+                Full HD 1080P
+              </span>
+            )}
             <span className="text-zinc-600">•</span>
             <span className="text-zinc-400 font-normal">Tên khác: <span className="text-zinc-200 font-medium">{heroMovie.altTitles.join(', ')}</span></span>
           </div>
@@ -278,9 +284,15 @@ export default function Home() {
                   </div>
 
                   {/* Rating Badge */}
-                  <div className="absolute top-3 right-3 bg-black/75 backdrop-blur-md border border-amber-400/30 text-amber-400 px-2.5 py-1 rounded-xl text-xs font-bold flex items-center gap-1 z-10 shadow-lg">
-                    <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
-                    {movie.rating.toFixed(1)}
+                  <div className="absolute top-3 right-3 bg-black/75 backdrop-blur-md border border-amber-400/30 text-amber-400 px-2.5 py-1 rounded-xl text-xs font-bold flex items-center gap-1 z-10 shadow-lg select-none">
+                    {movie.rating > 0 ? (
+                      <>
+                        <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
+                        {movie.rating.toFixed(1)}
+                      </>
+                    ) : (
+                      <span className="text-[10px] tracking-wider font-extrabold text-amber-400 uppercase">1080P</span>
+                    )}
                   </div>
 
                   {/* Global Tier Badge */}
