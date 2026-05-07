@@ -106,8 +106,10 @@ Standard HTML5 player controls look unpolished and generic. We build a fully cus
   - The video player throttles state updates and makes a `POST /api/watch-history` request every **10 seconds** of active watching to record `progress`.
 - **Auto-Resume Overlay Banner**:
   - When entering an episode page, if `WatchHistory.progress > 0`, a bottom-left glassmorphic alert triggers: `"Bạn đang xem dở tại 05:12. [Xem tiếp]"`. Clicking on it immediately seeks the HLS playback offset.
-- **Quick-Skip Intro Button (Skip OP/ED)**:
+- **Quick-Skip Intro Button (Skip OP)**:
   - Using episode metadata markers (`introStart`, `introEnd`), a glassmorphic button floating above the lower-right scrubber reads `"Bỏ qua đoạn mở đầu"`. Clicking immediately seeks the video timeline to the specified `introEnd` second.
+- **Quick-Skip Outro Button (Skip ED)**:
+  - Using episode metadata markers (`outroStart`, `outroEnd`), a glassmorphic button floating above the lower-right scrubber reads `"Bỏ qua đoạn kết thúc"`. Clicking immediately seeks the video timeline to the specified `outroEnd` second.
 
 ### 3.3 Key Shortcuts Support
 * `Spacebar`: Toggle Play/Pause.
@@ -116,7 +118,8 @@ Standard HTML5 player controls look unpolished and generic. We build a fully cus
 * `ArrowUp`: Increase volume by 5%.
 * `ArrowDown`: Decrease volume by 5%.
 * `F`: Toggle Fullscreen.
-* `S`: Skip intro segment.
+* `S`: Skip intro segment (OP).
+* `E`: Skip outro segment (ED).
 
 ---
 

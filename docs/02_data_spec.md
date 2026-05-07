@@ -4,7 +4,137 @@ This document serves as the **Database & Schema Specification (02_data_spec)** f
 
 ---
 
-## 1. Relational Database Schema (DDL)
+## 1. Relational Database Schema & Architecture
+
+To visual the structural constraints, compound relations, and indexing paths of Donghua3D, the following entity relationship diagram maps the exact database layout:
+
+```mermaid
+erDiagram
+    User {
+        UUID id PK
+        VARCHAR email UNIQUE
+        VARCHAR password
+        Role role "USER, EXPERT, ADMIN"
+        INTEGER reputationScore "0-100"
+        TIMESTAMP veteranSince
+        TIMESTAMP createdAt
+    }
+
+    Movie {
+        UUID id PK
+        VARCHAR title
+        VARCHAR altTitles "JSONB"
+        VARCHAR description
+        VARCHAR bannerUrl
+        VARCHAR posterUrl
+        VARCHAR studio
+        INTEGER releaseYear
+        DOUBLE PRECISION rating
+        DOUBLE PRECISION expertRating
+        DOUBLE PRECISION audienceRating
+        TIMESTAMP createdAt
+        TIMESTAMP updatedAt
+    }
+
+    Episode {
+        UUID id PK
+        UUID movieId FK
+        INTEGER episodeNumber
+        VARCHAR title
+        TEXT description
+        VARCHAR videoUrl
+        DOUBLE PRECISION duration
+        DOUBLE PRECISION introStart
+        DOUBLE PRECISION introEnd
+        DOUBLE PRECISION outroStart
+        DOUBLE PRECISION outroEnd
+        VARCHAR thumbnail
+        DOUBLE PRECISION rating
+        DOUBLE PRECISION expertRating
+        DOUBLE PRECISION audienceRating
+        TIMESTAMP createdAt
+        TIMESTAMP updatedAt
+    }
+
+    Rating {
+        UUID id PK
+        UUID userId FK
+        UUID movieId FK
+        UUID episodeId FK
+        RatingType ratingType "USER, EXPERT"
+        INTEGER value "1-10"
+        TEXT review
+        BOOLEAN isCredible
+        BOOLEAN isApproved
+        TIMESTAMP createdAt
+    }
+
+    Comment {
+        UUID id PK
+        UUID userId FK
+        UUID movieId FK
+        UUID episodeId FK
+        UUID parentId FK "self-reference"
+        TEXT content
+        BOOLEAN isSpoiler
+        BOOLEAN isFlagged
+        TIMESTAMP createdAt
+        TIMESTAMP updatedAt
+    }
+
+    WatchHistory {
+        UUID id PK
+        UUID userId FK
+        UUID episodeId FK
+        DOUBLE PRECISION progress "seconds"
+        BOOLEAN completed
+        TIMESTAMP updatedAt
+    }
+
+    PersonalTierList {
+        UUID id PK
+        UUID userId FK
+        UUID movieId FK
+        Tier tier "S, A, B, C, D, F"
+        TEXT notes
+        TIMESTAMP updatedAt
+    }
+
+    GlobalTierLeaderboard {
+        UUID movieId PK, FK
+        INTEGER s_tier_count
+        INTEGER a_tier_count
+        INTEGER b_tier_count
+        INTEGER c_tier_count
+        INTEGER d_tier_count
+        INTEGER f_tier_count
+        DOUBLE PRECISION tierScore
+        Tier globalTier
+        INTEGER rank
+        TIMESTAMP lastCalculated
+    }
+
+    User ||--o{ Rating : "posts"
+    User ||--o{ Comment : "writes"
+    User ||--o{ WatchHistory : "tracks"
+    User ||--o{ PersonalTierList : "manages"
+
+    Movie ||--|{ Episode : "contains"
+    Movie ||--o{ Rating : "receives"
+    Movie ||--o{ Comment : "receives"
+    Movie ||--o{ PersonalTierList : "placed_in"
+    Movie ||--|| GlobalTierLeaderboard : "cached_rank"
+
+    Episode ||--o{ Rating : "receives"
+    Episode ||--o{ Comment : "receives"
+    Episode ||--o{ WatchHistory : "tracks_progress"
+
+    Comment ||--o{ Comment : "replies_to"
+```
+
+---
+
+## 2. PostgreSQL DDL Specification (Data Definition Language)
 
 We utilize **PostgreSQL (v15+)** for catalog persistence, watch session tracking, and social interactions.
 
@@ -59,6 +189,8 @@ CREATE TABLE "Episode" (
     "duration" DOUBLE PRECISION DEFAULT 0.0 NOT NULL,           -- In seconds
     "introStart" DOUBLE PRECISION DEFAULT 0.0 NOT NULL,         -- Video second offset where OP song starts
     "introEnd" DOUBLE PRECISION DEFAULT 0.0 NOT NULL,           -- Video second offset where OP song ends
+    "outroStart" DOUBLE PRECISION DEFAULT 0.0 NOT NULL,         -- Video second offset where ED song starts
+    "outroEnd" DOUBLE PRECISION DEFAULT 0.0 NOT NULL,           -- Video second offset where ED song ends
     "thumbnail" VARCHAR(512),                                  -- Video thumbnail screen grab
     "rating" DOUBLE PRECISION DEFAULT 0.0 NOT NULL,
     "expertRating" DOUBLE PRECISION DEFAULT 0.0 NOT NULL,
@@ -138,7 +270,7 @@ CREATE TABLE "GlobalTierLeaderboard" (
 
 ---
 
-## 2. Indexing Matrix (Performance Tuning)
+## 3. Indexing Matrix (Performance Tuning)
 
 To support instant loading screens, PostgreSQL lookup latency must remain sub-millisecond ($< 5\text{ms}$). We apply B-Tree and Gin composite indexes:
 
@@ -164,7 +296,7 @@ CREATE INDEX "idx_movie_titles_gin" ON "Movie" USING gin ("altTitles");
 
 ---
 
-## 3. Mathematical Formula Spec for Rating Calculations
+## 4. Mathematical Formula Spec for Rating Calculations
 
 To defend against coordinate review bombing, ratings are aggregated using a strict, reputation-weighted formula.
 
