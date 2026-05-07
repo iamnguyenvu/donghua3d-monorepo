@@ -6,7 +6,7 @@ import { useParams, useRouter } from 'next/navigation';
 import Hls from 'hls.js';
 import { 
   Play, Pause, Volume2, Maximize2, SkipForward, ArrowLeft, Star, 
-  MessageSquare, User, Calendar, AlertCircle, Loader2, Send, EyeOff, Flag 
+  MessageSquare, Loader2, Send, Flag 
 } from 'lucide-react';
 import Header from '@/components/Header';
 import { 
@@ -134,7 +134,7 @@ export default function WatchEpisode() {
 
     const handleKeyDown = (e: KeyboardEvent) => {
       const activeEl = document.activeElement?.tagName;
-      if (activeEl === 'INPUT' || activeEl === 'TEXTAREA') return; // Ignore if typing inside reviews or comment boxes
+      if (activeEl === 'INPUT' || activeEl === 'TEXTAREA') return;
 
       if ((e.key === 's' || e.key === 'S') && showIntroSkip) {
         handleSkipIntro();
@@ -268,7 +268,7 @@ export default function WatchEpisode() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-black flex items-center justify-center">
+      <div className="min-h-screen bg-[#050508] flex items-center justify-center">
         <Loader2 className="w-10 h-10 text-violet-500 animate-spin" />
       </div>
     );
@@ -276,16 +276,16 @@ export default function WatchEpisode() {
 
   if (!episode || !movie) {
     return (
-      <div className="min-h-screen bg-black flex flex-col items-center justify-center p-8">
-        <AlertCircle className="w-12 h-12 text-red-500 mb-4" />
+      <div className="min-h-screen bg-[#050508] flex flex-col items-center justify-center p-8">
+        <Loader2 className="w-12 h-12 text-rose-500 mb-4 animate-spin" />
         <h2 className="text-xl font-bold text-white">Không tìm thấy tập phim</h2>
-        <Link href="/" className="btn-cinema btn-cinema-primary mt-6">Quay về Trang Chủ</Link>
+        <Link href="/" className="px-6 py-3 bg-gradient-to-r from-violet-600 to-indigo-600 rounded-full text-white font-bold mt-6 hover:scale-105 active:scale-95 transition-all">Quay về Trang Chủ</Link>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-black text-white flex flex-col font-sans pb-24">
+    <div className="min-h-screen bg-[#050508] text-zinc-100 flex flex-col font-sans pb-24">
       <Header />
 
       {/* ==============================================================================
@@ -297,8 +297,8 @@ export default function WatchEpisode() {
           Quay lại danh mục {movie.title}
         </Link>
 
-        {/* Video Player Frame wrapper */}
-        <div className="relative aspect-video w-full rounded-2xl overflow-hidden border border-white/10 bg-zinc-950 shadow-2xl group/player">
+        {/* Video Player Frame wrapper using pure Tailwind layout */}
+        <div className="relative aspect-video w-full rounded-2xl overflow-hidden border border-zinc-800 bg-black shadow-2xl group">
           <video
             ref={videoRef}
             onTimeUpdate={handleTimeUpdate}
@@ -311,10 +311,9 @@ export default function WatchEpisode() {
           {showIntroSkip && (
             <button
               onClick={handleSkipIntro}
-              className="absolute bottom-20 left-8 z-30 btn-cinema btn-cinema-primary rounded-xl px-6 py-3.5 animate-pulse-glow flex items-center gap-2 font-bold font-sans text-sm"
-              style={{ background: 'linear-gradient(135deg, hsl(var(--primary)), #4C1D95)' }}
+              className="absolute bottom-20 left-8 z-30 py-3.5 px-6 rounded-xl bg-gradient-to-r from-violet-600 to-indigo-600 border border-violet-500/20 text-white font-bold font-sans text-sm shadow-[0_0_20px_rgba(138,43,226,0.5)] hover:scale-105 active:scale-95 transition-all duration-300 animate-pulse"
             >
-              <SkipForward className="w-4 h-4" />
+              <SkipForward className="w-4 h-4 inline mr-1.5" />
               BỎ QUA GIỚI THIỆU (Nhấn S)
             </button>
           )}
@@ -323,16 +322,15 @@ export default function WatchEpisode() {
           {showOutroSkip && (
             <button
               onClick={handleSkipOutro}
-              className="absolute bottom-20 right-8 z-30 btn-cinema btn-cinema-primary rounded-xl px-6 py-3.5 animate-pulse-glow flex items-center gap-2 font-bold font-sans text-sm"
-              style={{ background: 'linear-gradient(135deg, hsl(var(--primary)), #4C1D95)' }}
+              className="absolute bottom-20 right-8 z-30 py-3.5 px-6 rounded-xl bg-gradient-to-r from-violet-600 to-indigo-600 border border-violet-500/20 text-white font-bold font-sans text-sm shadow-[0_0_20px_rgba(138,43,226,0.5)] hover:scale-105 active:scale-95 transition-all duration-300 animate-pulse"
             >
-              <SkipForward className="w-4 h-4" />
+              <SkipForward className="w-4 h-4 inline mr-1.5" />
               BỎ QUA PHẦN KẾT THÚC (Nhấn E)
             </button>
           )}
 
-          {/* CUSTOM CONTROLS OVERLAY BAR */}
-          <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent p-4 flex flex-col gap-3 opacity-0 group-hover/player:opacity-100 transition-opacity duration-300 z-20">
+          {/* CUSTOM CONTROLS OVERLAY BAR using pure Tailwind */}
+          <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black via-black/40 to-transparent p-5 flex flex-col gap-3.5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-20">
             {/* Timeline Progress Slider */}
             <input
               type="range"
@@ -344,21 +342,21 @@ export default function WatchEpisode() {
                 if (videoRef.current) videoRef.current.currentTime = val;
                 setCurrentTime(val);
               }}
-              className="w-full h-1 bg-white/20 rounded-lg appearance-none cursor-pointer accent-violet-500 hover:h-2 transition-all"
+              className="w-full h-1 bg-white/20 rounded-lg appearance-none cursor-pointer accent-violet-500 hover:h-1.5 transition-all outline-none"
             />
 
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-4">
-                <button onClick={togglePlay} className="p-2 rounded-full bg-white/5 border border-white/10 hover:bg-white/10 text-white cursor-pointer transition-colors">
-                  {isPlaying ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4 fill-white" />}
+              <div className="flex items-center gap-4.5">
+                <button onClick={togglePlay} className="p-2.5 rounded-full bg-white/5 border border-white/10 hover:bg-white/15 text-white cursor-pointer transition-colors outline-none">
+                  {isPlaying ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4 fill-white text-white" />}
                 </button>
 
-                <span className="text-xs text-zinc-300 font-bold">
+                <span className="text-xs text-zinc-300 font-bold tracking-wider">
                   {formatTime(currentTime)} / {formatTime(duration)}
                 </span>
               </div>
 
-              <div className="flex items-center gap-4">
+              <div className="flex items-center gap-4.5">
                 {/* Volume Slider */}
                 <div className="flex items-center gap-2">
                   <Volume2 className="w-4 h-4 text-zinc-400" />
@@ -369,11 +367,11 @@ export default function WatchEpisode() {
                     step="0.1"
                     value={volume}
                     onChange={handleVolumeChange}
-                    className="w-16 h-1 bg-white/20 appearance-none rounded-lg accent-violet-500 cursor-pointer"
+                    className="w-16 h-1 bg-white/20 appearance-none rounded-lg accent-violet-500 cursor-pointer outline-none"
                   />
                 </div>
 
-                <button onClick={toggleFullscreen} className="p-2 text-zinc-400 hover:text-white bg-transparent border-0 cursor-pointer transition-colors">
+                <button onClick={toggleFullscreen} className="p-2 text-zinc-400 hover:text-white bg-transparent border-0 cursor-pointer transition-colors outline-none">
                   <Maximize2 className="w-4 h-4" />
                 </button>
               </div>
@@ -382,13 +380,13 @@ export default function WatchEpisode() {
         </div>
 
         {/* EPISODE DETAILS INFO */}
-        <div className="mt-8 border-b border-white/10 pb-8">
+        <div className="mt-8 border-b border-zinc-800/80 pb-8">
           <div className="flex items-center gap-2 text-sm text-violet-400 font-bold uppercase tracking-wider mb-2">
             <span>{movie.title}</span>
-            <span>•</span>
+            <span className="text-zinc-600">•</span>
             <span>Tập {episode.episodeNumber}</span>
           </div>
-          <h1 className="text-2xl md:text-3xl font-extrabold text-white mb-3">
+          <h1 className="text-2xl md:text-3xl font-extrabold text-white tracking-tight mb-3">
             {episode.title}
           </h1>
           <p className="text-sm text-zinc-400 leading-relaxed max-w-4xl">
@@ -403,14 +401,14 @@ export default function WatchEpisode() {
           
           {/* LEFT: VERIFIED RATINGS PANEL */}
           <div className="lg:col-span-1 flex flex-col gap-6">
-            <h2 className="text-xl font-bold flex items-center gap-2 border-b border-white/10 pb-4">
+            <h2 className="text-xl font-bold flex items-center gap-2.5 border-b border-zinc-800 pb-4">
               <Star className="w-5 h-5 text-amber-400 fill-amber-400" />
               Đánh Giá Xác Thực
             </h2>
 
             {/* Post review panel form */}
-            <form onSubmit={handleRatingSubmit} className="glass-card p-6 flex flex-col gap-4">
-              <span className="text-xs font-bold text-zinc-400 uppercase">Bạn đánh giá tập phim này bao nhiêu?</span>
+            <form onSubmit={handleRatingSubmit} className="p-6 bg-zinc-950/80 border border-zinc-800/80 rounded-2xl flex flex-col gap-4 shadow-lg">
+              <span className="text-xs font-bold text-zinc-400 uppercase tracking-wider">Bạn đánh giá tập phim này bao nhiêu?</span>
               
               {/* Star selector buttons */}
               <div className="flex items-center gap-1.5">
@@ -419,7 +417,7 @@ export default function WatchEpisode() {
                     key={star}
                     type="button"
                     onClick={() => setUserRating(star)}
-                    className="p-1 bg-transparent border-0 cursor-pointer transition-transform hover:scale-125"
+                    className="p-1 bg-transparent border-0 cursor-pointer transition-transform hover:scale-125 outline-none"
                   >
                     <Star className={`w-5 h-5 ${star <= userRating ? 'fill-amber-400 text-amber-400' : 'text-zinc-600'}`} />
                   </button>
@@ -431,13 +429,13 @@ export default function WatchEpisode() {
                 placeholder="Viết nhận xét ngắn gọn của bạn tại đây (không bắt buộc)..."
                 value={reviewText}
                 onChange={(e) => setReviewText(e.target.value)}
-                className="input-cinema text-sm w-full"
+                className="bg-zinc-900 border border-zinc-800 text-white rounded-xl p-3 text-sm outline-none focus:border-violet-500 focus:ring-1 focus:ring-violet-500 transition-all w-full"
               />
 
               <button
                 type="submit"
                 disabled={userRating === 0 || submittingReview}
-                className="btn-cinema btn-cinema-primary w-full py-2.5 text-sm"
+                className="py-3 px-5 rounded-xl bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white font-bold text-sm transition-all duration-300 hover:scale-[1.02] active:scale-95 shadow-md disabled:opacity-50"
               >
                 Gửi Đánh Giá {userRating > 0 && `(${userRating}/10)`}
               </button>
@@ -447,15 +445,15 @@ export default function WatchEpisode() {
             <div className="flex flex-col gap-4 max-h-[400px] overflow-y-auto pr-2">
               {reviews.length > 0 ? (
                 reviews.map((rev) => (
-                  <div key={rev.id} className="glass-card p-4 flex flex-col gap-2">
+                  <div key={rev.id} className="p-4 bg-zinc-950/80 border border-zinc-800/80 rounded-xl flex flex-col gap-2 shadow-sm">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
-                        <div className="w-7 h-7 rounded-full bg-zinc-800 flex items-center justify-center border border-white/10 text-xs font-bold text-white">
+                        <div className="w-7 h-7 rounded-full bg-zinc-900 border border-zinc-800 flex items-center justify-center text-xs font-bold text-white">
                           U
                         </div>
                         <span className="text-xs text-zinc-300 font-semibold truncate max-w-[120px]">{rev.user.email.split('@')[0]}</span>
                       </div>
-                      <span className="bg-amber-400/10 border border-amber-500/20 text-amber-400 px-2 py-0.5 rounded text-[11px] font-extrabold flex items-center gap-0.5">
+                      <span className="bg-amber-400/5 border border-amber-500/20 text-amber-400 px-2.5 py-0.5 rounded-lg text-[11px] font-extrabold flex items-center gap-0.5 shadow-sm">
                         <Star className="w-3 h-3 fill-amber-400" />
                         {rev.value}/10
                       </span>
@@ -464,9 +462,9 @@ export default function WatchEpisode() {
                   </div>
                 ))
               ) : (
-                <div className="text-center py-12 glass-card p-6">
+                <div className="text-center py-12 bg-zinc-950/40 border border-zinc-800 rounded-xl p-6">
                   <Star className="w-8 h-8 text-zinc-600 mx-auto mb-2" />
-                  <p className="text-xs text-zinc-500">Chưa có đánh giá nào cho bộ phim này.</p>
+                  <p className="text-xs text-zinc-500 italic">Chưa có đánh giá nào cho bộ phim này.</p>
                 </div>
               )}
             </div>
@@ -474,19 +472,19 @@ export default function WatchEpisode() {
 
           {/* RIGHT: THREADED SOCIAL COMMENTS SYSTEM */}
           <div className="lg:col-span-2 flex flex-col gap-6">
-            <h2 className="text-xl font-bold flex items-center gap-2 border-b border-white/10 pb-4">
+            <h2 className="text-xl font-bold flex items-center gap-2.5 border-b border-zinc-800 pb-4">
               <MessageSquare className="w-5 h-5 text-violet-400" />
               Thảo Luận Tập Phim
             </h2>
 
             {/* Post comment form */}
-            <form onSubmit={handleCommentSubmit} className="glass-card p-6 flex flex-col gap-4">
+            <form onSubmit={handleCommentSubmit} className="p-6 bg-zinc-950/80 border border-zinc-800/80 rounded-2xl flex flex-col gap-4 shadow-lg">
               <textarea
                 rows={3}
                 placeholder="Bình luận suy nghĩ hoặc giả thuyết của bạn về tập này..."
                 value={commentText}
                 onChange={(e) => setCommentText(e.target.value)}
-                className="input-cinema text-sm w-full"
+                className="bg-zinc-900 border border-zinc-800 text-white rounded-xl p-3 text-sm outline-none focus:border-violet-500 focus:ring-1 focus:ring-violet-500 transition-all w-full"
                 required
               />
 
@@ -496,7 +494,7 @@ export default function WatchEpisode() {
                     type="checkbox"
                     checked={isSpoilerComment}
                     onChange={(e) => setIsSpoilerComment(e.target.checked)}
-                    className="accent-violet-500"
+                    className="accent-violet-500 rounded border-zinc-700 bg-zinc-900"
                   />
                   Chứa tiết lộ nội dung trước (Spoiler Alert!)
                 </label>
@@ -504,7 +502,7 @@ export default function WatchEpisode() {
                 <button
                   type="submit"
                   disabled={submittingComment}
-                  className="btn-cinema btn-cinema-primary py-2 px-6 text-sm flex items-center gap-2"
+                  className="py-2.5 px-6 rounded-xl bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white font-bold text-sm transition-all duration-300 hover:scale-[1.02] active:scale-95 shadow-md disabled:opacity-50 flex items-center gap-2"
                 >
                   <Send className="w-3.5 h-3.5" />
                   Gửi Bình Luận
@@ -516,8 +514,8 @@ export default function WatchEpisode() {
             <div className="flex flex-col gap-6">
               {comments.length > 0 ? (
                 comments.map((comment) => (
-                  <div key={comment.id} className="border-b border-white/5 pb-4 last:border-0 flex gap-4">
-                    <div className="w-9 h-9 rounded-full bg-violet-900/40 flex items-center justify-center border border-violet-500/20 text-sm font-bold text-violet-300 flex-shrink-0">
+                  <div key={comment.id} className="border-b border-zinc-900 pb-5 last:border-0 flex gap-4">
+                    <div className="w-9 h-9 rounded-full bg-violet-900/40 flex items-center justify-center border border-violet-500/20 text-sm font-bold text-violet-300 flex-shrink-0 select-none">
                       C
                     </div>
                     
@@ -525,13 +523,13 @@ export default function WatchEpisode() {
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
                           <span className="text-xs text-zinc-300 font-bold">{comment.user.email.split('@')[0]}</span>
-                          <span className="text-[10px] text-zinc-500">{new Date(comment.createdAt).toLocaleDateString()}</span>
+                          <span className="text-[10px] text-zinc-500 font-semibold">{new Date(comment.createdAt).toLocaleDateString()}</span>
                         </div>
 
                         <div className="flex items-center gap-2">
                           <button
                             onClick={() => handleCommentFlag(comment.id)}
-                            className="p-1 bg-transparent border-0 cursor-pointer text-zinc-500 hover:text-red-400 transition-colors"
+                            className="p-1 bg-transparent border-0 cursor-pointer text-zinc-500 hover:text-rose-400 transition-colors outline-none"
                             title="Báo cáo vi phạm"
                           >
                             <Flag className="w-3.5 h-3.5" />
@@ -543,7 +541,7 @@ export default function WatchEpisode() {
                       {comment.isSpoiler && !visibleSpoilers[comment.id] ? (
                         <div 
                           onClick={() => setVisibleSpoilers({ ...visibleSpoilers, [comment.id]: true })}
-                          className="spoiler-text inline-block text-xs py-2 px-3 border border-white/5"
+                          className="inline-block text-xs py-2 px-3.5 border border-amber-500/20 bg-amber-500/5 hover:bg-amber-500/10 text-amber-300 rounded-lg cursor-pointer transition-all select-none"
                         >
                           ⚠️ NHẤP ĐỂ XEM SPOILER (Nội dung tiết lộ trước cốt truyện tập phim)
                         </div>
@@ -556,9 +554,9 @@ export default function WatchEpisode() {
                   </div>
                 ))
               ) : (
-                <div className="text-center py-16 glass-card p-6">
+                <div className="text-center py-16 bg-zinc-950/40 border border-zinc-800 rounded-2xl p-6">
                   <MessageSquare className="w-10 h-10 text-zinc-600 mx-auto mb-2" />
-                  <p className="text-sm text-zinc-500">Chưa có bình luận nào cho tập phim này. Hãy bắt đầu cuộc trò chuyện!</p>
+                  <p className="text-sm text-zinc-500 italic">Chưa có bình luận nào cho tập phim này. Hãy bắt đầu cuộc trò chuyện!</p>
                 </div>
               )}
             </div>

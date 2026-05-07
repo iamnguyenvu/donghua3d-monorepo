@@ -123,7 +123,7 @@ export default function Home() {
   const heroMovie = movies[activeHeroIdx] || fallbacks[0];
 
   return (
-    <div className="min-h-screen bg-black text-white flex flex-col font-sans pb-16">
+    <div className="min-h-screen bg-[#050508] text-zinc-100 flex flex-col font-sans pb-16">
       <Header onSearchChange={setSearchQuery} />
 
       {/* ==============================================================================
@@ -140,68 +140,68 @@ export default function Home() {
             className="object-cover opacity-35 scale-105 transition-all duration-1000 ease-out"
           />
           {/* Edge vignettes & smooth gradients */}
-          <div className="absolute inset-0 bg-gradient-to-t from-[#0A0A0E] via-[#0A0A0E]/60 to-transparent" />
-          <div className="absolute inset-0 bg-gradient-to-r from-[#0A0A0E] via-[#0A0A0E]/30 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-[#050508] via-[#050508]/60 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-r from-[#050508] via-[#050508]/40 to-transparent" />
         </div>
 
         {/* Hero Content text */}
         <div className="relative z-10 container mx-auto px-8 max-w-6xl flex flex-col items-start gap-6 mt-16 animate-fade-in-up">
           <div className="flex items-center gap-3">
-            <span className="bg-violet-600/20 border border-violet-500/30 text-violet-300 font-bold px-3 py-1 rounded-full text-xs flex items-center gap-1">
-              <Sparkles className="w-3 h-3" />
+            <span className="bg-violet-500/10 border border-violet-500/30 text-violet-300 font-bold px-3 py-1 rounded-full text-xs flex items-center gap-1.5 shadow-sm">
+              <Sparkles className="w-3.5 h-3.5 text-violet-400" />
               Nổi Bật Tuần Này
             </span>
-            <span className="bg-zinc-800 border border-zinc-700 text-zinc-300 px-3 py-1 rounded-full text-xs font-semibold flex items-center gap-1">
-              <Calendar className="w-3 h-3" />
+            <span className="bg-zinc-900/80 border border-zinc-800 text-zinc-300 px-3 py-1 rounded-full text-xs font-semibold flex items-center gap-1.5 shadow-sm">
+              <Calendar className="w-3.5 h-3.5 text-zinc-400" />
               {heroMovie.releaseYear}
             </span>
           </div>
 
-          <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight" style={{ textShadow: '0 2px 10px rgba(0,0,0,0.5)' }}>
+          <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight text-white leading-tight" style={{ textShadow: '0 4px 15px rgba(0,0,0,0.8)' }}>
             {heroMovie.title}
           </h1>
           
           <div className="flex items-center gap-3 text-sm text-zinc-300 font-semibold flex-wrap">
-            <span className="text-violet-400 font-bold">{heroMovie.studio}</span>
-            <span>•</span>
-            <span className="flex items-center gap-1 text-amber-400">
-              <Star className="w-4 h-4 fill-amber-400" />
-              {heroMovie.rating.toFixed(1)}/10
+            <span className="text-violet-400 font-bold tracking-wider uppercase">{heroMovie.studio}</span>
+            <span className="text-zinc-600">•</span>
+            <span className="flex items-center gap-1.5 text-amber-400 bg-amber-400/5 px-2.5 py-0.5 rounded-lg border border-amber-400/20">
+              <Star className="w-4 h-4 fill-amber-400 text-amber-400" />
+              {heroMovie.rating.toFixed(1)} / 10
             </span>
-            <span>•</span>
-            <span>Tên khác: {heroMovie.altTitles.join(', ')}</span>
+            <span className="text-zinc-600">•</span>
+            <span className="text-zinc-400 font-normal">Tên khác: <span className="text-zinc-200 font-medium">{heroMovie.altTitles.join(', ')}</span></span>
           </div>
 
-          <p className="max-w-2xl text-base text-zinc-400 leading-relaxed truncate-3-lines" style={{ textShadow: '0 1px 3px rgba(0,0,0,0.5)' }}>
+          <p className="max-w-2xl text-base text-zinc-400 leading-relaxed truncate-3-lines" style={{ textShadow: '0 2px 4px rgba(0,0,0,0.8)' }}>
             {heroMovie.description}
           </p>
 
           <div className="flex items-center gap-4 mt-2">
             <Link
               href={`/movies/${heroMovie.id}`}
-              className="btn-cinema btn-cinema-primary rounded-full px-8 py-3 flex items-center gap-2 text-base"
+              className="px-8 py-3 rounded-full bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white font-bold flex items-center gap-2 text-base transition-all duration-300 hover:scale-105 hover:shadow-[0_4px_25px_rgba(138,43,226,0.5)] active:scale-95"
             >
               <Play className="w-5 h-5 fill-white" />
               Xem Ngay
             </Link>
             <Link
               href={`/movies/${heroMovie.id}`}
-              className="btn-cinema btn-cinema-secondary rounded-full px-6 py-3 text-base"
+              className="px-6 py-3 rounded-full bg-zinc-900/80 border border-zinc-800 hover:bg-zinc-800 hover:border-zinc-700 text-zinc-200 font-semibold flex items-center gap-2 text-base transition-all duration-300 active:scale-95"
             >
               Chi tiết phim
-              <ArrowRight className="w-4 h-4" />
+              <ArrowRight className="w-4 h-4 text-zinc-400" />
             </Link>
           </div>
         </div>
 
         {/* Carousel indicators */}
-        <div className="absolute bottom-8 right-8 z-20 flex gap-2">
+        <div className="absolute bottom-8 right-8 z-20 flex gap-2.5">
           {movies.slice(0, 3).map((_, idx) => (
             <button
               key={idx}
               onClick={() => setActiveHeroIdx(idx)}
-              className={`h-2 rounded-full transition-all border-0 cursor-pointer ${
-                activeHeroIdx === idx ? 'w-8 bg-violet-500' : 'w-2 bg-zinc-600'
+              className={`h-2 rounded-full transition-all duration-500 border-0 cursor-pointer ${
+                activeHeroIdx === idx ? 'w-8 bg-violet-500' : 'w-2 bg-zinc-700 hover:bg-zinc-500'
               }`}
             />
           ))}
@@ -212,20 +212,22 @@ export default function Home() {
          GRID CATALOG & SEARCH FILTERS
          ============================================================================== */}
       <main className="container mx-auto px-8 max-w-6xl mt-8">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 border-b border-white/10 pb-6 mb-8">
-          <div className="flex items-center gap-2">
-            <Grid3X3 className="w-5 h-5 text-violet-400" />
-            <h2 className="text-2xl font-bold">Thư Viện Donghua 3D</h2>
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 border-b border-zinc-800/80 pb-6 mb-8">
+          <div className="flex items-center gap-2.5">
+            <div className="p-2 rounded-lg bg-violet-600/10 border border-violet-500/20">
+              <Grid3X3 className="w-5 h-5 text-violet-400" />
+            </div>
+            <h2 className="text-2xl font-bold text-white tracking-tight">Thư Viện Donghua 3D</h2>
           </div>
 
           {/* Quick Filters */}
           <div className="flex items-center gap-4 flex-wrap">
             <div className="flex items-center gap-2">
-              <span className="text-xs text-zinc-400 font-semibold">Năm:</span>
+              <span className="text-xs text-zinc-400 font-semibold uppercase tracking-wider">Năm:</span>
               <select
                 value={selectedYear}
                 onChange={(e) => setSelectedYear(e.target.value)}
-                className="bg-zinc-900 border border-white/10 text-white rounded-lg px-3 py-1.5 text-sm cursor-pointer outline-none focus:border-violet-500"
+                className="bg-zinc-900/90 border border-zinc-800 text-zinc-200 rounded-xl px-4 py-2 text-sm cursor-pointer outline-none focus:border-violet-500 focus:ring-1 focus:ring-violet-500 transition-all duration-300"
               >
                 <option value="all">Tất cả năm</option>
                 <option value="2021">2021</option>
@@ -235,11 +237,11 @@ export default function Home() {
             </div>
 
             <div className="flex items-center gap-2">
-              <span className="text-xs text-zinc-400 font-semibold">Sắp xếp:</span>
+              <span className="text-xs text-zinc-400 font-semibold uppercase tracking-wider">Sắp xếp:</span>
               <select
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value)}
-                className="bg-zinc-900 border border-white/10 text-white rounded-lg px-3 py-1.5 text-sm cursor-pointer outline-none focus:border-violet-500"
+                className="bg-zinc-900/90 border border-zinc-800 text-zinc-200 rounded-xl px-4 py-2 text-sm cursor-pointer outline-none focus:border-violet-500 focus:ring-1 focus:ring-violet-500 transition-all duration-300"
               >
                 <option value="rating">Điểm Đánh Giá</option>
                 <option value="year">Năm Phát Hành</option>
@@ -253,10 +255,10 @@ export default function Home() {
         {loading ? (
           <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-6">
             {[1, 2, 3, 4, 5].map((idx) => (
-              <div key={idx} className="flex flex-col gap-3">
-                <div className="skeleton aspect-[2/3] rounded-xl" />
-                <div className="skeleton h-4 w-3/4" />
-                <div className="skeleton h-3 w-1/2" />
+              <div key={idx} className="flex flex-col gap-3 animate-pulse">
+                <div className="aspect-[2/3] rounded-2xl bg-zinc-900 border border-zinc-800" />
+                <div className="h-4 bg-zinc-900 rounded-lg w-3/4" />
+                <div className="h-3 bg-zinc-900 rounded-lg w-1/2" />
               </div>
             ))}
           </div>
@@ -264,26 +266,26 @@ export default function Home() {
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
             {filteredMovies.map((movie) => (
               <Link href={`/movies/${movie.id}`} key={movie.id} className="no-underline group">
-                <div className="movie-card">
+                <div className="relative overflow-hidden rounded-2xl border border-zinc-800/60 aspect-[2/3] cursor-pointer transition-all duration-500 hover:-translate-y-2 hover:border-violet-500/50 hover:shadow-[0_15px_35px_rgba(138,43,226,0.35)] bg-zinc-950">
                   {/* Poster Image */}
                   <div className="relative w-full h-full">
                     <Image
                       src={movie.posterUrl || '/static/uploads/default_poster.jpg'}
                       alt={movie.title}
                       fill
-                      className="movie-poster"
+                      className="object-cover transition-transform duration-500 group-hover:scale-105"
                     />
                   </div>
 
                   {/* Rating Badge */}
-                  <div className="badge-rating">
+                  <div className="absolute top-3 right-3 bg-black/75 backdrop-blur-md border border-amber-400/30 text-amber-400 px-2.5 py-1 rounded-xl text-xs font-bold flex items-center gap-1 z-10 shadow-lg">
                     <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
                     {movie.rating.toFixed(1)}
                   </div>
 
                   {/* Global Tier Badge */}
                   {movie.leaderboard && (
-                    <div className="absolute top-12 left-12 bg-black/80 backdrop-blur-md px-2.5 py-0.5 rounded border border-white/10 font-sans font-extrabold text-[11px]" style={{
+                    <div className="absolute top-3 left-3 bg-black/75 backdrop-blur-md px-2.5 py-1 rounded-xl border border-violet-500/20 text-violet-300 font-sans font-extrabold text-[10px] tracking-wider z-10 shadow-lg" style={{
                       color: movie.leaderboard.globalTier === 'S' ? '#ff7f7f' : movie.leaderboard.globalTier === 'A' ? '#ffbf7f' : '#bfff7f'
                     }}>
                       {movie.leaderboard.globalTier}-TIER
@@ -291,8 +293,8 @@ export default function Home() {
                   )}
 
                   {/* Movie Info Overlay */}
-                  <div className="movie-overlay">
-                    <span className="text-[10px] text-violet-400 font-bold uppercase tracking-wider">{movie.studio}</span>
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#050508] via-black/30 to-transparent flex flex-col justify-end p-5 opacity-90 group-hover:opacity-100 transition-all duration-500">
+                    <span className="text-[9px] text-violet-400 font-bold uppercase tracking-wider">{movie.studio}</span>
                     <h3 className="text-sm font-bold text-white group-hover:text-violet-300 transition-colors truncate mt-1">
                       {movie.title}
                     </h3>
@@ -305,10 +307,10 @@ export default function Home() {
             ))}
           </div>
         ) : (
-          <div className="text-center py-24 glass-card p-12">
-            <Film className="w-12 h-12 text-zinc-500 mx-auto mb-4" />
+          <div className="text-center py-24 bg-zinc-950/40 border border-zinc-800 rounded-3xl p-12 max-w-2xl mx-auto">
+            <Film className="w-12 h-12 text-zinc-600 mx-auto mb-4" />
             <h3 className="text-lg font-bold text-white">Không tìm thấy bộ phim nào</h3>
-            <p className="text-sm text-zinc-400 mt-1 max-w-sm mx-auto">
+            <p className="text-sm text-zinc-400 mt-2 max-w-sm mx-auto leading-relaxed">
               Hãy thử gõ lại từ khóa khác hoặc điều chỉnh các bộ lọc phát hành phim của bạn.
             </p>
           </div>
