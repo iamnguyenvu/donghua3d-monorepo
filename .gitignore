@@ -1,0 +1,53 @@
+# ==============================================================================
+# DONGHUA3D ROOT MONOREPO .GITIGNORE
+# ==============================================================================
+
+# --- Node.js Dependencies ---
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# --- Local Environment Secrets ---
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+*.env
+
+# --- Next.js Build Files ---
+frontend/.next/
+frontend/out/
+frontend/build/
+
+# --- Express Backend Build Files ---
+backend/dist/
+backend/build/
+
+# --- IDEs and Editor Configs ---
+.idea/
+.vscode/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+.DS_Store
+Thumbs.db
+
+# --- PostgreSQL Local Data Storage ---
+postgres_data/
+
+# --- Local Shared Media Storage (Prevent large video files pushing to Git) ---
+uploads/
+backend/uploads/
+frontend/public/uploads/
+*.mp4
+*.ts
+*.m3u8
+*.jpg
+*.jpeg
+*.png
+temp/
