@@ -1,0 +1,181 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// Custom Enums (matching 02_data_spec.md)
+enum Role {
+  USER
+  EXPERT
+  ADMIN
+}
+
+enum Tier {
+  S
+  A
+  B
+  C
+  D
+  F
+}
+
+enum RatingType {
+  USER
+  EXPERT
+}
+
+// 1. User Entity Model
+model User {
+  id              String             @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  email           String             @unique @db.VarChar(255)
+  password        String             @db.VarChar(255)
+  role            Role               @default(USER)
+  reputationScore Int                @default(100)
+  veteranSince    DateTime?          @db.Timestamptz
+  createdAt       DateTime           @default(now()) @db.Timestamptz
+  ratings         Rating[]
+  comments        Comment[]
+  watchHistories  WatchHistory[]
+  personalTiers   PersonalTierList[]
+}
+
+// 2. Movie Entity Model
+model Movie {
+  id             String                 @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  title          String                 @db.VarChar(255)
+  altTitles      Json                   @default("[]") // JSONB format
+  description    String?                @db.Text
+  bannerUrl      String?                @db.VarChar(512)
+  posterUrl      String?                @db.VarChar(512)
+  studio         String?                @db.VarChar(255)
+  releaseYear    Int
+  rating         Float                  @default(0.0)
+  expertRating   Float                  @default(0.0)
+  audienceRating Float                  @default(0.0)
+  createdAt      DateTime               @default(now()) @db.Timestamptz
+  updatedAt      DateTime               @updatedAt @db.Timestamptz
+  episodes       Episode[]
+  ratings        Rating[]
+  comments       Comment[]
+  personalTiers  PersonalTierList[]
+  leaderboard    GlobalTierLeaderboard?
+
+  @@index([releaseYear(sort: Desc), rating(sort: Desc)], name: "idx_movie_release_rating")
+}
+
+// 3. Episode Entity Model
+model Episode {
+  id             String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  movieId        String         @db.Uuid
+  episodeNumber  Int
+  title          String         @db.VarChar(255)
+  description    String?        @db.Text
+  videoUrl       String         @db.VarChar(512) // Local index.m3u8 path or CloudFront S3 path
+  duration       Float          @default(0.0) // In seconds
+  introStart     Float          @default(0.0) // Video second offset where OP song starts
+  introEnd       Float          @default(0.0) // Video second offset where OP song ends
+  outroStart     Float          @default(0.0) // Video second offset where ED song starts
+  outroEnd       Float          @default(0.0) // Video second offset where ED song ends
+  thumbnail      String?        @db.VarChar(512) // Video thumbnail screen grab
+  rating         Float          @default(0.0)
+  expertRating   Float          @default(0.0)
+  audienceRating Float          @default(0.0)
+  createdAt      DateTime       @default(now()) @db.Timestamptz
+  updatedAt      DateTime       @updatedAt @db.Timestamptz
+  movie          Movie          @relation(fields: [movieId], references: [id], onDelete: Cascade)
+  ratings        Rating[]
+  comments       Comment[]
+  watchHistories WatchHistory[]
+
+  @@unique([movieId, episodeNumber], name: "unique_movie_episode")
+  @@index([movieId, episodeNumber(sort: Asc)], name: "idx_episode_movie_number")
+}
+
+// 4. Rating Entity Model
+model Rating {
+  id         String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId     String     @db.Uuid
+  movieId    String     @db.Uuid
+  episodeId  String?    @db.Uuid // Optional, only present when rating a specific episode
+  ratingType RatingType @default(USER)
+  value      Int // 1 - 10
+  review     String?    @db.Text
+  isCredible Boolean    @default(true)
+  isApproved Boolean    @default(true)
+  createdAt  DateTime   @default(now()) @db.Timestamptz
+  user       User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  movie      Movie      @relation(fields: [movieId], references: [id], onDelete: Cascade)
+  episode    Episode?   @relation(fields: [episodeId], references: [id], onDelete: Cascade)
+
+  @@index([movieId, isCredible, isApproved], name: "idx_rating_verification")
+}
+
+// 5. Nested Comment Model (Recursive threading support)
+model Comment {
+  id        String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId    String    @db.Uuid
+  movieId   String    @db.Uuid
+  episodeId String?   @db.Uuid // Optional, can comment on whole movie or specific episode
+  parentId  String?   @db.Uuid // Self-reference for recursive threading
+  content   String    @db.Text
+  isSpoiler Boolean   @default(false)
+  isFlagged Boolean   @default(false)
+  createdAt DateTime  @default(now()) @db.Timestamptz
+  updatedAt DateTime  @updatedAt @db.Timestamptz
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  movie     Movie     @relation(fields: [movieId], references: [id], onDelete: Cascade)
+  episode   Episode?  @relation(fields: [episodeId], references: [id], onDelete: Cascade)
+  parent    Comment?  @relation("CommentReplies", fields: [parentId], references: [id], onDelete: Cascade)
+  replies   Comment[] @relation("CommentReplies")
+
+  @@index([movieId, episodeId, parentId, createdAt(sort: Desc)], name: "idx_comment_traversal")
+}
+
+// 6. Watch History Model
+model WatchHistory {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId    String   @db.Uuid
+  episodeId String   @db.Uuid
+  progress  Float    @default(0.0) // Playback time in seconds
+  completed Boolean  @default(false)
+  updatedAt DateTime @updatedAt @db.Timestamptz
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  episode   Episode  @relation(fields: [episodeId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, episodeId], name: "unique_user_watch_progress")
+}
+
+// 7. Personal Tier List Model
+model PersonalTierList {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId    String   @db.Uuid
+  movieId   String   @db.Uuid
+  tier      Tier
+  notes     String?  @db.Text
+  updatedAt DateTime @default(now()) @updatedAt @db.Timestamptz
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  movie     Movie    @relation(fields: [movieId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, movieId], name: "unique_user_movie_tier")
+  @@index([userId, tier], name: "idx_tierlist_user")
+}
+
+// 8. Global Tier Leaderboard Cache Model
+model GlobalTierLeaderboard {
+  movieId        String   @id @db.Uuid
+  s_tier_count   Int      @default(0)
+  a_tier_count   Int      @default(0)
+  b_tier_count   Int      @default(0)
+  c_tier_count   Int      @default(0)
+  d_tier_count   Int      @default(0)
+  f_tier_count   Int      @default(0)
+  tierScore      Float    @default(0.0) // Cumulative weighted rank variable
+  globalTier     Tier     @default(C)
+  rank           Int?
+  lastCalculated DateTime @default(now()) @db.Timestamptz
+  movie          Movie    @relation(fields: [movieId], references: [id], onDelete: Cascade)
+}
