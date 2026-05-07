@@ -45,9 +45,5 @@ uploads/
 backend/uploads/
 frontend/public/uploads/
 *.mp4
-*.ts
 *.m3u8
-*.jpg
-*.jpeg
-*.png
 temp/
