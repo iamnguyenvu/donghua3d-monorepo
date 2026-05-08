@@ -45,7 +45,12 @@ donghua3d-monorepo/
 │   ├── 04_ui_ux_spec.md              # Cinematic design tokens, custom player, tier board
 │   ├── 05_ops_spec.md                # Dockerfiles, Nginx cache, S3 OAC, 4 scaling phases
 │   ├── 06_implementation_plan.md     # Chronological task list with verification steps
-│   └── 07_conventions_spec.md        # Naming, git commits, clean code, styling conventions
+│   ├── 07_conventions_spec.md        # Naming, git commits, clean code, styling conventions
+│   ├── 08_audit_report.md            # Initial source code audit and repository assessment
+│   ├── 09_current_system_report.md   # Post-Phase 1 state report and layout audit
+│   ├── 10_phase2_implementation.md   # Phase 2 implementation plan (Vidstack, R2, Sockets)
+│   ├── 11_video_sources_audit.md     # In-depth video sources and HLS proxy CDN analysis
+│   └── 12_premium_4k_architecture.md # Premium 4K hybrid Cloudflare R2 stream architecture
 ├── nginx/                            # Reverse Proxy Configs
 │   └── nginx.conf                    # CORS headers, microcaching policies, video streaming
 ├── backend/                          # Express.js & TypeScript API Server
@@ -108,6 +113,11 @@ The system is fully specified before writing application code. For deeper code r
 * 📄 **[05_Ops & Caching Spec](file:///d:/Download/Project/donghua3d/docs/05_ops_spec.md)**: Multi-stage Docker packaging, microcaching, and AWS CloudFront setups.
 * 📄 **[06_Implementation Plan](file:///d:/Download/Project/donghua3d/docs/06_implementation_plan.md)**: Order of development tasks with specific verify triggers.
 * 📄 **[07_Conventions Spec](file:///d:/Download/Project/donghua3d/docs/07_conventions_spec.md)**: Coding parameters, plural API naming, BEM styling, and Angular semantic git rules.
+* 📄 **[08_Source Code Audit Report](file:///d:/Download/Project/donghua3d/docs/08_audit_report.md)**: Initial source code security and quality audit results.
+* 📄 **[09_Current System Report](file:///d:/Download/Project/donghua3d/docs/09_current_system_report.md)**: Detailed report of current architectural state, CDN seeding, and UI alignment fixes.
+* 📄 **[10_Phase 2 Implementation Plan](file:///d:/Download/Project/donghua3d/docs/10_phase2_implementation_plan.md)**: Chronological development roadmap for Vidstack Player, Cloudflare R2, WebSockets, and CI/CD.
+* 📄 **[11_Video Sources Audit](file:///d:/Download/Project/donghua3d/docs/11_video_sources_audit.md)**: In-depth technical analysis of hoathinh3d and hh3d HLS streaming proxies and CDN behaviors.
+* 📄 **[12_Premium 4K Architecture](file:///d:/Download/Project/donghua3d/docs/12_premium_4k_architecture.md)**: High-level design for hybrid external HLS streaming combined with premium anti-leech 4K R2 hosting.
 
 ---
 

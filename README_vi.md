@@ -45,7 +45,12 @@ donghua3d-monorepo/
 │   ├── 04_ui_ux_spec.md              # Cinematic design tokens, custom player, bảng tier list
 │   ├── 05_ops_spec.md                # Dockerfiles, Nginx cache, cấu hình S3 OAC, 4 phase scaling
 │   ├── 06_implementation_plan.md     # Kế hoạch code từng bước kèm điều kiện verify kiểm thử
-│   └── 07_conventions_spec.md        # Quy chuẩn viết code, commit git, chuẩn đặt tên API & CSS
+│   ├── 07_conventions_spec.md        # Quy chuẩn viết code, commit git, chuẩn đặt tên API & CSS
+│   ├── 08_audit_report.md            # Báo cáo rà soát và đánh giá mã nguồn ban đầu
+│   ├── 09_current_system_report.md   # Báo cáo hiện trạng hệ thống & kiểm toán giao diện thực tế
+│   ├── 10_phase2_implementation.md   # Kế hoạch chi tiết triển khai Giai đoạn 2 (Vidstack, R2, Sockets)
+│   ├── 11_video_sources_audit.md     # Phân tích chuyên sâu nguồn video (hoathinh3d & hh3d, Proxy CDN)
+│   └── 12_premium_4k_architecture.md # Thiết kế kiến trúc chuyển tiếp video lai chất lượng cao 4K
 ├── nginx/                            # Cấu hình Reverse Proxy Nginx
 │   └── nginx.conf                    # CORS headers, chính sách microcaching, tối ưu hóa phát file
 ├── backend/                          # Mã nguồn API Server (Express.js & TypeScript)
@@ -108,6 +113,11 @@ Hệ thống được thiết kế hoàn thiện trước khi tiến hành code.
 * 📄 **[05_Đặc tả Ops & Caching](file:///d:/Download/Project/donghua3d/docs/05_ops_spec.md)**: Đóng gói Docker multi-stage, chính sách cache Nginx và hạ tầng AWS CloudFront S3.
 * 📄 **[06_Kế hoạch Triển khai](file:///d:/Download/Project/donghua3d/docs/06_implementation_plan.md)**: Danh sách tác vụ lập trình tuần tự kèm điều kiện xác nhận thành công.
 * 📄 **[07_Quy chuẩn Dự án](file:///d:/Download/Project/donghua3d/docs/07_conventions_spec.md)**: Quy tắc gõ code TypeScript, đặt tên biến, BEM CSS, và cú pháp commit Git.
+* 📄 **[08_Báo cáo Kiểm toán Mã nguồn](file:///d:/Download/Project/donghua3d/docs/08_audit_report.md)**: Kết quả đánh giá chất lượng mã nguồn ban đầu của monorepo.
+* 📄 **[09_Báo cáo Hiện trạng Hệ thống](file:///d:/Download/Project/donghua3d/docs/09_current_system_report.md)**: Tổng hợp hệ thống sau Giai đoạn 1 và khắc phục lỗi giao diện.
+* 📄 **[10_Kế hoạch Giai đoạn 2](file:///d:/Download/Project/donghua3d/docs/10_phase2_implementation_plan.md)**: Lộ trình triển khai nâng cấp Vidstack Player, Cloudflare R2, WebSockets.
+* 📄 **[11_Phân tích Nguồn Video](file:///d:/Download/Project/donghua3d/docs/11_video_sources_audit.md)**: Nghiên cứu chuyên sâu giao thức HLS, CDN Proxy của hoathinh3d & hh3d.
+* 📄 **[12_Kiến trúc 4K Premium](file:///d:/Download/Project/donghua3d/docs/12_premium_4k_architecture.md)**: Thiết kế giải pháp chuyển tiếp video lai chất lượng cao và chống leech 4K.
 
 ---
 
