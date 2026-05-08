@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { 
   MediaPlayer, 
   MediaOutlet, 
@@ -40,7 +40,7 @@ export default function PremiumPlayer({
       <MediaPlayer
         src={src}
         title={title}
-        aspectRatio="16/9"
+        aspectRatio={16/9}
         load="visible"
         playsInline
         crossOrigin="anonymous"
@@ -104,31 +104,29 @@ function CustomControls({
     waiting = false 
   } = useMediaStore();
 
-  // UI Local States
-  const [showIntroSkip, setShowIntroSkip] = useState(false);
-  const [showOutroSkip, setShowOutroSkip] = useState(false);
+  // UI Local States (Only settings and speeds, skip states are computed on render!)
   const [showSettings, setShowSettings] = useState(false);
   const [playbackSpeed, setPlaybackSpeed] = useState(1);
   const [quality, setQuality] = useState('Auto');
 
-  // Dynamic Skip buttons logic
-  useEffect(() => {
-    setShowIntroSkip(currentTime >= introStart && currentTime <= introEnd && introEnd > introStart);
-    setShowOutroSkip(currentTime >= outroStart && currentTime <= outroEnd && outroEnd > outroStart);
-  }, [currentTime, introStart, introEnd, outroStart, outroEnd]);
+  // Compute Skip buttons visibility dynamically on render - ZERO state overhead, zero re-render loops!
+  const showIntroSkip = currentTime >= introStart && currentTime <= introEnd && introEnd > introStart;
+  const showOutroSkip = currentTime >= outroStart && currentTime <= outroEnd && outroEnd > outroStart;
 
-  // Periodic watch progress pulse (Every 10 seconds of active playing)
+  // Periodic watch progress pulse using a ref to prevent interval spamming and state loops
+  const lastPulseRef = useRef<number>(0);
+
   useEffect(() => {
     if (paused || duration === 0) return;
 
-    const interval = setInterval(() => {
+    // Trigger pulse if 10 seconds of active playtime elapsed since the last pulse
+    if (Math.abs(currentTime - lastPulseRef.current) >= 10) {
+      lastPulseRef.current = currentTime;
       if (onProgressPulse) {
         const isCompleted = currentTime >= duration - 30; // Within 30 seconds of video end
         onProgressPulse(currentTime, isCompleted);
       }
-    }, 10000);
-
-    return () => clearInterval(interval);
+    }
   }, [paused, currentTime, duration, onProgressPulse]);
 
   // Keyboard Shortcuts for skip buttons
@@ -159,12 +157,10 @@ function CustomControls({
 
   const handleSkipIntro = () => {
     remote.seek(introEnd);
-    setShowIntroSkip(false);
   };
 
   const handleSkipOutro = () => {
     remote.seek(outroEnd);
-    setShowOutroSkip(false);
   };
 
   const handleVolumeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
