@@ -1,14 +1,13 @@
 'use client';
 
-import React, { useRef, useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { useParams, useRouter } from 'next/navigation';
-import Hls from 'hls.js';
+import { useParams } from 'next/navigation';
 import { 
-  Play, Pause, Volume2, Maximize2, SkipForward, ArrowLeft, Star, 
-  MessageSquare, Loader2, Send, Flag 
+  ArrowLeft, Star, MessageSquare, Loader2, Send, Flag 
 } from 'lucide-react';
 import Header from '@/components/Header';
+import PremiumPlayer from '@/components/PremiumPlayer';
 import { 
   catalogApi, ratingApi, commentApi, 
   EpisodePayload, MoviePayload, ReviewPayload, CommentPayload 
@@ -16,20 +15,11 @@ import {
 
 export default function WatchEpisode() {
   const params = useParams() as { id: string; episodeId: string };
-  const router = useRouter();
   
-  const videoRef = useRef<HTMLVideoElement>(null);
   const [episode, setEpisode] = useState<EpisodePayload | null>(null);
   const [movie, setMovie] = useState<MoviePayload | null>(null);
   const [loading, setLoading] = useState(true);
-
-  // Custom Player Controls
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [duration, setDuration] = useState(0);
-  const [currentTime, setCurrentTime] = useState(0);
-  const [volume, setVolume] = useState(0.8);
-  const [showIntroSkip, setShowIntroSkip] = useState(false);
-  const [showOutroSkip, setShowOutroSkip] = useState(false);
+  const [initialProgress, setInitialProgress] = useState(0);
 
   // Social Panel State
   const [reviews, setReviews] = useState<ReviewPayload[]>([]);
@@ -53,9 +43,9 @@ export default function WatchEpisode() {
         setEpisode(epRes.data);
         setMovie(mvRes.data);
         
-        // Load watch progress if present
+        // Set initial watch progress if present
         if (epRes.data.watchHistory && epRes.data.watchHistory.progress > 0) {
-          setCurrentTime(epRes.data.watchHistory.progress);
+          setInitialProgress(epRes.data.watchHistory.progress);
         }
 
         // Fetch comments and reviews
@@ -98,132 +88,13 @@ export default function WatchEpisode() {
     loadData();
   }, [params.id, params.episodeId]);
 
-  // 2. Bind HLS Video Player
-  useEffect(() => {
-    if (!episode || !videoRef.current) return;
-
-    const video = videoRef.current;
-    let hls: Hls | null = null;
-
-    if (Hls.isSupported()) {
-      hls = new Hls();
-      hls.loadSource(episode.videoUrl);
-      hls.attachMedia(video);
-
-      hls.on(Hls.Events.MANIFEST_PARSED, () => {
-        // Recover previous watch progress if needed
-        if (episode.watchHistory && episode.watchHistory.progress > 0) {
-          video.currentTime = episode.watchHistory.progress;
-        }
-      });
-    } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
-      // Native Safari HLS support
-      video.src = episode.videoUrl;
-    }
-
-    return () => {
-      if (hls) {
-        hls.destroy();
-      }
-    };
-  }, [episode]);
-
-  // 3. Monitor Video Timing, Shortcuts and Skip Button Triggers
-  useEffect(() => {
-    if (!episode) return;
-
-    const handleKeyDown = (e: KeyboardEvent) => {
-      const activeEl = document.activeElement?.tagName;
-      if (activeEl === 'INPUT' || activeEl === 'TEXTAREA') return;
-
-      if ((e.key === 's' || e.key === 'S') && showIntroSkip) {
-        handleSkipIntro();
-      }
-      if ((e.key === 'e' || e.key === 'E') && showOutroSkip) {
-        handleSkipOutro();
-      }
-      if (e.key === ' ') {
-        e.preventDefault();
-        togglePlay();
-      }
-    };
-
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [episode, showIntroSkip, showOutroSkip]);
-
-  // Save progress pulse tracker (Every 10 seconds of active play)
-  useEffect(() => {
-    if (!isPlaying || !episode) return;
-
-    const pulseInterval = setInterval(() => {
-      if (videoRef.current) {
-        const t = videoRef.current.currentTime;
-        const comp = t >= duration - 30; // Mark complete if within 30 seconds of video end
-        catalogApi.saveWatchHistory(episode.id, t, comp);
-      }
-    }, 10000);
-
-    return () => clearInterval(pulseInterval);
-  }, [isPlaying, episode, duration]);
-
-  const togglePlay = () => {
-    if (!videoRef.current) return;
-    if (isPlaying) {
-      videoRef.current.pause();
-      setIsPlaying(false);
-    } else {
-      videoRef.current.play().catch(() => {});
-      setIsPlaying(true);
+  const handleProgressPulse = (currentTime: number, isCompleted: boolean) => {
+    if (episode) {
+      catalogApi.saveWatchHistory(episode.id, currentTime, isCompleted);
     }
   };
 
-  const handleTimeUpdate = () => {
-    if (!videoRef.current || !episode) return;
-    const t = videoRef.current.currentTime;
-    setCurrentTime(t);
-
-    // Show/hide Skip Intro and Outro buttons dynamically
-    setShowIntroSkip(t >= episode.introStart && t <= episode.introEnd);
-    setShowOutroSkip(t >= episode.outroStart && t <= episode.outroEnd);
-  };
-
-  const handleSkipIntro = () => {
-    if (!videoRef.current || !episode) return;
-    videoRef.current.currentTime = episode.introEnd;
-    setCurrentTime(episode.introEnd);
-    setShowIntroSkip(false);
-  };
-
-  const handleSkipOutro = () => {
-    if (!videoRef.current || !episode) return;
-    videoRef.current.currentTime = episode.outroEnd;
-    setCurrentTime(episode.outroEnd);
-    setShowOutroSkip(false);
-  };
-
-  const handleVolumeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const val = parseFloat(e.target.value);
-    setVolume(val);
-    if (videoRef.current) {
-      videoRef.current.volume = val;
-    }
-  };
-
-  const toggleFullscreen = () => {
-    if (!videoRef.current) return;
-    if (videoRef.current.requestFullscreen) {
-      videoRef.current.requestFullscreen();
-    }
-  };
-
-  const formatTime = (seconds: number) => {
-    const m = Math.floor(seconds / 60);
-    const s = Math.floor(seconds % 60);
-    return `${m}:${s < 10 ? '0' : ''}${s}`;
-  };
-
-  // 4. Submission Handlers
+  // 2. Submission Handlers
   const handleRatingSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (userRating === 0 || !movie) return;
@@ -289,7 +160,7 @@ export default function WatchEpisode() {
       <Header />
 
       {/* ==============================================================================
-         CINEMATIC WATCH PLAYER BLOCK (Layout 02 Netflix Style)
+         CINEMATIC WATCH PLAYER BLOCK (Layout 02 Netflix Style - Custom Vidstack Player)
          ============================================================================== */}
       <main className="w-full px-6 md:px-12 lg:px-16 mt-28">
         <Link href={`/movies/${movie.id}`} className="flex items-center gap-1.5 text-zinc-400 hover:text-white no-underline text-[10px] font-bold uppercase tracking-wider mb-5 transition-colors">
@@ -297,87 +168,17 @@ export default function WatchEpisode() {
           Quay lại danh mục {movie.title}
         </Link>
 
-        {/* Video Player Frame wrapper using pure Tailwind layout */}
-        <div className="relative aspect-video w-full rounded-[4px] overflow-hidden border border-zinc-900/60 bg-black shadow-2xl group">
-          <video
-            ref={videoRef}
-            onTimeUpdate={handleTimeUpdate}
-            onDurationChange={() => videoRef.current && setDuration(videoRef.current.duration)}
-            onClick={togglePlay}
-            className="w-full h-full object-contain cursor-pointer"
-          />
-
-          {/* SKIP INTRO FLOATING ACTION BUTTON */}
-          {showIntroSkip && (
-            <button
-              onClick={handleSkipIntro}
-              className="absolute bottom-20 left-8 z-30 py-2.5 px-5 rounded-[4px] bg-violet-600 border-0 text-white font-extrabold font-sans text-xs tracking-wider uppercase shadow-[0_0_15px_rgba(124,58,237,0.5)] hover:scale-105 active:scale-95 transition-all duration-200 animate-pulse cursor-pointer outline-none"
-            >
-              <SkipForward className="w-3.5 h-3.5 inline mr-1.5" />
-              BỎ QUA GIỚI THIỆU (S)
-            </button>
-          )}
-
-          {/* SKIP OUTRO FLOATING ACTION BUTTON */}
-          {showOutroSkip && (
-            <button
-              onClick={handleSkipOutro}
-              className="absolute bottom-20 right-8 z-30 py-2.5 px-5 rounded-[4px] bg-violet-600 border-0 text-white font-extrabold font-sans text-xs tracking-wider uppercase shadow-[0_0_15px_rgba(124,58,237,0.5)] hover:scale-105 active:scale-95 transition-all duration-200 animate-pulse cursor-pointer outline-none"
-            >
-              <SkipForward className="w-3.5 h-3.5 inline mr-1.5" />
-              BỎ QUA PHẦN KẾT THÚC (E)
-            </button>
-          )}
-
-          {/* CUSTOM CONTROLS OVERLAY BAR using pure Tailwind */}
-          <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black via-black/45 to-transparent p-5 flex flex-col gap-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-20">
-            {/* Timeline Progress Slider */}
-            <input
-              type="range"
-              min="0"
-              max={duration || 100}
-              value={currentTime}
-              onChange={(e) => {
-                const val = parseFloat(e.target.value);
-                if (videoRef.current) videoRef.current.currentTime = val;
-                setCurrentTime(val);
-              }}
-              className="w-full h-1 bg-white/20 rounded-md appearance-none cursor-pointer accent-violet-600 hover:h-1.5 transition-all outline-none"
-            />
-
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-4">
-                <button onClick={togglePlay} className="p-2 rounded-[4px] bg-white/5 border border-white/10 hover:bg-white/10 text-white cursor-pointer transition-colors outline-none">
-                  {isPlaying ? <Pause className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5 fill-white text-white" />}
-                </button>
-
-                <span className="text-[10px] text-zinc-300 font-extrabold tracking-wider">
-                  {formatTime(currentTime)} / {formatTime(duration)}
-                </span>
-              </div>
-
-              <div className="flex items-center gap-4">
-                {/* Volume Slider */}
-                <div className="flex items-center gap-2">
-                  <Volume2 className="w-3.5 h-3.5 text-zinc-400" />
-                  <input
-                    type="range"
-                    min="0"
-                    max="1"
-                    step="0.1"
-                    value={volume}
-                    onChange={handleVolumeChange}
-                    className="w-16 h-1 bg-white/20 appearance-none rounded-lg accent-violet-600 cursor-pointer outline-none"
-                  />
-                </div>
-
-                <button onClick={toggleFullscreen} className="p-1.5 text-zinc-400 hover:text-white bg-transparent border-0 cursor-pointer transition-colors outline-none">
-                  <Maximize2 className="w-3.5 h-3.5" />
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
+        {/* Custom Vidstack Premium Video Player Component */}
+        <PremiumPlayer
+          src={episode.videoUrl}
+          title={episode.title}
+          introStart={episode.introStart}
+          introEnd={episode.introEnd}
+          outroStart={episode.outroStart}
+          outroEnd={episode.outroEnd}
+          initialProgress={initialProgress}
+          onProgressPulse={handleProgressPulse}
+        />
 
         {/* EPISODE DETAILS INFO */}
         <div className="mt-8 border-b border-zinc-900/60 pb-6 select-none">
