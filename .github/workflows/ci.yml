@@ -55,7 +55,7 @@ jobs:
       - name: Install frontend dependencies
         run: |
           cd frontend
-          npm ci
+          npm ci --legacy-peer-deps
 
       - name: Compile Next.js & TypeScript Verification
         run: |
