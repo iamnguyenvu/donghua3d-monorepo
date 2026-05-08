@@ -54,6 +54,20 @@ export default function LeaderboardAndTiers() {
     loadData();
   }, []);
 
+  const reloadLeaderboardAndTiers = async () => {
+    const leadRes = await tierApi.getLeaderboard();
+    if (leadRes.success && leadRes.data) {
+      setLeaderboard(leadRes.data);
+    }
+    const token = localStorage.getItem('donghua3d_token');
+    if (token) {
+      const personalRes = await tierApi.getPersonalTiers();
+      if (personalRes.success && personalRes.data) {
+        setPersonalTiers(personalRes.data);
+      }
+    }
+  };
+
   const handleSaveTier = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedMovieId) return;
@@ -70,7 +84,7 @@ export default function LeaderboardAndTiers() {
     if (res.success && res.data) {
       setTierNotes('');
       // Reload everything to trigger fresh leaderboard mathematical scores
-      await loadData();
+      await reloadLeaderboardAndTiers();
     } else {
       alert(res.error?.message || 'Có lỗi xảy ra khi lưu.');
     }
