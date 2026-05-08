@@ -59,7 +59,7 @@ async function apiFetch<T>(endpoint: string, options: RequestInit = {}): Promise
     const res = await fetch(url, mergedOptions);
     const data = await res.json();
     return data as ApiResponse<T>;
-  } catch (err: any) {
+  } catch (err) {
     console.error(`[API Fetch Error] Endpoint ${endpoint} failed:`, err);
     return {
       success: false,
@@ -154,6 +154,8 @@ export interface EpisodePayload {
   title: string;
   description?: string;
   videoUrl: string;
+  videoUrl4k?: string | null;
+  isVipOnly?: boolean;
   duration: number;
   introStart: number;
   introEnd: number;
@@ -191,8 +193,8 @@ export const catalogApi = {
     return apiFetch<EpisodePayload>(`/catalog/episodes/${id}`);
   },
 
-  async saveWatchHistory(episodeId: string, progress: number, completed: boolean): Promise<ApiResponse<any>> {
-    return apiFetch<any>(`/catalog/episodes/${episodeId}/watch-history`, {
+  async saveWatchHistory(episodeId: string, progress: number, completed: boolean): Promise<ApiResponse<unknown>> {
+    return apiFetch<unknown>(`/catalog/episodes/${episodeId}/watch-history`, {
       method: 'POST',
       body: JSON.stringify({ progress, completed }),
     });
@@ -274,14 +276,14 @@ export const commentApi = {
     });
   },
 
-  async flagComment(id: string): Promise<ApiResponse<any>> {
-    return apiFetch<any>(`/comments/${id}/flag`, {
+  async flagComment(id: string): Promise<ApiResponse<unknown>> {
+    return apiFetch<unknown>(`/comments/${id}/flag`, {
       method: 'POST',
     });
   },
 
-  async deleteComment(id: string): Promise<ApiResponse<any>> {
-    return apiFetch<any>(`/comments/${id}`, {
+  async deleteComment(id: string): Promise<ApiResponse<unknown>> {
+    return apiFetch<unknown>(`/comments/${id}`, {
       method: 'DELETE',
     });
   }
@@ -342,3 +344,29 @@ export const tierApi = {
     return apiFetch<LeaderboardRowPayload[]>('/tiers/leaderboard');
   }
 };
+
+// ==============================================================================
+// WATCHLIST / FAVORITES SYSTEM ENDPOINTS
+// ==============================================================================
+export const watchlistApi = {
+  async getWatchlist(): Promise<ApiResponse<MoviePayload[]>> {
+    return apiFetch<MoviePayload[]>('/watchlist');
+  },
+
+  async addToWatchlist(movieId: string): Promise<ApiResponse<unknown>> {
+    return apiFetch<unknown>(`/watchlist/${movieId}`, {
+      method: 'POST',
+    });
+  },
+
+  async removeFromWatchlist(movieId: string): Promise<ApiResponse<unknown>> {
+    return apiFetch<unknown>(`/watchlist/${movieId}`, {
+      method: 'DELETE',
+    });
+  },
+
+  async checkInWatchlist(movieId: string): Promise<ApiResponse<{ isAdded: boolean }>> {
+    return apiFetch<{ isAdded: boolean }>(`/watchlist/check/${movieId}`);
+  }
+};
+

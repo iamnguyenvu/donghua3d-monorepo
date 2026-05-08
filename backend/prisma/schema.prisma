@@ -41,6 +41,7 @@ model User {
   comments        Comment[]
   watchHistories  WatchHistory[]
   personalTiers   PersonalTierList[]
+  watchlist       Watchlist[]
 }
 
 // 2. Movie Entity Model
@@ -63,6 +64,7 @@ model Movie {
   comments       Comment[]
   personalTiers  PersonalTierList[]
   leaderboard    GlobalTierLeaderboard?
+  watchlist      Watchlist[]
 
   @@index([releaseYear(sort: Desc), rating(sort: Desc)], name: "idx_movie_release_rating")
 }
@@ -75,6 +77,7 @@ model Episode {
   title          String         @db.VarChar(255)
   description    String?        @db.Text
   videoUrl       String         @db.VarChar(512) // Local index.m3u8 path or CloudFront S3 path
+  videoUrl4k     String?        @db.VarChar(512) // Optional Cloudflare R2 4K VIP stream
   duration       Float          @default(0.0) // In seconds
   introStart     Float          @default(0.0) // Video second offset where OP song starts
   introEnd       Float          @default(0.0) // Video second offset where OP song ends
@@ -178,4 +181,18 @@ model GlobalTierLeaderboard {
   rank           Int?
   lastCalculated DateTime @default(now()) @db.Timestamptz
   movie          Movie    @relation(fields: [movieId], references: [id], onDelete: Cascade)
+}
+
+// 9. Watchlist (Favorites) Model
+model Watchlist {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId    String   @db.Uuid
+  movieId   String   @db.Uuid
+  createdAt DateTime @default(now()) @db.Timestamptz
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  movie     Movie    @relation(fields: [movieId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, movieId], name: "unique_user_movie_watchlist")
+  @@index([userId], name: "idx_watchlist_user")
 }

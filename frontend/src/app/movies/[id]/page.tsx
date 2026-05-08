@@ -5,17 +5,69 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useParams } from 'next/navigation';
 import { 
-  Star, Play, Calendar, Film, ArrowLeft, Loader2, Award, 
-  Tv, MessageSquare, Info 
+  Star, Play, Film, ArrowLeft, Loader2, Award, 
+  Info, Plus, Check 
 } from 'lucide-react';
 import Header from '@/components/Header';
-import { catalogApi, ratingApi, MovieWithEpisodes, ReviewPayload } from '@/lib/api';
+import { catalogApi, ratingApi, MovieWithEpisodes, ReviewPayload, watchlistApi, Tier } from '@/lib/api';
 
 export default function MovieDetails() {
   const params = useParams() as { id: string };
   const [movie, setMovie] = useState<MovieWithEpisodes | null>(null);
   const [reviews, setReviews] = useState<ReviewPayload[]>([]);
   const [loading, setLoading] = useState(true);
+
+  // Watchlist integration
+  const [watchlistIds, setWatchlistIds] = useState<Set<string>>(new Set());
+  const [watchlistActionLoading, setWatchlistActionLoading] = useState(false);
+
+  useEffect(() => {
+    async function loadWatchlist() {
+      const token = localStorage.getItem('donghua3d_token');
+      if (token) {
+        const res = await watchlistApi.getWatchlist();
+        if (res.success && res.data) {
+          setWatchlistIds(new Set(res.data.map((m) => m.id)));
+        }
+      }
+    }
+    loadWatchlist();
+  }, []);
+
+  const toggleWatchlist = async (movieId: string) => {
+    const token = localStorage.getItem('donghua3d_token');
+    if (!token) {
+      alert('Vui lòng đăng nhập để lưu phim vào danh sách.');
+      return;
+    }
+
+    setWatchlistActionLoading(true);
+    try {
+      if (watchlistIds.has(movieId)) {
+        const res = await watchlistApi.removeFromWatchlist(movieId);
+        if (res.success) {
+          setWatchlistIds((prev) => {
+            const next = new Set(prev);
+            next.delete(movieId);
+            return next;
+          });
+        }
+      } else {
+        const res = await watchlistApi.addToWatchlist(movieId);
+        if (res.success) {
+          setWatchlistIds((prev) => {
+            const next = new Set(prev);
+            next.add(movieId);
+            return next;
+          });
+        }
+      }
+    } catch (err) {
+      console.error('Failed to toggle watchlist:', err);
+    } finally {
+      setWatchlistActionLoading(false);
+    }
+  };
 
   useEffect(() => {
     async function loadMovieData() {
@@ -74,7 +126,7 @@ export default function MovieDetails() {
           expertRating: 9.4,
           audienceRating: 9.0,
           createdAt: new Date().toISOString(),
-          leaderboard: { globalTier: 'S' as any, tierScore: 94.5, rank: 1 },
+          leaderboard: { globalTier: Tier.S, tierScore: 94.5, rank: 1 },
           episodes: mockEpisodes
         });
       }
@@ -85,7 +137,7 @@ export default function MovieDetails() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-black flex items-center justify-center">
+      <div className="min-h-screen bg-[#050508] flex items-center justify-center">
         <Loader2 className="w-10 h-10 text-violet-500 animate-spin" />
       </div>
     );
@@ -93,75 +145,123 @@ export default function MovieDetails() {
 
   if (!movie) {
     return (
-      <div className="min-h-screen bg-black flex flex-col items-center justify-center p-8">
-        <Film className="w-12 h-12 text-red-500 mb-4" />
-        <h2 className="text-xl font-bold text-white">Không tìm thấy bộ phim</h2>
-        <Link href="/" className="btn-cinema btn-cinema-primary mt-6">Quay về Trang Chủ</Link>
+      <div className="min-h-screen bg-[#050508] flex flex-col items-center justify-center p-8 select-none text-center">
+        <Film className="w-10 h-10 text-violet-500 mb-4 animate-bounce" />
+        <h2 className="text-base font-bold text-white uppercase tracking-wider">Không tìm thấy bộ phim</h2>
+        <Link href="/" className="mt-5 px-5 py-2.5 rounded-[4px] bg-violet-600 hover:bg-violet-700 text-xs font-extrabold uppercase tracking-wider text-white no-underline transition-all">Quay về Trang Chủ</Link>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-black text-white flex flex-col font-sans pb-24">
+    <div className="min-h-screen bg-[#050508] text-zinc-100 flex flex-col font-sans pb-24">
       <Header />
 
       {/* ==============================================================================
-         MOVIE METADATA HERO HEADER
+         MOVIE METADATA HERO HEADER (Layout 02 Netflix Style)
          ============================================================================== */}
-      <section className="relative w-full h-[60vh] flex items-end pb-12 overflow-hidden">
+      <section className="relative w-full h-[55vh] flex items-end pb-10 overflow-hidden border-b border-zinc-900/40">
         <div className="absolute inset-0 z-0">
           <Image
             src={movie.bannerUrl || movie.posterUrl || ''}
             alt={movie.title}
             fill
             priority
-            className="object-cover opacity-35"
+            className="object-cover opacity-35 scale-100"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-black via-black/55 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-[#050508] via-[#050508]/70 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-r from-[#050508] via-[#050508]/40 to-transparent" />
         </div>
 
-        <div className="relative z-10 container mx-auto px-8 max-w-6xl flex flex-col md:flex-row items-end gap-8 animate-fade-in-up">
+        <div className="relative z-10 w-full px-6 md:px-12 lg:px-16 flex flex-col md:flex-row items-end gap-6 animate-fade-in-up">
           {/* Flat Poster Artwork card */}
-          <div className="w-48 aspect-[2/3] rounded-2xl overflow-hidden border border-white/10 shadow-2xl flex-shrink-0 hidden md:block">
+          <div className="w-40 aspect-[2/3] rounded-[4px] overflow-hidden border border-zinc-900/60 shadow-2xl flex-shrink-0 hidden md:block">
             <Image
               src={movie.posterUrl || '/static/uploads/default_poster.jpg'}
               alt={movie.title}
-              width={192}
-              height={288}
+              width={160}
+              height={240}
               className="w-full h-full object-cover"
             />
           </div>
 
           {/* Details Metadata panel */}
-          <div className="flex-grow flex flex-col gap-4">
-            <Link href="/" className="flex items-center gap-2 text-zinc-400 hover:text-white no-underline text-xs font-semibold uppercase tracking-wider mb-2 transition-colors">
+          <div className="flex-grow flex flex-col gap-3.5">
+            <Link href="/" className="flex items-center gap-1.5 text-zinc-400 hover:text-white no-underline text-[10px] font-bold uppercase tracking-wider mb-1 transition-colors">
               <ArrowLeft className="w-3.5 h-3.5" />
               Quay lại danh mục chính
             </Link>
 
-            <h1 className="text-3xl md:text-5xl font-extrabold text-white" style={{ textShadow: '0 2px 10px rgba(0,0,0,0.5)' }}>
+            <h1 className="text-2xl md:text-4xl font-black text-white leading-tight uppercase" style={{ textShadow: '0 2px 10px rgba(0,0,0,0.9)' }}>
               {movie.title}
             </h1>
 
-            <div className="flex items-center gap-4 flex-wrap text-sm text-zinc-300 font-semibold mt-1">
-              <span className="text-violet-400">{movie.studio}</span>
-              <span>•</span>
-              <span className="flex items-center gap-1 text-amber-400">
-                <Star className="w-4 h-4 fill-amber-400" />
-                {movie.rating.toFixed(1)}/10
+            {/* Premium Pill Metadata Grid */}
+            <div className="flex items-center gap-2 flex-wrap select-none">
+              <span className="border border-zinc-800 bg-zinc-950/60 text-violet-400 px-2.5 py-1.5 rounded-[4px] text-[10px] font-extrabold tracking-wider uppercase">
+                {movie.studio}
               </span>
-              <span>•</span>
-              <span className="flex items-center gap-1">
-                <Calendar className="w-3.5 h-3.5" />
+              <span className="border border-zinc-800 bg-zinc-950/60 text-amber-400 px-2.5 py-1.5 rounded-[4px] text-[10px] font-extrabold tracking-wider uppercase flex items-center gap-1">
+                ⭐ {movie.rating > 0 ? movie.rating.toFixed(1) : '9.0'} / 10
+              </span>
+              <span className="border border-zinc-800 bg-zinc-950/60 text-zinc-300 px-2.5 py-1.5 rounded-[4px] text-[10px] font-extrabold tracking-wider uppercase">
                 {movie.releaseYear}
               </span>
-              <span>•</span>
-              <span>Tên khác: {movie.altTitles.join(', ')}</span>
+              <span className="border border-zinc-800 bg-zinc-950/60 text-zinc-300 px-2.5 py-1.5 rounded-[4px] text-[10px] font-extrabold tracking-wider uppercase">
+                FULL HD 1080P
+              </span>
+              <span className="border border-zinc-800 bg-zinc-950/60 text-zinc-300 px-2.5 py-1.5 rounded-[4px] text-[10px] font-extrabold tracking-wider uppercase">
+                HLS H.264
+              </span>
+              <span className="text-zinc-500 text-[10px] font-bold uppercase tracking-wider ml-2 hidden sm:inline">
+                Tên khác: <span className="text-zinc-300">{movie.altTitles[0] || 'N/A'}</span>
+              </span>
             </div>
 
-            <p className="max-w-3xl text-sm text-zinc-300 leading-relaxed truncate-3-lines" style={{ textShadow: '0 1px 3px rgba(0,0,0,0.5)' }}>
+            <p className="max-w-2xl text-xs md:text-sm text-zinc-400 leading-relaxed truncate-3-lines" style={{ textShadow: '0 1px 3px rgba(0,0,0,0.9)' }}>
               {movie.description}
             </p>
+
+            {/* Premium Interactive Action CTA Bar */}
+            <div className="flex items-center gap-3.5 mt-2.5 flex-wrap">
+              {movie.episodes && movie.episodes.length > 0 ? (
+                <Link
+                  href={`/movies/${movie.id}/episodes/${movie.episodes[0].id}`}
+                  className="px-6 py-3.5 rounded-[4px] bg-violet-600 hover:bg-violet-700 text-white font-extrabold flex items-center gap-2 text-[11px] uppercase tracking-wider transition-all duration-300 hover:scale-105 active:scale-95 shadow-[0_4px_20px_rgba(124,58,237,0.3)] hover:shadow-[0_4px_25px_rgba(124,58,237,0.5)] border-0 outline-none no-underline"
+                >
+                  <Play className="w-4 h-4 fill-white text-white" />
+                  Phát Tập 1
+                </Link>
+              ) : (
+                <button
+                  disabled
+                  className="px-6 py-3.5 rounded-[4px] bg-zinc-900 border border-zinc-850 text-zinc-660 font-extrabold flex items-center gap-2 text-[11px] uppercase tracking-wider select-none opacity-50"
+                >
+                  <Play className="w-4 h-4" />
+                  Sắp Ra Mắt
+                </button>
+              )}
+
+              <button
+                onClick={() => toggleWatchlist(movie.id)}
+                disabled={watchlistActionLoading}
+                className="px-6 py-3.5 rounded-[4px] bg-white/5 border border-white/10 hover:bg-white/10 hover:border-white/20 text-white font-extrabold flex items-center gap-2 text-[11px] uppercase tracking-wider transition-all duration-300 active:scale-95 cursor-pointer outline-none"
+              >
+                {watchlistActionLoading ? (
+                  <Loader2 className="w-4 h-4 animate-spin text-white" />
+                ) : watchlistIds.has(movie.id) ? (
+                  <>
+                    <Check className="w-4 h-4 text-emerald-400" />
+                    Trong danh sách
+                  </>
+                ) : (
+                  <>
+                    <Plus className="w-4 h-4 text-white" />
+                    Danh sách của tôi
+                  </>
+                )}
+              </button>
+            </div>
           </div>
         </div>
       </section>
@@ -169,13 +269,14 @@ export default function MovieDetails() {
       {/* ==============================================================================
          EPISODES AND REVIEWS INFORMATION SECTIONS
          ============================================================================== */}
-      <main className="container mx-auto px-8 max-w-6xl mt-12 grid grid-cols-1 lg:grid-cols-3 gap-12">
+      <main className="w-full px-6 md:px-12 lg:px-16 mt-12 grid grid-cols-1 lg:grid-cols-3 gap-12">
         
         {/* LEFT COLUMN: LIST OF EPISODES (2/3 Grid) */}
         <div className="lg:col-span-2 flex flex-col gap-6">
-          <div className="flex items-center gap-2 border-b border-white/10 pb-4">
-            <Tv className="w-5 h-5 text-violet-400" />
-            <h2 className="text-xl font-bold">Danh Sách Tập Phim</h2>
+          <div className="flex items-center gap-2 border-b border-zinc-900/60 pb-4">
+            <h2 className="text-base font-black text-white tracking-wider uppercase border-l-2 border-violet-500 pl-3">
+              Danh Sách Tập Phim
+            </h2>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
@@ -184,37 +285,37 @@ export default function MovieDetails() {
                 <Link
                   href={`/movies/${movie.id}/episodes/${ep.id}`}
                   key={ep.id}
-                  className="glass-card overflow-hidden no-underline flex flex-col group/ep hover:border-violet-500/40"
+                  className="bg-[#0c0c0f]/40 border border-zinc-900/60 hover:border-zinc-800 rounded-[4px] overflow-hidden flex flex-col group transition-all duration-300 shadow-md no-underline"
                 >
-                  <div className="relative aspect-video w-full bg-zinc-900">
+                  <div className="relative aspect-video w-full bg-zinc-950">
                     <Image
                       src={ep.thumbnail || movie.posterUrl || '/static/uploads/default_thumb.jpg'}
                       alt={ep.title}
                       fill
-                      className="object-cover group-hover/ep:scale-105 transition-transform duration-300"
+                      className="object-cover transition-transform duration-550 group-hover:scale-103"
                     />
-                    <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover/ep:opacity-100 transition-opacity">
-                      <div className="p-3 rounded-full bg-violet-600 text-white shadow-xl">
-                        <Play className="w-5 h-5 fill-white" />
+                    <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                      <div className="p-2.5 rounded-[4px] bg-violet-600 text-white shadow-2xl scale-95 group-hover:scale-100 transition-all duration-200">
+                        <Play className="w-3.5 h-3.5 fill-white text-white" />
                       </div>
                     </div>
                   </div>
 
-                  <div className="p-4 flex flex-col gap-1.5">
-                    <span className="text-xs text-violet-400 font-bold uppercase">Tập {ep.episodeNumber}</span>
-                    <h3 className="text-sm font-bold text-white group-hover/ep:text-violet-300 transition-colors truncate">
+                  <div className="p-4 flex flex-col gap-1 select-none">
+                    <span className="text-[9px] text-violet-500 font-black uppercase tracking-widest">Tập {ep.episodeNumber}</span>
+                    <h3 className="text-xs font-bold text-white group-hover:text-violet-400 transition-colors truncate mt-0.5">
                       {ep.title}
                     </h3>
-                    <p className="text-[11px] text-zinc-400 truncate-2-lines leading-relaxed">
+                    <p className="text-[11px] text-zinc-500 truncate-2-lines leading-relaxed mt-0.5">
                       {ep.description}
                     </p>
                   </div>
                 </Link>
               ))
             ) : (
-              <div className="col-span-2 text-center py-12 glass-card">
-                <Info className="w-8 h-8 text-zinc-600 mx-auto mb-2" />
-                <p className="text-sm text-zinc-500">Chưa có tập phim nào được phát hành.</p>
+              <div className="col-span-2 text-center py-12 bg-zinc-950/40 border border-zinc-900 rounded-[4px] p-6 select-none">
+                <Info className="w-6 h-6 text-zinc-650 mx-auto mb-2" />
+                <p className="text-xs text-zinc-550 italic">Chưa có tập phim nào được phát hành.</p>
               </div>
             )}
           </div>
@@ -224,36 +325,37 @@ export default function MovieDetails() {
         <div className="lg:col-span-1 flex flex-col gap-8">
           {/* Movie Leaderboard Tier Placement card */}
           {movie.leaderboard && (
-            <div className="glass-card p-6 flex items-center gap-4 border-l-4 border-l-violet-500">
-              <Award className="w-10 h-10 text-violet-400" />
+            <div className="p-4 bg-zinc-950/40 border border-zinc-900 rounded-[4px] flex items-center gap-4 border-l-2 border-l-violet-500 shadow-md select-none">
+              <Award className="w-8 h-8 text-violet-500 flex-shrink-0" />
               <div className="flex flex-col">
-                <span className="text-xs text-zinc-400 font-bold uppercase tracking-wider">Xếp Hạng BXH</span>
-                <span className="text-lg font-bold text-white mt-0.5">Xếp Hạng {movie.leaderboard.globalTier}-TIER</span>
-                <span className="text-xs text-zinc-500">Thứ hạng {movie.leaderboard.rank || 'N/A'} toàn mạng</span>
+                <span className="text-[10px] text-zinc-550 font-bold uppercase tracking-wider">Xếp Hạng BXH</span>
+                <span className="text-sm font-black text-white mt-0.5 uppercase tracking-wide">Xếp Hạng {movie.leaderboard.globalTier}-TIER</span>
+                <span className="text-[11px] text-zinc-500">Thứ hạng {movie.leaderboard.rank || 'N/A'} toàn mạng</span>
               </div>
             </div>
           )}
 
           {/* List verified movie reviews */}
           <div className="flex flex-col gap-4">
-            <div className="flex items-center gap-2 border-b border-white/10 pb-4">
-              <MessageSquare className="w-5 h-5 text-amber-400" />
-              <h2 className="text-lg font-bold">Nhận Xét Từ Người Xem</h2>
+            <div className="flex items-center gap-2 border-b border-zinc-900/60 pb-4">
+              <h2 className="text-sm font-black text-white tracking-wider uppercase border-l-2 border-violet-500 pl-3">
+                Nhận Xét Người Xem
+              </h2>
             </div>
 
-            <div className="flex flex-col gap-4 max-h-[450px] overflow-y-auto pr-2">
+            <div className="flex flex-col gap-4 max-h-[450px] overflow-y-auto pr-2 select-none">
               {reviews.length > 0 ? (
                 reviews.map((rev) => (
-                  <div key={rev.id} className="glass-card p-4 flex flex-col gap-2">
+                  <div key={rev.id} className="p-3.5 bg-zinc-950/40 border border-zinc-900 rounded-[4px] flex flex-col gap-2 shadow-sm">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
-                        <div className="w-7 h-7 rounded-full bg-zinc-800 flex items-center justify-center border border-white/10 text-xs font-bold text-white">
-                          U
+                        <div className="w-6 h-6 rounded-[2px] bg-zinc-900 border border-zinc-800 flex items-center justify-center text-[10px] font-bold text-zinc-400">
+                          {rev.user.email.charAt(0).toUpperCase()}
                         </div>
                         <span className="text-xs text-zinc-300 font-semibold truncate max-w-[120px]">{rev.user.email.split('@')[0]}</span>
                       </div>
-                      <span className="bg-amber-400/10 border border-amber-500/20 text-amber-400 px-2 py-0.5 rounded text-[11px] font-extrabold flex items-center gap-0.5">
-                        <Star className="w-3 h-3 fill-amber-400" />
+                      <span className="bg-amber-400/5 border border-amber-500/20 text-amber-400 px-1.5 py-0.5 rounded-[2px] text-[10px] font-extrabold flex items-center gap-0.5 shadow-sm">
+                        <Star className="w-2.5 h-2.5 fill-amber-400 text-amber-400" />
                         {rev.value}/10
                       </span>
                     </div>
@@ -261,9 +363,9 @@ export default function MovieDetails() {
                   </div>
                 ))
               ) : (
-                <div className="text-center py-12 glass-card p-6">
-                  <Star className="w-8 h-8 text-zinc-600 mx-auto mb-2" />
-                  <p className="text-xs text-zinc-500">Chưa có nhận xét nào cho bộ phim này.</p>
+                <div className="text-center py-12 bg-zinc-950/40 border border-zinc-900 rounded-[4px] p-6">
+                  <Star className="w-6 h-6 text-zinc-650 mx-auto mb-2" />
+                  <p className="text-xs text-zinc-550 italic">Chưa có nhận xét nào cho bộ phim này.</p>
                 </div>
               )}
             </div>

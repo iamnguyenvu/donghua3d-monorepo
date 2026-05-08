@@ -1,197 +1,176 @@
 # Claude Spec-Driven Development: 04_ui_ux_spec
 
-This document serves as the **UI/UX & Giao diện Thiết kế Cao cấp (04_ui_ux_spec)** for the **Donghua3D** web client (Netflix Cinematic dark theme).
+This document serves as the **UI/UX & Giao diện Thiết kế Siêu Cấp (04_ui_ux_spec)** for the **Donghua3D** monorepo client application. It outlines a world-class, premium cinematic visual identity (Netflix/Steam-grade dark space theme) and details exact interactive ergonomics.
 
 ---
 
-## 1. Cinematic Color System & Token Set
+## 1. Cinematic Visual Identity & Fluid Color Tokens
 
-To represent the vibrant colors of 3D martial arts cultivation animations, we implement a highly stylized, futuristic dark palette utilizing HSL variables for smooth theme transitions.
+To reflect the epic scale, cultivation, and mystical aura of 3D Chinese animation (Donghua), we construct a rich, highly immersive dark-void layout utilizing custom CSS properties and Tailwind v4 design token integrations.
 
-| Token Name | Color Value (HEX/HSL) | UI Purpose |
-| :--- | :--- | :--- |
-| **`--bg-deep`** | `#08090a` / `hsl(210, 15%, 4%)` | Primary background, deepest dark |
-| **`--bg-surface`** | `#111315` / `hsl(210, 10%, 8%)` | Cards, navbar, modal containers |
-| **`--bg-elevated`** | `#1c1e22` / `hsl(210, 10%, 12%)` | Hover states, active dropdowns |
-| **`--brand-neon`** | `#45f3ff` / `hsl(184, 100%, 63%)` | Accent teal, primary action glow |
-| **`--brand-red`** | `#e50914` / `hsl(357, 92%, 47%)` | Cinematic warning/active play indicator |
-| **`--text-primary`**| `#ffffff` / `hsl(0, 0%, 100%)` | High-contrast copy text |
-| **`--text-muted`**  | `#9ca3af` / `hsl(220, 9%, 65%)` | Secondary metadata labels |
+### 1.1 Color Tokens System
+| Token Name | HEX / HSL Value | Tailwind Class Map | UI Ergonomic Role |
+| :--- | :--- | :--- | :--- |
+| **`--bg-deep`** | `#050508` / `hsl(240, 23%, 2.5%)` | `bg-deep` | Main site background, deep black void |
+| **`--bg-surface`** | `#0d0e14` / `hsl(231, 28%, 6.5%)` | `bg-surface` | Glassmorphic navigation headers, cards, modals |
+| **`--bg-elevated`** | `#141622` / `hsl(231, 25%, 10.5%)` | `bg-elevated` | Active/focused dropdowns, hovering containers |
+| **`--brand-violet`**| `#8a2be2` / `hsl(271, 76%, 53%)` | `text-primary` | Neon violet. Main primary brand action glow |
+| **`--brand-cyan`**  | `#00f2fe` / `hsl(184, 100%, 50%)` | `text-secondary` | Cyber electric cyan. Active tabs, highlighted elements |
+| **`--brand-crimson`**| `#ff004f` / `hsl(341, 100%, 50%)` | `text-danger` | Imperial warning/action indicator, active play line |
+| **`--brand-amber`**  | `#f5a623` / `hsl(38, 92%, 55%)` | `text-warning` | Deep gold. Verified tags, professional tier scores |
+| **`--text-bright`** | `#f8f9fa` / `hsl(210, 15%, 97%)` | `text-white` | Max contrast reading copy & titles |
+| **`--text-dim`**    | `#8e92a2` / `hsl(228, 9%, 60%)` | `text-zinc-400` | Secondary contextual metadata labels |
 
-### 1.1 Special UI Effects
-* **Glassmorphism Border Glow**:
-  ```css
-  .glass-card {
-    background: rgba(17, 19, 21, 0.75);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
-    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-  }
-  .glass-card:hover {
-    border-color: var(--brand-neon);
-    box-shadow: 0 0 15px rgba(69, 243, 255, 0.25);
-    transform: translateY(-4px);
-  }
-  ```
+### 1.2 Typography Hierarchy
+We employ Google Fonts dynamically to create extreme contrast and premium editorial layouts:
+*   **Headlines & Action Labels**: `Space Grotesk` (Sans-serif, weight `500`/`700`/`800`). Built with letter-spacing reductions (`tracking-tight` / `-0.03em`) for a solid futuristic, punchy feeling.
+*   **Content Copy & Metadata**: `Outfit` (Sans-serif, weight `300`/`400`/`600`). Soft, circular geometric shapes optimized for high readability against absolute dark backgrounds.
 
 ---
 
-## 2. Page & Layout Containers
+## 2. Elite Design Tokens & Micro-Interactions
+
+An ultra-premium interface must feel responsive and alive. Static elements are banned; every card, button, and layout container must react dynamically to client focus.
+
+### 2.1 Glassmorphism & Translucent Gradient Borders
+Every surface is treated as a piece of curved celestial glass.
+```css
+.premium-glass {
+  background: rgba(13, 14, 20, 0.45);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  box-shadow: 
+    0 4px 30px rgba(0, 0, 0, 0.4),
+    inset 0 1px 1px rgba(255, 255, 255, 0.05);
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.premium-glass:hover {
+  background: rgba(20, 22, 34, 0.55);
+  border-color: rgba(0, 242, 254, 0.2);
+  box-shadow: 
+    0 15px 45px rgba(0, 0, 0, 0.7),
+    0 0 20px rgba(0, 242, 254, 0.05);
+  transform: translateY(-4px);
+}
+```
+
+### 2.2 Glowing Accent Gradients
+High-contrast elements utilize a double-gradient radial border to establish depth:
+```css
+.glow-accent-hover {
+  position: relative;
+}
+.glow-accent-hover::after {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  background: linear-gradient(135deg, var(--brand-violet), var(--brand-cyan));
+  border-radius: inherit;
+  z-index: -1;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+.glow-accent-hover:hover::after {
+  opacity: 1;
+}
+```
+
+---
+
+## 3. High-Fidelity Responsive Component Layouts
 
 ```text
-+-------------------------------------------------------------+
-|  [Logo] Donghua3D     Home   Tier Lists   Admin    [Avatar]  | <-- Glass Navbar
-+-------------------------------------------------------------+
-|                                                             |
-|   =======================================================   |
-|   |                   CINE HERO BANNER                  |   | <-- Cinematic Hero Section
-|   |         Soul Land: Episode 263 (Grand Finale)       |   |
-|   |         [ > Play Now ]      [ + My List ]           |   |
-|   =======================================================   |
-|                                                             |
-|   My Personal Tier List                                     |
-|   +-----------------------------------------------------+   |
-|   | S-Tier | [Movie Card] [Movie Card]                  |   | <-- Drag & Drop Board
-|   +-----------------------------------------------------+   |
-|                                                             |
-|   Trending Series (Top Ratings)                             |
-|   [Card]   [Card]   [Card]   [Card]   [Card]   [Card]       | <-- Grid Layout
-|                                                             |
-+-------------------------------------------------------------+
++-----------------------------------------------------------------------------------+
+|  💎 Donghua3D        [ Trang Chủ ]   [ Bảng Xếp Hạng ]   [ Đọc Truyện ]    (👤 Admin) |  <-- Glass Sticky Navbar
++-----------------------------------------------------------------------------------+
+|                                                                                   |
+|  +=============================================================================+  |
+|  |  🌌 CAROUSEL BANNER: THẾ GIỚI HOÀN MỸ (Shi Hao Epic Fight)                   |  |  <-- Premium Banner Slider
+|  |  ⭐ 9.8 / 10 | 📺 Foch Film                                                 |  |
+|  |                                                                             |  |
+|  |  [ ▶ XEM NGAY TẬP 1 ]      [ ☰ DANH SÁCH TẬP ]       [ ➕ YÊU THÍCH ]        |  |
+|  +=============================================================================+  |
+|                                                                                   |
+|   Xu Hướng Thịnh Hành (S-Tier Leaders)                                            |
+|   +-------------------+  +-------------------+  +-------------------+             |
+|   | [Image Cover]     |  | [Image Cover]     |  | [Image Cover]     |             |  |
+|   | Perfect World     |  | Soul Land         |  | Mortals Journey   |             |  <-- Dynamic Glass Cards
+|   | ⭐ 9.8            |  | ⭐ 9.2            |  | ⭐ 9.5            |             |
+|   +-------------------+  +-------------------+  +-------------------+             |
++-----------------------------------------------------------------------------------+
 ```
 
-### 2.1 The Glassmorphic Header (Navbar)
-* **Behavior**: Fixed height (`72px`), completely sticky (`top-0`), initially transparent. Transitioning to integrated dark glassmorphism once scrolled more than `20px` down.
-* **Layout**: Left aligned brand logo with a neon underline, centered navigation items, right aligned profile card containing reputation score tags.
+### 3.1 Sticky Glass Header (Navigation Bar)
+*   **Ergonomics**: Sticky (`top-0`), absolute depth layer (`z-50`). Height is locked at `76px`.
+*   **Initial State**: Fully transparent with a thin translucent underline.
+*   **Scrolled State (>30px)**: Transitions into a dark glassmorphic layout (`backdrop-filter: blur(20px)`), with a subtle violet box-shadow pulse reflecting on scroll.
+*   **User Widget**: Right-hand widget showcases the active user profile, flashing glowing emerald borders if the user holds an `ADMIN` or `EXPERT` rank.
+
+### 3.2 Immersive Movie Cards
+*   **Aspect Ratio**: `2 / 3` (portrait cinematic standard).
+*   **Transitions**: Card cover zooms slightly (`scale(1.06)`) on hover, while a vibrant brand shadow (`box-shadow: 0 10px 30px rgba(138, 43, 226, 0.45)`) expands smoothly.
+*   **Action Floating Badge**: Displays the `Global Tier` rating (S, A, B...) in a glowing gold badge floating on the upper-right corner.
 
 ---
 
-## 3. High-Fidelity Custom HLS Player Component
+## 4. Premium Ergonomics: Custom HLS Player & Active Seek Controls
 
-Standard HTML5 player controls look unpolished and generic. We build a fully custom control interface overlay running on top of HLS.js.
+Rather than a basic player wrapper, we deploy a highly integrated, custom UI control overlay that is fully responsive across tablet and desktop aspect ratios.
 
 ```text
-+-------------------------------------------------------------+
-|                         [ Video Player ]                     |
-|                                                             |
-|  [ Buffering Spinner Grid ... ]                             |
-|                                                             |
-|                                                             |
-|                                                             |
-| +---------------------------------------------------------+ |
-| | [=======|==============================================] | | <-- Scrubber Line
-| +---------------------------------------------------------+ |
-| | [Play]  [Back 10s]  [Vol ==|==]  05:12 / 20:00   [1080p]| | <-- Control Bar
-+-------------------------------------------------------------+
++---------------------------------------------------------------------------+
+|                          [ Custom HLS Player Container ]                   |
+|                                                                           |
+|   (⏪ Quay Lại 10s)         [ ⏺ Đang Tải Phân Đoạn HLS ]       (⏩ Tiến 10s)    |
+|                                                                           |
+| +-----------------------------------------------------------------------+ |
+| | [===|================================================================] | |  <-- Crimson Progress Bar
+| +-----------------------------------------------------------------------+ |
+| | [▶]  [🔈 Volume ==|==]   12:35 / 24:00   [⏩ SKIP OP]   [⚙️ 1080p]  [⛶] | |  <-- Floating Controls
+| +-----------------------------------------------------------------------+ |
++---------------------------------------------------------------------------+
 ```
 
-### 3.1 Control Bar Overlay Architecture
-- **Timeline Scrubber**:
-  - Linear horizontal track representing progress (`Episode.duration`).
-  - Active filled seek-bar using `--brand-red`.
-  - Floating tooltip reflecting targeted hour:minute:second timestamp when hovering anywhere on the timeline scrub track.
-- **Volume Controller**:
-  - Dynamic volume icon (switches between Mute, Low, High based on input state).
-  - Hover expander: Hovering over the volume button expands a smooth vertical volume slider input.
-- **Theater / Fullscreen Options**:
-  - Theater Mode: Toggles wider layout container within standard document flow.
-  - Native Fullscreen: Integrates with browser HTML5 Fullscreen API, presenting custom control overlay bars in active hardware rendering modes.
-- **Buffer Layer**:
-  - Under client latency checks (player state waiting), a subtle glow grid with rotating neon loader spinner overlays the center screen.
-
-### 3.2 Premium Interactivity & Auto-Resume
-- **Pulse Progress Tracker**:
-  - The video player throttles state updates and makes a `POST /api/watch-history` request every **10 seconds** of active watching to record `progress`.
-- **Auto-Resume Overlay Banner**:
-  - When entering an episode page, if `WatchHistory.progress > 0`, a bottom-left glassmorphic alert triggers: `"Bạn đang xem dở tại 05:12. [Xem tiếp]"`. Clicking on it immediately seeks the HLS playback offset.
-- **Quick-Skip Intro Button (Skip OP)**:
-  - Using episode metadata markers (`introStart`, `introEnd`), a glassmorphic button floating above the lower-right scrubber reads `"Bỏ qua đoạn mở đầu"`. Clicking immediately seeks the video timeline to the specified `introEnd` second.
-- **Quick-Skip Outro Button (Skip ED)**:
-  - Using episode metadata markers (`outroStart`, `outroEnd`), a glassmorphic button floating above the lower-right scrubber reads `"Bỏ qua đoạn kết thúc"`. Clicking immediately seeks the video timeline to the specified `outroEnd` second.
-
-### 3.3 Key Shortcuts Support
-* `Spacebar`: Toggle Play/Pause.
-* `ArrowLeft`: Seek backward 10 seconds.
-* `ArrowRight`: Seek forward 10 seconds.
-* `ArrowUp`: Increase volume by 5%.
-* `ArrowDown`: Decrease volume by 5%.
-* `F`: Toggle Fullscreen.
-* `S`: Skip intro segment (OP).
-* `E`: Skip outro segment (ED).
+### 4.1 Floating Controls Ergonomics
+*   **Idle Autohide**: Controls bar smoothly slides down out of view after **3 seconds** of mouse inactivity. Moves back up immediately on hover.
+*   **Progress Scrub track**: An active horizontal timeline track using `var(--brand-crimson)` for filled seeking state, with an expanded hover radius and a floating micro-tooltip showing target seek time on cursor position.
+*   **Active Skip OP/ED Buttons**: Floating dark glass buttons (`Bỏ qua Intro` & `Bỏ qua Outro`) trigger instantly if the player's current frame matches specified metadata markers, sliding in from the right edge.
+*   **Auto-Resume Alert Box**: Integrates a client-side progress tracker. If a user previously watched an episode up to `15:30`, entering the page triggers a bottom-left sliding glass box reading: *"Chào mừng trở lại! Tiếp tục xem từ 15:30? [Đồng Ý]"*.
 
 ---
 
-## 4. Drag-and-Drop Tier List Board
+## 5. Drag-and-Drop Tier-List Board
 
-The Personal Tier List dashboard provides an engaging drag-and-drop system using `@hello-pangea/dnd` or HTML5 native drag APIs.
+The Bảng Xếp Hạng Tier List utilizes a grid alignment model mapped across 6 absolute tiers (**S, A, B, C, D, F**).
 
-### 4.1 Tier Rows Layout Specification
-* Rows are stacked vertically in descending order: **S**, **A**, **B**, **C**, **D**, **F**.
-* Each row has a colored left-hand badge reflecting its character class:
-  - **S-Tier**: Gradient Purple/Crimson (`#ff007f` to `#7f00ff`) with a subtle border pulse.
-  - **A-Tier**: Deep Neon Orange (`#ff5e00`).
-  - **B-Tier**: Golden Yellow (`#ffb700`).
-  - **C-Tier**: Deep Teal (`#00e5ff`).
-  - **D-Tier**: Neutral Muted Grey (`#6b7280`).
-  - **F-Tier**: Slate Dark Brown (`#4b382a`).
-* Cards dragged within or between row segments triggers automatic `POST /api/tier-list` requests, shifting states.
-
----
-
-## 5. Spoiler Comment Component
-
-Donghua episodes feature major plot twists. To preserve user experience:
-* Comments tagged with `isSpoiler = true` apply a CSS blur to the container.
-* When blurred, the text is invisible, and a prompt is overlayed: `"Cảnh báo spoil - Nhấn để xem"`.
-* Clicking on the blurred block removes the CSS filter class instantly.
-
-```css
-.spoiler-text-blurred {
-  filter: blur(10px);
-  user-select: none;
-  cursor: pointer;
-  background: rgba(255, 255, 255, 0.05);
-  padding: 4px 8px;
-  border-radius: 4px;
-  transition: filter 0.4s ease;
-}
-.spoiler-text-blurred:hover {
-  background: rgba(255, 255, 255, 0.1);
-}
-```
+### 5.1 Ergonomic Visual Styling
+*   **Row Height**: Set to `min-h-[100px]` with flexible height wrapping.
+*   **Row Badges**: Mapped with high-contrast glowing neon profiles:
+    *   **S-Tier (Thần Thoại)**: Deep Gradient Violet/Cyan (`#8a2be2` -> `#00f2fe`) with an animated glowing pulse.
+    *   **A-Tier (Tuyệt Thế)**: Vivid Warm Crimson (`#ff004f`).
+    *   **B-Tier (Kiệt Xuất)**: Golden Amber (`#f5a623`).
+    *   **C-Tier (Tinh Anh)**: Emerald Cyan (`#00f5d4`).
+    *   **D-Tier (Bình Thường)**: Slate Muted Gray (`#64748b`).
+    *   **F-Tier (Phế Vật)**: Dusty Charcoal Carbon (`#334155`).
+*   **Interactive Placement Panel**: A bottom dashboard containing unranked movies, enabling users to drag items directly into their respective rows with smooth kinetic bounce effects.
 
 ---
 
-## 6. Admin Panel: Progress Visualizer
+## 6. Real-time Transcoding Console (SSE Visualizer)
 
-When an administrator uploads an episode and initiates the FFmpeg transcoder, the status view renders the live SSE (`/api/upload/status/:episodeId`) payload.
+For administrator uploads, a custom terminal container renders live transcoding telemetry:
 
-- **Dynamic Progress Bar**: A horizontal fill track with a pulsing `--brand-neon` glow.
-- **Telemetry Console**: A dark terminal window displaying real-time transcribing variables:
-  - **Percentage Completed**: Rendered in large bold figures (e.g. `45.2%`).
-  - **Encoding FPS**: The frame speed at which FFmpeg compiles segments (e.g., `25 FPS`).
-  - **ETA**: Projected time left to complete encoding (e.g., `45s`).
-- Once finished, the container transitions from progress view to active stream player view, enabling instant verification.
+*   **Pulsing Ring Console**: Circular progress bar using SVG stroke dashes, changing color from red to neon cyan as percent approaches `100%`.
+*   **Dynamic Logs Terminal**: Consoles logs slide upward with subtle text glowing effects.
+*   **Interactive Statistics Overlay**: Showcases Frame rate (`FPS`), Bitrate (`kbps`), and Remaining duration (`ETA`).
 
 ---
 
-## 7. Skeleton Loading States (Visual Polish)
+## 7. Skeleton Shimmer & Page Transitions
 
-To avoid raw, sudden jumps during fetch wait times, elements are represented using fluid animated skeleton loaders.
+To elevate perceived loading speeds, all pages utilize absolute viewport transition delays and shimmering layout skeletons.
 
-```css
-@keyframes pulse-glow {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
-}
-.skeleton-loading {
-  background: linear-gradient(-90deg, #111315 0%, #1c1e22 50%, #111315 100%);
-  background-size: 400% 400%;
-  animation: pulse-glow 1.5s ease infinite;
-}
-```
-* **Movie Grid Skeletons**: 6 empty card structures rendering glowing gradient profiles, replacing generic spinner icons.
-* **Comment Skeletons**: Alternating line profiles representing avatar icons, username segments, and comment bodies.
+*   **Slide Page Transition**: Changing routes triggers a full-page smooth slide-in/slide-out effect with a bezier easing `cubic-bezier(0.76, 0, 0.24, 1)`.
+*   **Active Skeleton Card Grid**: Instead of spinning loaders, empty cards fade in with a 45-degree angle shimmering gradient moving from left to right endlessly (`animation: skeleton-shimmer 1.6s infinite`).

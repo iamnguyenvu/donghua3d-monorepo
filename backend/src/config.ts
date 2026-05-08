@@ -12,6 +12,12 @@ export const config = {
   uploadDir: process.env.UPLOAD_DIR || path.join(__dirname, '../uploads'),
   clientUrl: process.env.CLIENT_URL || 'http://localhost',
   nodeEnv: process.env.NODE_ENV || 'development',
+  s3: {
+    endpoint: process.env.S3_ENDPOINT || '',
+    accessKeyId: process.env.S3_ACCESS_KEY_ID || '',
+    secretAccessKey: process.env.S3_SECRET_ACCESS_KEY || '',
+    bucketName: process.env.S3_BUCKET_NAME || 'donghua3d-vip-media',
+  }
 };
 
 // Simple validations

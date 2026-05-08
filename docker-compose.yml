@@ -37,6 +37,7 @@ services:
     volumes:
       - ./backend:/app
       - /app/node_modules
+      - /app/dist
       - shared_uploads:/app/uploads
     depends_on:
       db:
@@ -55,7 +56,6 @@ services:
     volumes:
       - ./frontend:/app
       - /app/node_modules
-      - /app/.next
     depends_on:
       - backend
 

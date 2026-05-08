@@ -1,7 +1,7 @@
-FROM node:20-alpine
+FROM node:20-slim
 
 # Install system dependencies needed for native node packages or ffmpeg
-RUN apk add --no-cache ffmpeg python3 make g++
+RUN apt-get update && apt-get install -y ffmpeg python3 make g++ --no-install-recommends && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 

@@ -2,6 +2,7 @@ import { Router, Response, NextFunction } from 'express';
 import { prisma } from '../db';
 import { AuthenticatedRequest, requireAuth, requireRole } from '../middleware/auth.middleware';
 import { encodingService } from '../services/encoding.service';
+import { storageService } from '../services/storage.service';
 import { Role } from '@prisma/client';
 
 const router = Router();
@@ -147,8 +148,16 @@ router.get('/episodes/:id', async (req: AuthenticatedRequest, res: Response, nex
     // Resolve user watch progress if logged in
     let watchProgress = 0.0;
     let watchCompleted = false;
+    let isVip = false;
 
     if (req.user) {
+      const dbUser = await prisma.user.findUnique({
+        where: { id: req.user.id }
+      });
+      if (dbUser) {
+        isVip = dbUser.role === Role.ADMIN || dbUser.role === Role.EXPERT || dbUser.reputationScore >= 110;
+      }
+
       const history = await prisma.watchHistory.findUnique({
         where: {
           unique_user_watch_progress: {
@@ -163,10 +172,24 @@ router.get('/episodes/:id', async (req: AuthenticatedRequest, res: Response, nex
       }
     }
 
+    // Handle anti-leech for 4K video using secure presigned URLs (1 hour expiration)
+    let finalVideoUrl4k: string | null = null;
+    let isVipOnly = false;
+
+    if (episode.videoUrl4k) {
+      isVipOnly = true; // Yes, 4K quality is VIP-only
+      if (isVip) {
+        // Generate presigned URL valid for 1 hour (3600 seconds)
+        finalVideoUrl4k = await storageService.generatePresignedUrl(episode.videoUrl4k, 3600);
+      }
+    }
+
     res.status(200).json({
       success: true,
       data: {
         ...episode,
+        videoUrl4k: finalVideoUrl4k,
+        isVipOnly,
         watchHistory: {
           progress: watchProgress,
           completed: watchCompleted,
