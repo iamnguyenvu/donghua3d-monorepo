@@ -77,14 +77,6 @@ export default function LeaderboardAndTiers() {
     setSubmitting(false);
   };
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-[#050508] flex items-center justify-center">
-        <Loader2 className="w-10 h-10 text-violet-500 animate-spin" />
-      </div>
-    );
-  }
-
   // Group personal tiers by Tier Category for the board visual
   const boardStructure = {
     [Tier.S]: personalTiers.filter(p => p.tier === Tier.S),
@@ -109,7 +101,12 @@ export default function LeaderboardAndTiers() {
     <div className="min-h-screen bg-[#050508] text-zinc-100 flex flex-col font-sans pb-24">
       <Header />
 
-      <main className="w-full px-6 md:px-12 lg:px-16 mt-28">
+      {loading ? (
+        <div className="flex-grow flex items-center justify-center py-32 mt-20">
+          <Loader2 className="w-10 h-10 text-violet-500 animate-spin" />
+        </div>
+      ) : (
+        <main className="w-full px-6 md:px-12 lg:px-16 mt-28">
         <div className="flex items-center gap-4 border-b border-zinc-900/60 pb-5 mb-12">
           <div className="flex items-center gap-2">
             <h1 className="text-lg font-black text-white tracking-wider uppercase border-l-2 border-violet-500 pl-3">
@@ -311,6 +308,7 @@ export default function LeaderboardAndTiers() {
 
         </div>
       </main>
+      )}
     </div>
   );
 }

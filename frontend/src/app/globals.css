@@ -44,6 +44,11 @@
   box-sizing: border-box;
 }
 
+html {
+  scrollbar-gutter: stable;
+  scroll-behavior: smooth;
+}
+
 body {
   background-color: #050508;
   color: hsl(var(--text-primary));
