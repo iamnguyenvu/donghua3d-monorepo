@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { Heart, Star, Film, Loader2, ArrowLeft, Trash2, LayoutGrid, Sparkles } from 'lucide-react';
+import { Heart, Star, Film, Loader2, ArrowLeft, Trash2, LayoutGrid } from 'lucide-react';
 import Header from '../../components/Header';
 import { watchlistApi, authApi, MoviePayload, UserPayload } from '../../lib/api';
 
@@ -88,7 +88,7 @@ export default function WatchlistPage() {
             </div>
             <h2 className="text-base font-bold text-white uppercase tracking-wider">Yêu Cầu Đăng Nhập</h2>
             <p className="text-xs text-zinc-500 mt-2 leading-relaxed">
-              Tính năng "Danh sách của tôi" giúp bạn đồng bộ danh sách phim yêu thích trên mọi thiết bị. Hãy đăng nhập để tiếp tục trải nghiệm.
+              Tính năng &quot;Danh sách của tôi&quot; giúp bạn đồng bộ danh sách phim yêu thích trên mọi thiết bị. Hãy đăng nhập để tiếp tục trải nghiệm.
             </p>
             <Link 
               href="/"
@@ -167,7 +167,7 @@ export default function WatchlistPage() {
             </div>
             <h3 className="text-sm font-bold text-white uppercase tracking-wider">Danh sách chưa có phim nào</h3>
             <p className="text-xs text-zinc-500 mt-2 max-w-sm mx-auto leading-relaxed">
-              Khám phá thư viện phim Donghua 3D và nhấn nút "+ Danh sách của tôi" để lưu giữ những bộ phim bạn yêu thích nhất.
+              Khám phá thư viện phim Donghua 3D và nhấn nút &quot;+ Danh sách của tôi&quot; để lưu giữ những bộ phim bạn yêu thích nhất.
             </p>
             <Link
               href="/"

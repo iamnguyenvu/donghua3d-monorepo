@@ -59,7 +59,7 @@ async function apiFetch<T>(endpoint: string, options: RequestInit = {}): Promise
     const res = await fetch(url, mergedOptions);
     const data = await res.json();
     return data as ApiResponse<T>;
-  } catch (err: any) {
+  } catch (err) {
     console.error(`[API Fetch Error] Endpoint ${endpoint} failed:`, err);
     return {
       success: false,
@@ -191,8 +191,8 @@ export const catalogApi = {
     return apiFetch<EpisodePayload>(`/catalog/episodes/${id}`);
   },
 
-  async saveWatchHistory(episodeId: string, progress: number, completed: boolean): Promise<ApiResponse<any>> {
-    return apiFetch<any>(`/catalog/episodes/${episodeId}/watch-history`, {
+  async saveWatchHistory(episodeId: string, progress: number, completed: boolean): Promise<ApiResponse<unknown>> {
+    return apiFetch<unknown>(`/catalog/episodes/${episodeId}/watch-history`, {
       method: 'POST',
       body: JSON.stringify({ progress, completed }),
     });
@@ -274,14 +274,14 @@ export const commentApi = {
     });
   },
 
-  async flagComment(id: string): Promise<ApiResponse<any>> {
-    return apiFetch<any>(`/comments/${id}/flag`, {
+  async flagComment(id: string): Promise<ApiResponse<unknown>> {
+    return apiFetch<unknown>(`/comments/${id}/flag`, {
       method: 'POST',
     });
   },
 
-  async deleteComment(id: string): Promise<ApiResponse<any>> {
-    return apiFetch<any>(`/comments/${id}`, {
+  async deleteComment(id: string): Promise<ApiResponse<unknown>> {
+    return apiFetch<unknown>(`/comments/${id}`, {
       method: 'DELETE',
     });
   }
@@ -351,14 +351,14 @@ export const watchlistApi = {
     return apiFetch<MoviePayload[]>('/watchlist');
   },
 
-  async addToWatchlist(movieId: string): Promise<ApiResponse<any>> {
-    return apiFetch<any>(`/watchlist/${movieId}`, {
+  async addToWatchlist(movieId: string): Promise<ApiResponse<unknown>> {
+    return apiFetch<unknown>(`/watchlist/${movieId}`, {
       method: 'POST',
     });
   },
 
-  async removeFromWatchlist(movieId: string): Promise<ApiResponse<any>> {
-    return apiFetch<any>(`/watchlist/${movieId}`, {
+  async removeFromWatchlist(movieId: string): Promise<ApiResponse<unknown>> {
+    return apiFetch<unknown>(`/watchlist/${movieId}`, {
       method: 'DELETE',
     });
   },

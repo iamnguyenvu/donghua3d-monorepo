@@ -1,11 +1,11 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { Star, Play, Calendar, Film, ArrowRight, Grid3X3, Sparkles, Plus, Check, Loader2, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Star, Play, Film, ArrowRight, Sparkles, Plus, Check, Loader2, ChevronLeft, ChevronRight } from 'lucide-react';
 import Header from '../components/Header';
-import { catalogApi, MoviePayload, watchlistApi } from '../lib/api';
+import { catalogApi, MoviePayload, watchlistApi, Tier } from '../lib/api';
 
 // Pre-seeded high quality default fallback mock items to ensure immediate cinematic rendering
 const fallbacks: MoviePayload[] = [
@@ -22,7 +22,7 @@ const fallbacks: MoviePayload[] = [
     expertRating: 9.4,
     audienceRating: 9.0,
     createdAt: new Date().toISOString(),
-    leaderboard: { globalTier: 'S' as any, tierScore: 94.5, rank: 1 }
+    leaderboard: { globalTier: Tier.S, tierScore: 94.5, rank: 1 }
   },
   {
     id: 'sl-1',
@@ -37,7 +37,7 @@ const fallbacks: MoviePayload[] = [
     expertRating: 8.9,
     audienceRating: 8.7,
     createdAt: new Date().toISOString(),
-    leaderboard: { globalTier: 'A' as any, tierScore: 86.2, rank: 2 }
+    leaderboard: { globalTier: Tier.A, tierScore: 86.2, rank: 2 }
   },
   {
     id: 'mj-1',
@@ -52,13 +52,12 @@ const fallbacks: MoviePayload[] = [
     expertRating: 9.2,
     audienceRating: 8.8,
     createdAt: new Date().toISOString(),
-    leaderboard: { globalTier: 'S' as any, tierScore: 91.0, rank: 3 }
+    leaderboard: { globalTier: Tier.S, tierScore: 91.0, rank: 3 }
   }
 ];
 
 export default function Home() {
   const [movies, setMovies] = useState<MoviePayload[]>([]);
-  const [filteredMovies, setFilteredMovies] = useState<MoviePayload[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeHeroIdx, setActiveHeroIdx] = useState(0);
   
@@ -133,7 +132,7 @@ export default function Home() {
   };
 
   // Filter and sort computations
-  useEffect(() => {
+  const filteredMovies = useMemo(() => {
     let result = [...movies];
 
     if (searchQuery) {
@@ -158,7 +157,7 @@ export default function Home() {
       result.sort((a, b) => a.title.localeCompare(b.title));
     }
 
-    setFilteredMovies(result);
+    return result;
   }, [movies, searchQuery, selectedYear, sortBy]);
 
   // Rotate Hero Carousel slide

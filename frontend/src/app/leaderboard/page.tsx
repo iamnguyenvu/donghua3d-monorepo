@@ -3,8 +3,8 @@
 import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { 
-  Trophy, Star, Award, Sparkles, Loader2, Save, 
-  PlusCircle, BookmarkCheck, Film 
+  Star, Loader2, Save, 
+  PlusCircle, Film 
 } from 'lucide-react';
 import Header from '@/components/Header';
 import { 
@@ -25,32 +25,32 @@ export default function LeaderboardAndTiers() {
   const [submitting, setSubmitting] = useState(false);
 
   // Load Leaderboard and personal placements
-  const loadData = async () => {
-    setLoading(true);
-    const leadRes = await tierApi.getLeaderboard();
-    const movieRes = await catalogApi.getMovies();
-    
-    if (leadRes.success && leadRes.data) {
-      setLeaderboard(leadRes.data);
-    }
-    if (movieRes.success && movieRes.data) {
-      setMovies(movieRes.data);
-      if (movieRes.data.length > 0) {
-        setSelectedMovieId(movieRes.data[0].id);
-      }
-    }
-
-    const token = localStorage.getItem('donghua3d_token');
-    if (token) {
-      const personalRes = await tierApi.getPersonalTiers();
-      if (personalRes.success && personalRes.data) {
-        setPersonalTiers(personalRes.data);
-      }
-    }
-    setLoading(false);
-  };
-
   useEffect(() => {
+    const loadData = async () => {
+      setLoading(true);
+      const leadRes = await tierApi.getLeaderboard();
+      const movieRes = await catalogApi.getMovies();
+      
+      if (leadRes.success && leadRes.data) {
+        setLeaderboard(leadRes.data);
+      }
+      if (movieRes.success && movieRes.data) {
+        setMovies(movieRes.data);
+        if (movieRes.data.length > 0) {
+          setSelectedMovieId(movieRes.data[0].id);
+        }
+      }
+
+      const token = localStorage.getItem('donghua3d_token');
+      if (token) {
+        const personalRes = await tierApi.getPersonalTiers();
+        if (personalRes.success && personalRes.data) {
+          setPersonalTiers(personalRes.data);
+        }
+      }
+      setLoading(false);
+    };
+
     loadData();
   }, []);
 

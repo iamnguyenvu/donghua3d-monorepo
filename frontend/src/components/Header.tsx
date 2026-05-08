@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { Film, Search, Trophy, LayoutGrid, User, LogOut, Loader2, Heart, ChevronDown, Bell } from 'lucide-react';
+import { Film, Search, User, LogOut, Loader2, ChevronDown, Bell } from 'lucide-react';
 import { authApi, UserPayload } from '../lib/api';
 
 interface HeaderProps {
@@ -70,7 +70,7 @@ export default function Header({ onSearchChange }: HeaderProps) {
       } else {
         setErrorMsg(res.error?.message || 'Có lỗi xảy ra. Vui lòng thử lại.');
       }
-    } catch (err) {
+    } catch {
       setErrorMsg('Không thể kết nối đến máy chủ.');
     } finally {
       setSubmitting(false);

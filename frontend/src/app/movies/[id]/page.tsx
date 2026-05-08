@@ -5,11 +5,11 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useParams } from 'next/navigation';
 import { 
-  Star, Play, Calendar, Film, ArrowLeft, Loader2, Award, 
-  Tv, MessageSquare, Info, Plus, Check 
+  Star, Play, Film, ArrowLeft, Loader2, Award, 
+  Info, Plus, Check 
 } from 'lucide-react';
 import Header from '@/components/Header';
-import { catalogApi, ratingApi, MovieWithEpisodes, ReviewPayload, watchlistApi } from '@/lib/api';
+import { catalogApi, ratingApi, MovieWithEpisodes, ReviewPayload, watchlistApi, Tier } from '@/lib/api';
 
 export default function MovieDetails() {
   const params = useParams() as { id: string };
@@ -126,7 +126,7 @@ export default function MovieDetails() {
           expertRating: 9.4,
           audienceRating: 9.0,
           createdAt: new Date().toISOString(),
-          leaderboard: { globalTier: 'S' as any, tierScore: 94.5, rank: 1 },
+          leaderboard: { globalTier: Tier.S, tierScore: 94.5, rank: 1 },
           episodes: mockEpisodes
         });
       }

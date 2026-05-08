@@ -81,7 +81,7 @@ export default function WatchEpisode() {
           expertRating: 9.4,
           audienceRating: 9.0,
           releaseYear: 2021,
-        } as any);
+        } as unknown as MoviePayload);
       }
       setLoading(false);
     }

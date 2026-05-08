@@ -1,12 +1,11 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { 
   MediaPlayer, 
   MediaOutlet, 
   useMediaStore, 
-  useMediaRemote,
-  useMediaPlayer
+  useMediaRemote
 } from '@vidstack/react';
 import Hls from 'hls.js';
 import { 
@@ -45,6 +44,7 @@ export default function PremiumPlayer({
         playsInline
         crossOrigin="anonymous"
         currentTime={initialProgress}
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         onProviderSetup={(provider: any) => {
           if (provider.type === 'hls') {
             provider.library = Hls;
@@ -91,7 +91,6 @@ function CustomControls({
   onProgressPulse
 }: CustomControlsProps) {
   const remote = useMediaRemote();
-  const player = useMediaPlayer();
 
   // Subscribe to Vidstack player states using useMediaStore
   const { 
@@ -129,6 +128,15 @@ function CustomControls({
     }
   }, [paused, currentTime, duration, onProgressPulse]);
 
+  // Declared skipping functions with useCallback before useEffect keydown
+  const handleSkipIntro = useCallback(() => {
+    remote.seek(introEnd);
+  }, [remote, introEnd]);
+
+  const handleSkipOutro = useCallback(() => {
+    remote.seek(outroEnd);
+  }, [remote, outroEnd]);
+
   // Keyboard Shortcuts for skip buttons
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -145,7 +153,7 @@ function CustomControls({
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [showIntroSkip, showOutroSkip]);
+  }, [showIntroSkip, showOutroSkip, handleSkipIntro, handleSkipOutro]);
 
   const togglePlay = () => {
     if (paused) {
@@ -153,14 +161,6 @@ function CustomControls({
     } else {
       remote.pause();
     }
-  };
-
-  const handleSkipIntro = () => {
-    remote.seek(introEnd);
-  };
-
-  const handleSkipOutro = () => {
-    remote.seek(outroEnd);
   };
 
   const handleVolumeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
