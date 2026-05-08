@@ -154,6 +154,8 @@ export interface EpisodePayload {
   title: string;
   description?: string;
   videoUrl: string;
+  videoUrl4k?: string | null;
+  isVipOnly?: boolean;
   duration: number;
   introStart: number;
   introEnd: number;

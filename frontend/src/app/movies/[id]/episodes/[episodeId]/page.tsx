@@ -171,6 +171,8 @@ export default function WatchEpisode() {
         {/* Custom Vidstack Premium Video Player Component */}
         <PremiumPlayer
           src={episode.videoUrl}
+          videoUrl4k={episode.videoUrl4k}
+          isVipOnly={episode.isVipOnly}
           title={episode.title}
           introStart={episode.introStart}
           introEnd={episode.introEnd}

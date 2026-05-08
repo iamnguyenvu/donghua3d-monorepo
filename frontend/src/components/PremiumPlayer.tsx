@@ -10,11 +10,13 @@ import {
 import Hls from 'hls.js';
 import { 
   Play, Pause, Volume2, VolumeX, Maximize2, Minimize2, 
-  SkipForward, Settings, Loader2
+  SkipForward, Settings, Loader2, Sparkles
 } from 'lucide-react';
 
 interface PremiumPlayerProps {
   src: string;
+  videoUrl4k?: string | null;
+  isVipOnly?: boolean;
   title: string;
   introStart?: number;
   introEnd?: number;
@@ -26,6 +28,7 @@ interface PremiumPlayerProps {
 
 export default function PremiumPlayer({
   src,
+  videoUrl4k,
   title,
   introStart = 0,
   introEnd = 0,
@@ -34,10 +37,18 @@ export default function PremiumPlayer({
   initialProgress = 0,
   onProgressPulse
 }: PremiumPlayerProps) {
+  const [selectedQuality, setSelectedQuality] = useState<'1080p' | '4K'>('1080p');
+
+  // Compute active source dynamically
+  const activeSrc = selectedQuality === '4K' && videoUrl4k ? videoUrl4k : src;
+
+  // Determine if paywall should be shown
+  const showVipOverlay = selectedQuality === '4K' && !videoUrl4k;
+
   return (
     <div className="relative aspect-video w-full rounded-[4px] overflow-hidden border border-zinc-900/60 bg-black shadow-2xl group select-none">
       <MediaPlayer
-        src={src}
+        src={activeSrc}
         title={title}
         aspectRatio={16/9}
         load="visible"
@@ -69,8 +80,51 @@ export default function PremiumPlayer({
           outroStart={outroStart}
           outroEnd={outroEnd}
           onProgressPulse={onProgressPulse}
+          selectedQuality={selectedQuality}
+          setSelectedQuality={setSelectedQuality}
+          videoUrl4k={videoUrl4k}
         />
       </MediaPlayer>
+
+      {/* STUNNING GLASSMORPHIC VIP PAYWALL OVERLAY */}
+      {showVipOverlay && (
+        <div className="absolute inset-0 z-50 flex flex-col items-center justify-center p-8 text-center bg-[#050508]/90 backdrop-blur-md transition-all duration-300">
+          {/* Neon Purple Pulsing Shield or Star Icon */}
+          <div className="relative mb-6">
+            <div className="absolute inset-0 bg-violet-500/35 rounded-full blur-xl scale-125 animate-pulse"></div>
+            <div className="relative p-5 rounded-full bg-gradient-to-tr from-amber-500 to-violet-600 border border-amber-300/30 shadow-[0_0_30px_rgba(139,92,246,0.5)]">
+              <Sparkles className="w-10 h-10 text-white animate-pulse" />
+            </div>
+          </div>
+
+          <h2 className="text-xl md:text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-amber-400 via-pink-400 to-violet-500 uppercase tracking-widest mb-3.5">
+            Trải Nghiệm 4K Ultra-HD VIP
+          </h2>
+          
+          <p className="text-zinc-300 text-xs md:text-sm max-w-lg leading-relaxed mb-8">
+            Chất lượng hình ảnh siêu sắc nét 4K chỉ dành riêng cho các thành viên VIP của Donghua3D. 
+            Bạn có thể tích lũy điểm uy tín bằng cách đóng góp đánh giá khách quan để kích hoạt VIP miễn phí!
+          </p>
+
+          <div className="flex flex-col sm:flex-row items-center gap-4">
+            <button
+              onClick={() => {
+                alert('Hệ thống thăng hạng VIP đang đồng bộ với ví & điểm uy tín của bạn!');
+              }}
+              className="px-6 py-3 rounded-[4px] bg-gradient-to-r from-amber-500 to-violet-600 text-xs font-black uppercase tracking-wider text-white border-0 cursor-pointer shadow-[0_0_20px_rgba(139,92,246,0.3)] hover:scale-105 active:scale-95 transition-all outline-none"
+            >
+              Kích hoạt VIP / Nâng cấp ngay
+            </button>
+
+            <button
+              onClick={() => setSelectedQuality('1080p')}
+              className="px-6 py-3 rounded-[4px] bg-transparent border border-zinc-700 hover:border-zinc-500 text-xs font-black uppercase tracking-wider text-zinc-400 hover:text-white cursor-pointer transition-all outline-none"
+            >
+              Quay lại 1080p Bản Thường
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -81,6 +135,9 @@ interface CustomControlsProps {
   outroStart: number;
   outroEnd: number;
   onProgressPulse?: (currentTime: number, isCompleted: boolean) => void;
+  selectedQuality: '1080p' | '4K';
+  setSelectedQuality: (q: '1080p' | '4K') => void;
+  videoUrl4k?: string | null;
 }
 
 function CustomControls({
@@ -88,7 +145,10 @@ function CustomControls({
   introEnd,
   outroStart,
   outroEnd,
-  onProgressPulse
+  onProgressPulse,
+  selectedQuality,
+  setSelectedQuality,
+  videoUrl4k
 }: CustomControlsProps) {
   const remote = useMediaRemote();
 
@@ -106,7 +166,6 @@ function CustomControls({
   // UI Local States (Only settings and speeds, skip states are computed on render!)
   const [showSettings, setShowSettings] = useState(false);
   const [playbackSpeed, setPlaybackSpeed] = useState(1);
-  const [quality, setQuality] = useState('Auto');
 
   // Compute Skip buttons visibility dynamically on render - ZERO state overhead, zero re-render loops!
   const showIntroSkip = currentTime >= introStart && currentTime <= introEnd && introEnd > introStart;
@@ -318,18 +377,33 @@ function CustomControls({
                   {/* Quality Settings Section */}
                   <div className="flex flex-col gap-1">
                     <span className="text-[9px] font-black text-zinc-550 uppercase tracking-widest pl-1.5 pb-1">Chất lượng</span>
-                    {['Auto', '1080p Ultra-HD', '720p HD', '480p SD'].map((q) => (
-                      <button
-                        key={q}
-                        onClick={() => {
-                          setQuality(q);
-                          setShowSettings(false);
-                        }}
-                        className={`text-left px-2 py-1 text-[10px] font-bold rounded-[2px] cursor-pointer outline-none border-0 transition-colors ${quality === q ? 'bg-violet-600 text-white' : 'bg-transparent text-zinc-400 hover:bg-white/5 hover:text-white'}`}
-                      >
-                        {q}
-                      </button>
-                    ))}
+                    
+                    {/* Free 1080p option */}
+                    <button
+                      onClick={() => {
+                        setSelectedQuality('1080p');
+                        setShowSettings(false);
+                      }}
+                      className={`text-left px-2.5 py-1.5 text-[10px] font-bold rounded-[2px] cursor-pointer outline-none border-0 transition-colors ${selectedQuality === '1080p' ? 'bg-violet-600 text-white' : 'bg-transparent text-zinc-400 hover:bg-white/5 hover:text-white'}`}
+                    >
+                      1080p Ultra-HD
+                    </button>
+
+                    {/* Premium 4K VIP option */}
+                    <button
+                      onClick={() => {
+                        setSelectedQuality('4K');
+                        setShowSettings(false);
+                      }}
+                      className={`text-left px-2.5 py-1.5 text-[10px] font-bold rounded-[2px] cursor-pointer outline-none border-0 transition-all flex items-center justify-between ${selectedQuality === '4K' ? 'bg-gradient-to-r from-amber-500 to-violet-600 text-white shadow-[0_0_10px_rgba(245,158,11,0.2)]' : 'bg-transparent text-amber-400 hover:bg-white/5'}`}
+                    >
+                      <span>4K Ultra-HD VIP</span>
+                      {!videoUrl4k && (
+                        <span className="bg-amber-500/20 text-amber-300 text-[8px] px-1 rounded-[2px] border border-amber-400/20 font-black animate-pulse">
+                          VIP
+                        </span>
+                      )}
+                    </button>
                   </div>
 
                   <div className="border-t border-zinc-900 my-0.5"></div>
