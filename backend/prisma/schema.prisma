@@ -41,6 +41,7 @@ model User {
   comments        Comment[]
   watchHistories  WatchHistory[]
   personalTiers   PersonalTierList[]
+  watchlist       Watchlist[]
 }
 
 // 2. Movie Entity Model
@@ -63,6 +64,7 @@ model Movie {
   comments       Comment[]
   personalTiers  PersonalTierList[]
   leaderboard    GlobalTierLeaderboard?
+  watchlist      Watchlist[]
 
   @@index([releaseYear(sort: Desc), rating(sort: Desc)], name: "idx_movie_release_rating")
 }
@@ -178,4 +180,18 @@ model GlobalTierLeaderboard {
   rank           Int?
   lastCalculated DateTime @default(now()) @db.Timestamptz
   movie          Movie    @relation(fields: [movieId], references: [id], onDelete: Cascade)
+}
+
+// 9. Watchlist (Favorites) Model
+model Watchlist {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId    String   @db.Uuid
+  movieId   String   @db.Uuid
+  createdAt DateTime @default(now()) @db.Timestamptz
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  movie     Movie    @relation(fields: [movieId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, movieId], name: "unique_user_movie_watchlist")
+  @@index([userId], name: "idx_watchlist_user")
 }

@@ -269,17 +269,17 @@ export default function WatchEpisode() {
   if (loading) {
     return (
       <div className="min-h-screen bg-[#050508] flex items-center justify-center">
-        <Loader2 className="w-10 h-10 text-violet-500 animate-spin" />
+        <Loader2 className="w-8 h-8 text-violet-500 animate-spin" />
       </div>
     );
   }
 
   if (!episode || !movie) {
     return (
-      <div className="min-h-screen bg-[#050508] flex flex-col items-center justify-center p-8">
-        <Loader2 className="w-12 h-12 text-rose-500 mb-4 animate-spin" />
-        <h2 className="text-xl font-bold text-white">Không tìm thấy tập phim</h2>
-        <Link href="/" className="px-6 py-3 bg-gradient-to-r from-violet-600 to-indigo-600 rounded-full text-white font-bold mt-6 hover:scale-105 active:scale-95 transition-all">Quay về Trang Chủ</Link>
+      <div className="min-h-screen bg-[#050508] flex flex-col items-center justify-center p-8 text-center select-none">
+        <Loader2 className="w-10 h-10 text-violet-500 mb-4 animate-spin" />
+        <h2 className="text-base font-bold text-white uppercase tracking-wider">Không tìm thấy tập phim</h2>
+        <Link href="/" className="mt-5 px-5 py-2.5 rounded-[4px] bg-violet-600 hover:bg-violet-700 text-xs font-extrabold uppercase tracking-wider text-white no-underline transition-all">Quay về Trang Chủ</Link>
       </div>
     );
   }
@@ -289,16 +289,16 @@ export default function WatchEpisode() {
       <Header />
 
       {/* ==============================================================================
-         CINEMATIC WATCH PLAYER BLOCK
+         CINEMATIC WATCH PLAYER BLOCK (Layout 02 Netflix Style)
          ============================================================================== */}
-      <main className="container mx-auto px-8 max-w-6xl mt-28">
-        <Link href={`/movies/${movie.id}`} className="flex items-center gap-2 text-zinc-400 hover:text-white no-underline font-semibold mb-6 transition-colors">
-          <ArrowLeft className="w-4 h-4" />
+      <main className="w-full px-6 md:px-12 lg:px-16 mt-28">
+        <Link href={`/movies/${movie.id}`} className="flex items-center gap-1.5 text-zinc-400 hover:text-white no-underline text-[10px] font-bold uppercase tracking-wider mb-5 transition-colors">
+          <ArrowLeft className="w-3.5 h-3.5" />
           Quay lại danh mục {movie.title}
         </Link>
 
         {/* Video Player Frame wrapper using pure Tailwind layout */}
-        <div className="relative aspect-video w-full rounded-2xl overflow-hidden border border-zinc-800 bg-black shadow-2xl group">
+        <div className="relative aspect-video w-full rounded-[4px] overflow-hidden border border-zinc-900/60 bg-black shadow-2xl group">
           <video
             ref={videoRef}
             onTimeUpdate={handleTimeUpdate}
@@ -311,10 +311,10 @@ export default function WatchEpisode() {
           {showIntroSkip && (
             <button
               onClick={handleSkipIntro}
-              className="absolute bottom-20 left-8 z-30 py-3.5 px-6 rounded-xl bg-gradient-to-r from-violet-600 to-indigo-600 border border-violet-500/20 text-white font-bold font-sans text-sm shadow-[0_0_20px_rgba(138,43,226,0.5)] hover:scale-105 active:scale-95 transition-all duration-300 animate-pulse"
+              className="absolute bottom-20 left-8 z-30 py-2.5 px-5 rounded-[4px] bg-violet-600 border-0 text-white font-extrabold font-sans text-xs tracking-wider uppercase shadow-[0_0_15px_rgba(124,58,237,0.5)] hover:scale-105 active:scale-95 transition-all duration-200 animate-pulse cursor-pointer outline-none"
             >
-              <SkipForward className="w-4 h-4 inline mr-1.5" />
-              BỎ QUA GIỚI THIỆU (Nhấn S)
+              <SkipForward className="w-3.5 h-3.5 inline mr-1.5" />
+              BỎ QUA GIỚI THIỆU (S)
             </button>
           )}
 
@@ -322,15 +322,15 @@ export default function WatchEpisode() {
           {showOutroSkip && (
             <button
               onClick={handleSkipOutro}
-              className="absolute bottom-20 right-8 z-30 py-3.5 px-6 rounded-xl bg-gradient-to-r from-violet-600 to-indigo-600 border border-violet-500/20 text-white font-bold font-sans text-sm shadow-[0_0_20px_rgba(138,43,226,0.5)] hover:scale-105 active:scale-95 transition-all duration-300 animate-pulse"
+              className="absolute bottom-20 right-8 z-30 py-2.5 px-5 rounded-[4px] bg-violet-600 border-0 text-white font-extrabold font-sans text-xs tracking-wider uppercase shadow-[0_0_15px_rgba(124,58,237,0.5)] hover:scale-105 active:scale-95 transition-all duration-200 animate-pulse cursor-pointer outline-none"
             >
-              <SkipForward className="w-4 h-4 inline mr-1.5" />
-              BỎ QUA PHẦN KẾT THÚC (Nhấn E)
+              <SkipForward className="w-3.5 h-3.5 inline mr-1.5" />
+              BỎ QUA PHẦN KẾT THÚC (E)
             </button>
           )}
 
           {/* CUSTOM CONTROLS OVERLAY BAR using pure Tailwind */}
-          <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black via-black/40 to-transparent p-5 flex flex-col gap-3.5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-20">
+          <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black via-black/45 to-transparent p-5 flex flex-col gap-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-20">
             {/* Timeline Progress Slider */}
             <input
               type="range"
@@ -342,24 +342,24 @@ export default function WatchEpisode() {
                 if (videoRef.current) videoRef.current.currentTime = val;
                 setCurrentTime(val);
               }}
-              className="w-full h-1 bg-white/20 rounded-lg appearance-none cursor-pointer accent-violet-500 hover:h-1.5 transition-all outline-none"
+              className="w-full h-1 bg-white/20 rounded-md appearance-none cursor-pointer accent-violet-600 hover:h-1.5 transition-all outline-none"
             />
 
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-4.5">
-                <button onClick={togglePlay} className="p-2.5 rounded-full bg-white/5 border border-white/10 hover:bg-white/15 text-white cursor-pointer transition-colors outline-none">
-                  {isPlaying ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4 fill-white text-white" />}
+              <div className="flex items-center gap-4">
+                <button onClick={togglePlay} className="p-2 rounded-[4px] bg-white/5 border border-white/10 hover:bg-white/10 text-white cursor-pointer transition-colors outline-none">
+                  {isPlaying ? <Pause className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5 fill-white text-white" />}
                 </button>
 
-                <span className="text-xs text-zinc-300 font-bold tracking-wider">
+                <span className="text-[10px] text-zinc-300 font-extrabold tracking-wider">
                   {formatTime(currentTime)} / {formatTime(duration)}
                 </span>
               </div>
 
-              <div className="flex items-center gap-4.5">
+              <div className="flex items-center gap-4">
                 {/* Volume Slider */}
                 <div className="flex items-center gap-2">
-                  <Volume2 className="w-4 h-4 text-zinc-400" />
+                  <Volume2 className="w-3.5 h-3.5 text-zinc-400" />
                   <input
                     type="range"
                     min="0"
@@ -367,12 +367,12 @@ export default function WatchEpisode() {
                     step="0.1"
                     value={volume}
                     onChange={handleVolumeChange}
-                    className="w-16 h-1 bg-white/20 appearance-none rounded-lg accent-violet-500 cursor-pointer outline-none"
+                    className="w-16 h-1 bg-white/20 appearance-none rounded-lg accent-violet-600 cursor-pointer outline-none"
                   />
                 </div>
 
-                <button onClick={toggleFullscreen} className="p-2 text-zinc-400 hover:text-white bg-transparent border-0 cursor-pointer transition-colors outline-none">
-                  <Maximize2 className="w-4 h-4" />
+                <button onClick={toggleFullscreen} className="p-1.5 text-zinc-400 hover:text-white bg-transparent border-0 cursor-pointer transition-colors outline-none">
+                  <Maximize2 className="w-3.5 h-3.5" />
                 </button>
               </div>
             </div>
@@ -380,16 +380,16 @@ export default function WatchEpisode() {
         </div>
 
         {/* EPISODE DETAILS INFO */}
-        <div className="mt-8 border-b border-zinc-800/80 pb-8">
-          <div className="flex items-center gap-2 text-sm text-violet-400 font-bold uppercase tracking-wider mb-2">
+        <div className="mt-8 border-b border-zinc-900/60 pb-6 select-none">
+          <div className="flex items-center gap-2 text-[10px] text-violet-400 font-black uppercase tracking-widest mb-1.5">
             <span>{movie.title}</span>
-            <span className="text-zinc-600">•</span>
+            <span className="text-zinc-700">|</span>
             <span>Tập {episode.episodeNumber}</span>
           </div>
-          <h1 className="text-2xl md:text-3xl font-extrabold text-white tracking-tight mb-3">
+          <h1 className="text-xl md:text-2xl font-black text-white uppercase tracking-wider mb-2">
             {episode.title}
           </h1>
-          <p className="text-sm text-zinc-400 leading-relaxed max-w-4xl">
+          <p className="text-xs text-zinc-400 leading-relaxed max-w-4xl">
             {episode.description}
           </p>
         </div>
@@ -401,14 +401,13 @@ export default function WatchEpisode() {
           
           {/* LEFT: VERIFIED RATINGS PANEL */}
           <div className="lg:col-span-1 flex flex-col gap-6">
-            <h2 className="text-xl font-bold flex items-center gap-2.5 border-b border-zinc-800 pb-4">
-              <Star className="w-5 h-5 text-amber-400 fill-amber-400" />
+            <h2 className="text-xs font-black text-white tracking-wider uppercase border-b border-zinc-900/60 pb-4 flex items-center gap-2">
               Đánh Giá Xác Thực
             </h2>
 
             {/* Post review panel form */}
-            <form onSubmit={handleRatingSubmit} className="p-6 bg-zinc-950/80 border border-zinc-800/80 rounded-2xl flex flex-col gap-4 shadow-lg">
-              <span className="text-xs font-bold text-zinc-400 uppercase tracking-wider">Bạn đánh giá tập phim này bao nhiêu?</span>
+            <form onSubmit={handleRatingSubmit} className="p-5 bg-zinc-950/40 border border-zinc-900 rounded-[4px] flex flex-col gap-4 shadow-lg select-none">
+              <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider">Bạn đánh giá tập phim này bao nhiêu?</span>
               
               {/* Star selector buttons */}
               <div className="flex items-center gap-1.5">
@@ -419,7 +418,7 @@ export default function WatchEpisode() {
                     onClick={() => setUserRating(star)}
                     className="p-1 bg-transparent border-0 cursor-pointer transition-transform hover:scale-125 outline-none"
                   >
-                    <Star className={`w-5 h-5 ${star <= userRating ? 'fill-amber-400 text-amber-400' : 'text-zinc-600'}`} />
+                    <Star className={`w-4 h-4 ${star <= userRating ? 'fill-amber-400 text-amber-400' : 'text-zinc-750'}`} />
                   </button>
                 ))}
               </div>
@@ -429,32 +428,32 @@ export default function WatchEpisode() {
                 placeholder="Viết nhận xét ngắn gọn của bạn tại đây (không bắt buộc)..."
                 value={reviewText}
                 onChange={(e) => setReviewText(e.target.value)}
-                className="bg-zinc-900 border border-zinc-800 text-white rounded-xl p-3 text-sm outline-none focus:border-violet-500 focus:ring-1 focus:ring-violet-500 transition-all w-full"
+                className="bg-[#0c0c0f] border border-zinc-800/80 text-white rounded-[4px] p-3 text-xs outline-none focus:border-zinc-750 transition-all w-full"
               />
 
               <button
                 type="submit"
                 disabled={userRating === 0 || submittingReview}
-                className="py-3 px-5 rounded-xl bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white font-bold text-sm transition-all duration-300 hover:scale-[1.02] active:scale-95 shadow-md disabled:opacity-50"
+                className="py-2.5 px-5 rounded-[4px] bg-violet-600 hover:bg-violet-700 text-white font-extrabold text-[11px] uppercase tracking-wider transition-all duration-200 active:scale-95 shadow-md disabled:opacity-50 cursor-pointer outline-none border-0"
               >
                 Gửi Đánh Giá {userRating > 0 && `(${userRating}/10)`}
               </button>
             </form>
 
             {/* List reviews feed */}
-            <div className="flex flex-col gap-4 max-h-[400px] overflow-y-auto pr-2">
+            <div className="flex flex-col gap-4 max-h-[400px] overflow-y-auto pr-2 select-none">
               {reviews.length > 0 ? (
                 reviews.map((rev) => (
-                  <div key={rev.id} className="p-4 bg-zinc-950/80 border border-zinc-800/80 rounded-xl flex flex-col gap-2 shadow-sm">
+                  <div key={rev.id} className="p-3.5 bg-zinc-950/40 border border-zinc-900 rounded-[4px] flex flex-col gap-2 shadow-sm">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
-                        <div className="w-7 h-7 rounded-full bg-zinc-900 border border-zinc-800 flex items-center justify-center text-xs font-bold text-white">
-                          U
+                        <div className="w-6 h-6 rounded-[2px] bg-zinc-900 border border-zinc-800 flex items-center justify-center text-[10px] font-bold text-zinc-455">
+                          {rev.user.email.charAt(0).toUpperCase()}
                         </div>
                         <span className="text-xs text-zinc-300 font-semibold truncate max-w-[120px]">{rev.user.email.split('@')[0]}</span>
                       </div>
-                      <span className="bg-amber-400/5 border border-amber-500/20 text-amber-400 px-2.5 py-0.5 rounded-lg text-[11px] font-extrabold flex items-center gap-0.5 shadow-sm">
-                        <Star className="w-3 h-3 fill-amber-400" />
+                      <span className="bg-amber-400/5 border border-amber-500/20 text-amber-400 px-1.5 py-0.5 rounded-[2px] text-[10px] font-extrabold flex items-center gap-0.5 shadow-sm">
+                        <Star className="w-2.5 h-2.5 fill-amber-400 text-amber-400" />
                         {rev.value}/10
                       </span>
                     </div>
@@ -462,9 +461,9 @@ export default function WatchEpisode() {
                   </div>
                 ))
               ) : (
-                <div className="text-center py-12 bg-zinc-950/40 border border-zinc-800 rounded-xl p-6">
-                  <Star className="w-8 h-8 text-zinc-600 mx-auto mb-2" />
-                  <p className="text-xs text-zinc-500 italic">Chưa có đánh giá nào cho bộ phim này.</p>
+                <div className="text-center py-12 bg-zinc-950/40 border border-zinc-900 rounded-[4px] p-6">
+                  <Star className="w-6 h-6 text-zinc-650 mx-auto mb-2" />
+                  <p className="text-xs text-zinc-550 italic">Chưa có nhận xét nào.</p>
                 </div>
               )}
             </div>
@@ -472,64 +471,63 @@ export default function WatchEpisode() {
 
           {/* RIGHT: THREADED SOCIAL COMMENTS SYSTEM */}
           <div className="lg:col-span-2 flex flex-col gap-6">
-            <h2 className="text-xl font-bold flex items-center gap-2.5 border-b border-zinc-800 pb-4">
-              <MessageSquare className="w-5 h-5 text-violet-400" />
+            <h2 className="text-xs font-black text-white tracking-wider uppercase border-b border-zinc-900/60 pb-4 flex items-center gap-2">
               Thảo Luận Tập Phim
             </h2>
 
             {/* Post comment form */}
-            <form onSubmit={handleCommentSubmit} className="p-6 bg-zinc-950/80 border border-zinc-800/80 rounded-2xl flex flex-col gap-4 shadow-lg">
+            <form onSubmit={handleCommentSubmit} className="p-5 bg-zinc-950/40 border border-zinc-900 rounded-[4px] flex flex-col gap-4 shadow-lg select-none">
               <textarea
                 rows={3}
                 placeholder="Bình luận suy nghĩ hoặc giả thuyết của bạn về tập này..."
                 value={commentText}
                 onChange={(e) => setCommentText(e.target.value)}
-                className="bg-zinc-900 border border-zinc-800 text-white rounded-xl p-3 text-sm outline-none focus:border-violet-500 focus:ring-1 focus:ring-violet-500 transition-all w-full"
+                className="bg-[#0c0c0f] border border-zinc-800/80 text-white rounded-[4px] p-3 text-xs outline-none focus:border-zinc-750 transition-all w-full"
                 required
               />
 
               <div className="flex items-center justify-between">
-                <label className="flex items-center gap-2 cursor-pointer text-xs text-zinc-400 select-none">
+                <label className="flex items-center gap-2 cursor-pointer text-[10px] text-zinc-400 select-none uppercase font-bold tracking-wider">
                   <input
                     type="checkbox"
                     checked={isSpoilerComment}
                     onChange={(e) => setIsSpoilerComment(e.target.checked)}
-                    className="accent-violet-500 rounded border-zinc-700 bg-zinc-900"
+                    className="accent-violet-600 rounded border-zinc-800 bg-zinc-950"
                   />
-                  Chứa tiết lộ nội dung trước (Spoiler Alert!)
+                  Chứa tiết lộ nội dung (Spoiler Alert!)
                 </label>
 
                 <button
                   type="submit"
                   disabled={submittingComment}
-                  className="py-2.5 px-6 rounded-xl bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white font-bold text-sm transition-all duration-300 hover:scale-[1.02] active:scale-95 shadow-md disabled:opacity-50 flex items-center gap-2"
+                  className="py-2 px-4 rounded-[4px] bg-violet-600 hover:bg-violet-700 text-white font-extrabold text-[11px] uppercase tracking-wider transition-all duration-200 active:scale-95 shadow-md disabled:opacity-50 flex items-center gap-1.5 cursor-pointer outline-none border-0"
                 >
-                  <Send className="w-3.5 h-3.5" />
+                  <Send className="w-3 h-3" />
                   Gửi Bình Luận
                 </button>
               </div>
             </form>
 
             {/* Feed Comments list */}
-            <div className="flex flex-col gap-6">
+            <div className="flex flex-col gap-6 select-none">
               {comments.length > 0 ? (
                 comments.map((comment) => (
-                  <div key={comment.id} className="border-b border-zinc-900 pb-5 last:border-0 flex gap-4">
-                    <div className="w-9 h-9 rounded-full bg-violet-900/40 flex items-center justify-center border border-violet-500/20 text-sm font-bold text-violet-300 flex-shrink-0 select-none">
-                      C
+                  <div key={comment.id} className="border-b border-zinc-900/60 pb-5 last:border-0 flex gap-4">
+                    <div className="w-8 h-8 rounded-[2px] bg-zinc-900 flex items-center justify-center border border-zinc-850 text-xs font-bold text-zinc-400 flex-shrink-0 select-none">
+                      {comment.user.email.charAt(0).toUpperCase()}
                     </div>
                     
                     <div className="flex flex-col gap-1.5 flex-grow">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
                           <span className="text-xs text-zinc-300 font-bold">{comment.user.email.split('@')[0]}</span>
-                          <span className="text-[10px] text-zinc-500 font-semibold">{new Date(comment.createdAt).toLocaleDateString()}</span>
+                          <span className="text-[10px] text-zinc-550 font-semibold">{new Date(comment.createdAt).toLocaleDateString()}</span>
                         </div>
 
                         <div className="flex items-center gap-2">
                           <button
                             onClick={() => handleCommentFlag(comment.id)}
-                            className="p-1 bg-transparent border-0 cursor-pointer text-zinc-500 hover:text-rose-400 transition-colors outline-none"
+                            className="p-1 bg-transparent border-0 cursor-pointer text-zinc-550 hover:text-rose-500 transition-colors outline-none"
                             title="Báo cáo vi phạm"
                           >
                             <Flag className="w-3.5 h-3.5" />
@@ -541,12 +539,12 @@ export default function WatchEpisode() {
                       {comment.isSpoiler && !visibleSpoilers[comment.id] ? (
                         <div 
                           onClick={() => setVisibleSpoilers({ ...visibleSpoilers, [comment.id]: true })}
-                          className="inline-block text-xs py-2 px-3.5 border border-amber-500/20 bg-amber-500/5 hover:bg-amber-500/10 text-amber-300 rounded-lg cursor-pointer transition-all select-none"
+                          className="inline-block text-[10px] font-bold py-1.5 px-3 border border-amber-500/15 bg-amber-500/5 hover:bg-amber-500/8 text-amber-400 rounded-[2px] cursor-pointer transition-all select-none uppercase tracking-wider"
                         >
-                          ⚠️ NHẤP ĐỂ XEM SPOILER (Nội dung tiết lộ trước cốt truyện tập phim)
+                          ⚠️ NHẤP ĐỂ XEM SPOILER (Nội dung tiết lộ trước cốt truyện)
                         </div>
                       ) : (
-                        <p className={`text-sm text-zinc-300 leading-relaxed ${comment.isSpoiler ? 'border-l-2 border-amber-500 pl-3 bg-amber-500/5 py-1 rounded' : ''}`}>
+                        <p className={`text-xs text-zinc-300 leading-relaxed ${comment.isSpoiler ? 'border-l-2 border-amber-500 pl-3 bg-amber-500/5 py-1 rounded-[2px]' : ''}`}>
                           {comment.content}
                         </p>
                       )}
@@ -554,9 +552,9 @@ export default function WatchEpisode() {
                   </div>
                 ))
               ) : (
-                <div className="text-center py-16 bg-zinc-950/40 border border-zinc-800 rounded-2xl p-6">
-                  <MessageSquare className="w-10 h-10 text-zinc-600 mx-auto mb-2" />
-                  <p className="text-sm text-zinc-500 italic">Chưa có bình luận nào cho tập phim này. Hãy bắt đầu cuộc trò chuyện!</p>
+                <div className="text-center py-16 bg-zinc-950/40 border border-zinc-900 rounded-[4px] p-6">
+                  <MessageSquare className="w-6 h-6 text-zinc-650 mx-auto mb-2" />
+                  <p className="text-xs text-zinc-550 italic">Chưa có bình luận nào. Hãy bắt đầu cuộc thảo luận đầu tiên!</p>
                 </div>
               )}
             </div>

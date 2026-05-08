@@ -9,6 +9,7 @@ import movieRouter from './controllers/movie.controller';
 import ratingRouter from './controllers/rating.controller';
 import commentRouter from './controllers/comment.controller';
 import tierRouter from './controllers/tier.controller';
+import watchlistRouter from './controllers/watchlist.controller';
 
 const app = express();
 
@@ -29,6 +30,7 @@ app.use('/catalog', movieRouter);
 app.use('/ratings', ratingRouter);
 app.use('/comments', commentRouter);
 app.use('/tiers', tierRouter);
+app.use('/watchlist', watchlistRouter);
 
 // 3. Health check route
 app.get('/health', (_req, res) => {

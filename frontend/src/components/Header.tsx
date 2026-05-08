@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { Film, Search, Trophy, LayoutGrid, User, LogOut, Loader2 } from 'lucide-react';
+import { Film, Search, Trophy, LayoutGrid, User, LogOut, Loader2, Heart, ChevronDown, Bell } from 'lucide-react';
 import { authApi, UserPayload } from '../lib/api';
 
 interface HeaderProps {
@@ -85,137 +85,178 @@ export default function Header({ onSearchChange }: HeaderProps) {
 
   return (
     <>
-      <header className="fixed top-4 left-4 right-4 z-50 rounded-full py-3 px-8 flex items-center justify-between bg-zinc-950/75 backdrop-blur-md border border-zinc-800/80 shadow-2xl">
-        {/* Logo Brand */}
-        <Link href="/" className="flex items-center gap-2 text-white no-underline group select-none">
-          <div className="p-2 rounded-full bg-gradient-to-br from-violet-600 to-indigo-600 flex items-center justify-center shadow-[0_0_15px_rgba(124,58,237,0.4)] group-hover:scale-105 transition-transform duration-300">
-            <Film className="w-5 h-5 text-white" />
-          </div>
-          <span className="font-sans font-extrabold text-xl tracking-tight bg-gradient-to-r from-violet-400 to-indigo-400 bg-clip-text text-transparent">
-            DONGHUA<span className="text-white transition-all duration-300 group-hover:text-violet-400">3D</span>
-          </span>
-        </Link>
-
-        {/* Search Bar Input */}
-        {onSearchChange && (
-          <div className="relative w-full max-w-md mx-8 hidden md:block">
-            <input
-              type="text"
-              placeholder="Tìm kiếm phim, tựa đề dịch..."
-              value={searchVal}
-              onChange={handleSearch}
-              className="w-full pl-12 pr-4 rounded-full py-2 bg-zinc-900/60 border border-zinc-800 focus:border-violet-500 focus:ring-1 focus:ring-violet-500 text-zinc-100 placeholder-zinc-500 outline-none transition-all text-sm"
-            />
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" />
-          </div>
-        )}
-
-        {/* Navigation Tabs */}
-        <nav className="flex items-center gap-6 select-none">
-          <Link
-            href="/"
-            className={`flex items-center gap-2 text-sm font-semibold no-underline transition-all duration-300 hover:scale-105 ${
-              pathname === '/' ? 'text-violet-400' : 'text-zinc-400 hover:text-white'
-            }`}
-          >
-            <LayoutGrid className="w-4 h-4" />
-            Trang Chủ
-          </Link>
-          <Link
-            href="/leaderboard"
-            className={`flex items-center gap-2 text-sm font-semibold no-underline transition-all duration-300 hover:scale-105 ${
-              pathname === '/leaderboard' ? 'text-violet-400' : 'text-zinc-400 hover:text-white'
-            }`}
-          >
-            <Trophy className="w-4 h-4" />
-            Bảng Xếp Hạng
-          </Link>
-
-          {/* User Auth Buttons */}
-          {loading ? (
-            <Loader2 className="w-5 h-5 text-zinc-400 animate-spin" />
-          ) : user ? (
-            <div className="flex items-center gap-4 border-l border-zinc-800 pl-4">
-              <div className="flex flex-col text-right">
-                <span className="text-xs font-semibold text-white max-w-[120px] truncate">{user.email.split('@')[0]}</span>
-                <span className="text-[10px] text-amber-400 font-bold uppercase tracking-wider">Rep: {user.reputationScore}</span>
+      <header className="fixed top-0 left-0 right-0 z-50 bg-[#050508]/90 backdrop-blur-md select-none border-b border-zinc-900/50">
+        <div className="max-w-[1440px] mx-auto w-full px-6 md:px-12 lg:px-16 h-20 md:h-[88px] flex items-center justify-between">
+          {/* Left Side: Logo + Navigation clustered together */}
+          <div className="flex items-center gap-10 md:gap-14">
+            {/* Logo Brand */}
+            <Link href="/" className="flex items-center gap-3 text-white no-underline group select-none flex-shrink-0">
+              <div className="p-2 rounded-[4px] bg-violet-600 flex items-center justify-center transition-all duration-300 group-hover:bg-violet-500 shadow-md">
+                <Film className="w-4.5 h-4.5 text-white" />
               </div>
-              <button
-                onClick={handleLogout}
-                className="p-2.5 rounded-full bg-zinc-900/60 border border-zinc-800 hover:bg-rose-500/10 hover:border-rose-500/20 text-zinc-400 hover:text-rose-400 transition-colors"
-                title="Đăng xuất"
+              <span className="font-sans font-black text-lg md:text-xl tracking-wider text-white">
+                DONGHUA<span className="text-violet-500">3D</span>
+              </span>
+            </Link>
+
+            {/* Navigation Tabs */}
+            <nav className="flex items-center gap-6 md:gap-8 select-none">
+              <Link
+                href="/"
+                className={`relative text-xs font-black uppercase tracking-wider no-underline transition-colors duration-200 py-2.5 ${
+                  pathname === '/' ? 'text-white' : 'text-zinc-400 hover:text-white'
+                }`}
               >
-                <LogOut className="w-4 h-4" />
-              </button>
+                Trang Chủ
+                {pathname === '/' && (
+                  <span className="absolute bottom-0 left-0 right-0 h-[2.5px] bg-violet-500 rounded-full" />
+                )}
+              </Link>
+              <Link
+                href="/leaderboard"
+                className={`relative text-xs font-black uppercase tracking-wider no-underline transition-colors duration-200 py-2.5 ${
+                  pathname === '/leaderboard' ? 'text-white' : 'text-zinc-400 hover:text-white'
+                }`}
+              >
+                Bảng Xếp Hạng
+                {pathname === '/leaderboard' && (
+                  <span className="absolute bottom-0 left-0 right-0 h-[2.5px] bg-violet-500 rounded-full" />
+                )}
+              </Link>
+              <Link
+                href="/watchlist"
+                className={`relative text-xs font-black uppercase tracking-wider no-underline transition-colors duration-200 py-2.5 ${
+                  pathname === '/watchlist' ? 'text-white' : 'text-zinc-400 hover:text-white'
+                }`}
+              >
+                Danh Sách Của Tôi
+                {pathname === '/watchlist' && (
+                  <span className="absolute bottom-0 left-0 right-0 h-[2.5px] bg-violet-500 rounded-full" />
+                )}
+              </Link>
+            </nav>
+          </div>
+
+          {/* Right Side: Search + Actions clustered together */}
+          <div className="flex items-center gap-6 flex-shrink-0">
+            {/* Search Bar Input Container (Flex row - 100% overlap proof) */}
+            {onSearchChange && (
+              <div className="flex items-center gap-3 px-4 py-2.5 rounded-[4px] bg-black/50 border border-zinc-800/80 focus-within:border-violet-500/80 focus-within:bg-black/85 transition-all duration-300 w-48 lg:w-64 hidden md:flex shadow-inner">
+                <Search className="w-4 h-4 text-zinc-400 flex-shrink-0 transition-colors" />
+                <input
+                  type="text"
+                  placeholder="Tìm kiếm phim..."
+                  value={searchVal}
+                  onChange={handleSearch}
+                  className="w-full bg-transparent text-zinc-100 placeholder-zinc-500 text-xs outline-none border-0 p-0 focus:ring-0 focus:outline-none"
+                />
+              </div>
+            )}
+
+            {/* Right action area */}
+            <div className="flex items-center gap-4">
+              {/* User Auth Buttons */}
+              {loading ? (
+                <Loader2 className="w-4 h-4 text-zinc-400 animate-spin" />
+              ) : user ? (
+                <div className="flex items-center gap-5 pl-5 border-l border-zinc-850">
+                  {/* Notification Bell with Violet Indicator Dot */}
+                  <div className="relative cursor-pointer hover:text-white text-zinc-400 p-2 transition-colors hidden sm:block" title="Thông báo">
+                    <Bell className="w-4.5 h-4.5 transition-transform hover:scale-110 duration-200" />
+                    <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 rounded-full bg-violet-600 ring-2 ring-[#050508]" />
+                  </div>
+
+                  <div className="flex items-center gap-3.5">
+                    <div className="flex flex-col text-right">
+                      <span className="text-xs font-black text-white max-w-[120px] truncate tracking-tight">{user.email.split('@')[0]}</span>
+                      <span className="text-[9px] text-violet-400 font-black uppercase tracking-widest mt-0.5">Rep: {user.reputationScore}</span>
+                    </div>
+                    <div className="flex items-center gap-1.5 group cursor-pointer" title="Hồ sơ">
+                      <div className="w-9 h-9 rounded-[4px] bg-violet-600 text-white font-black flex items-center justify-center text-sm shadow-md transition-all duration-300 group-hover:scale-105 group-hover:bg-violet-500 ring-1 ring-violet-500/30">
+                        {user.email[0].toUpperCase()}
+                      </div>
+                      <ChevronDown className="w-4 h-4 text-zinc-500 group-hover:text-zinc-300 transition-colors" />
+                    </div>
+                  </div>
+
+                  <button
+                    onClick={handleLogout}
+                    className="p-2.5 rounded-[4px] bg-zinc-950 border border-zinc-800 hover:border-violet-500/30 text-zinc-400 hover:text-violet-400 hover:bg-zinc-900 transition-all duration-300 cursor-pointer outline-none ml-1 flex items-center justify-center"
+                    title="Đăng xuất"
+                  >
+                    <LogOut className="w-4 h-4" />
+                  </button>
+                </div>
+              ) : (
+                <button
+                  onClick={() => { setAuthMode('login'); setShowModal(true); }}
+                  className="rounded-[4px] px-5 py-3 bg-violet-600 hover:bg-violet-700 text-white font-extrabold text-[11px] uppercase tracking-wider flex items-center gap-2 transition-all cursor-pointer outline-none border-0 shadow-md hover:shadow-[0_4px_20px_rgba(124,58,237,0.3)] active:scale-95"
+                >
+                  <User className="w-4 h-4" />
+                  Đăng Nhập
+                </button>
+              )}
             </div>
-          ) : (
-            <button
-              onClick={() => { setAuthMode('login'); setShowModal(true); }}
-              className="rounded-full px-5 py-2.5 bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white font-bold text-[13px] tracking-wide flex items-center gap-2 hover:scale-105 active:scale-95 transition-all shadow-md cursor-pointer outline-none"
-            >
-              <User className="w-4 h-4" />
-              Đăng Nhập
-            </button>
-          )}
-        </nav>
+          </div>
+        </div>
       </header>
 
       {/* Auth Modal Overlay */}
       {showModal && (
         <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4 animate-fade-in-up">
-          <div className="w-full max-w-md p-8 relative rounded-2xl bg-zinc-950 border border-zinc-800/80 shadow-2xl">
+          <div className="w-full max-w-sm p-6 relative rounded-[4px] bg-[#0c0c0f] border border-zinc-800/80 shadow-2xl">
             <button
               onClick={() => setShowModal(false)}
-              className="absolute top-4 right-4 p-2.5 text-zinc-400 hover:text-white bg-transparent border-0 cursor-pointer text-lg font-bold outline-none"
+              className="absolute top-4 right-4 p-2 text-zinc-400 hover:text-white bg-transparent border-0 cursor-pointer text-sm font-bold outline-none"
             >
               ✕
             </button>
             
-            <h2 className="text-2xl text-white font-extrabold mb-2 text-center tracking-tight">
-              {authMode === 'login' ? 'Đăng Nhập Hệ Thống' : 'Tạo Tài Khoản Mới'}
+            <h2 className="text-xl text-white font-extrabold mb-1 text-center tracking-tight">
+              {authMode === 'login' ? 'Đăng Nhập' : 'Đăng Ký'}
             </h2>
-            <p className="text-xs text-zinc-400 text-center mb-6">
+            <p className="text-xs text-zinc-500 text-center mb-5">
               {authMode === 'login' ? 'Kết nối với cộng đồng 3D Donghua chất lượng cao' : 'Nhập thông tin đăng ký tài khoản miễn phí'}
             </p>
 
             {errorMsg && (
-              <div className="bg-rose-500/5 border border-rose-500/20 text-rose-400 rounded-xl p-3 text-sm text-center mb-4">
+              <div className="bg-rose-500/5 border border-rose-500/20 text-rose-400 rounded-[4px] p-2.5 text-xs text-center mb-4">
                 {errorMsg}
               </div>
             )}
 
-            <form onSubmit={handleAuthSubmit} className="flex flex-col gap-4">
-              <div className="flex flex-col gap-2">
-                <label className="text-xs text-zinc-400 font-bold uppercase tracking-wider">Email Đăng Ký</label>
+            <form onSubmit={handleAuthSubmit} className="flex flex-col gap-3.5">
+              <div className="flex flex-col gap-1.5">
+                <label className="text-[10px] text-zinc-500 font-black uppercase tracking-wider">Email Đăng Nhập</label>
                 <input
                   type="email"
                   required
                   placeholder="name@example.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="bg-zinc-900 border border-zinc-800 text-white rounded-xl p-3.5 text-sm outline-none focus:border-violet-500 focus:ring-1 focus:ring-violet-500 transition-all"
+                  className="bg-black/50 border border-zinc-800 focus:border-violet-500 text-white rounded-[4px] py-2.5 px-3.5 text-xs outline-none transition-all duration-300"
                 />
               </div>
 
-              <div className="flex flex-col gap-2">
-                <label className="text-xs text-zinc-400 font-bold uppercase tracking-wider">Mật Khẩu</label>
+              <div className="flex flex-col gap-1.5">
+                <label className="text-[10px] text-zinc-500 font-black uppercase tracking-wider">Mật Khẩu</label>
                 <input
                   type="password"
                   required
                   placeholder="••••••••"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="bg-zinc-900 border border-zinc-800 text-white rounded-xl p-3.5 text-sm outline-none focus:border-violet-500 focus:ring-1 focus:ring-violet-500 transition-all"
+                  className="bg-black/50 border border-zinc-800 focus:border-violet-500 text-white rounded-[4px] py-2.5 px-3.5 text-xs outline-none transition-all duration-300"
                 />
               </div>
 
               <button
                 type="submit"
                 disabled={submitting}
-                className="w-full py-3.5 mt-2 rounded-xl bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white font-bold text-sm transition-all duration-300 hover:scale-[1.02] active:scale-95 shadow-md flex items-center justify-center disabled:opacity-50"
+                className="w-full py-3 mt-2 rounded-[4px] bg-violet-600 hover:bg-violet-700 text-white font-bold text-xs tracking-wider uppercase transition-all duration-300 active:scale-95 shadow-md flex items-center justify-center disabled:opacity-50 border-0 cursor-pointer"
               >
                 {submitting ? (
-                  <Loader2 className="w-5 h-5 text-white animate-spin" />
+                  <Loader2 className="w-4 h-4 text-white animate-spin" />
                 ) : authMode === 'login' ? (
                   'Đăng Nhập'
                 ) : (

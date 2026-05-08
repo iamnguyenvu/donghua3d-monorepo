@@ -342,3 +342,29 @@ export const tierApi = {
     return apiFetch<LeaderboardRowPayload[]>('/tiers/leaderboard');
   }
 };
+
+// ==============================================================================
+// WATCHLIST / FAVORITES SYSTEM ENDPOINTS
+// ==============================================================================
+export const watchlistApi = {
+  async getWatchlist(): Promise<ApiResponse<MoviePayload[]>> {
+    return apiFetch<MoviePayload[]>('/watchlist');
+  },
+
+  async addToWatchlist(movieId: string): Promise<ApiResponse<any>> {
+    return apiFetch<any>(`/watchlist/${movieId}`, {
+      method: 'POST',
+    });
+  },
+
+  async removeFromWatchlist(movieId: string): Promise<ApiResponse<any>> {
+    return apiFetch<any>(`/watchlist/${movieId}`, {
+      method: 'DELETE',
+    });
+  },
+
+  async checkInWatchlist(movieId: string): Promise<ApiResponse<{ isAdded: boolean }>> {
+    return apiFetch<{ isAdded: boolean }>(`/watchlist/check/${movieId}`);
+  }
+};
+
