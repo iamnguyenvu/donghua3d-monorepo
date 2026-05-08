@@ -24,6 +24,12 @@ interface PremiumPlayerProps {
   outroEnd?: number;
   initialProgress?: number;
   onProgressPulse?: (currentTime: number, isCompleted: boolean) => void;
+  // Real-time watch party sync callbacks
+  onPlay?: () => void;
+  onPause?: () => void;
+  onSeek?: (time: number) => void;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  playerRef?: React.RefObject<any>;
 }
 
 export default function PremiumPlayer({
@@ -35,7 +41,11 @@ export default function PremiumPlayer({
   outroStart = 0,
   outroEnd = 0,
   initialProgress = 0,
-  onProgressPulse
+  onProgressPulse,
+  onPlay,
+  onPause,
+  onSeek,
+  playerRef
 }: PremiumPlayerProps) {
   const [selectedQuality, setSelectedQuality] = useState<'1080p' | '4K'>('1080p');
 
@@ -48,6 +58,7 @@ export default function PremiumPlayer({
   return (
     <div className="relative aspect-video w-full rounded-[4px] overflow-hidden border border-zinc-900/60 bg-black shadow-2xl group select-none">
       <MediaPlayer
+        ref={playerRef}
         src={activeSrc}
         title={title}
         aspectRatio={16/9}
@@ -55,6 +66,13 @@ export default function PremiumPlayer({
         playsInline
         crossOrigin="anonymous"
         currentTime={initialProgress}
+        onPlay={onPlay}
+        onPause={onPause}
+        onSeeked={() => {
+          if (onSeek && playerRef?.current) {
+            onSeek(playerRef.current.currentTime);
+          }
+        }}
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         onProviderSetup={(provider: any) => {
           if (provider.type === 'hls') {
