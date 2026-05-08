@@ -53,10 +53,15 @@ app.use((err: any, _req: AuthenticatedRequest, res: Response, _next: NextFunctio
   });
 });
 
+import { cronService } from './services/cron.service';
+
 // 5. Start server listener
 app.listen(config.port, () => {
   console.log(`========================================================`);
   console.log(` 🚀 DONGHUA3D EXPRESS RUNNING ON PORT ${config.port} [${config.nodeEnv.toUpperCase()}]`);
   console.log(` API Endpoint: http://localhost:${config.port}`);
   console.log(`========================================================`);
+
+  // Start background scheduled cron tasks
+  cronService.startCronJobs();
 });

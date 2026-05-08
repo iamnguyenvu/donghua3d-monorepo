@@ -196,3 +196,14 @@ model Watchlist {
   @@unique([userId, movieId], name: "unique_user_movie_watchlist")
   @@index([userId], name: "idx_watchlist_user")
 }
+
+// 10. ScrapingLog Model
+model ScrapingLog {
+  id          String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  startedAt   DateTime  @default(now()) @db.Timestamptz
+  completedAt DateTime? @db.Timestamptz
+  status      String    @db.VarChar(50) // 'PENDING', 'SUCCESS', 'FAILED'
+  syncedCount Int       @default(0)
+  results     Json      @default("[]") // JSON list of detailed messages
+  error       String?   @db.Text
+}
