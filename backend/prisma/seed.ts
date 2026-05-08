@@ -69,7 +69,7 @@ async function main() {
           episodeNumber: 1,
           title: 'The Child of Stone Village',
           description: 'Shi Hao demonstrates incredible raw power and is tested by village elders.',
-          videoUrl: '/static/uploads/hls/perfect-world-ep1/index.m3u8',
+          videoUrl: 'https://s5.phim1280.tv/20250303/xZEA0QQm/index.m3u8',
           duration: 1200.0, // 20 mins
           introStart: 10.0,
           introEnd: 100.0,
@@ -81,7 +81,7 @@ async function main() {
           episodeNumber: 2,
           title: 'The Divine Beast Encounter',
           description: 'A terrifying beast approaches the stone village boundary.',
-          videoUrl: '/static/uploads/hls/perfect-world-ep2/index.m3u8',
+          videoUrl: 'https://s5.phim1280.tv/20250303/xZEA0QQm/index.m3u8',
           duration: 1180.0,
           introStart: 15.0,
           introEnd: 105.0,
@@ -104,7 +104,7 @@ async function main() {
           episodeNumber: 1,
           title: 'The Reincarnation of Tang San',
           description: 'Tang San leaps off Hell Peak and awakens his Blue Silver Grass spirit.',
-          videoUrl: '/static/uploads/hls/soul-land-ep1/index.m3u8',
+          videoUrl: 'https://v7.kkphimplayer7.com/20260425/fP9ApSnJ/index.m3u8',
           duration: 1300.0,
           introStart: 20.0,
           introEnd: 110.0,
@@ -127,7 +127,7 @@ async function main() {
           episodeNumber: 1,
           title: 'The Mountain Examination',
           description: 'Han Li arrives at the Seven Mysteries Sect and undergoes the primary physical trials.',
-          videoUrl: '/static/uploads/hls/mortals-journey-ep1/index.m3u8',
+          videoUrl: 'https://zyxcdn.com/f2_w2GjVp2PDolgRJzjKz2lkg_231528/master.m3u8',
           duration: 1250.0,
           introStart: 5.0,
           introEnd: 95.0,
@@ -191,6 +191,12 @@ async function main() {
           },
         });
         console.log(`  └─ ✅ Episode ${ep.episodeNumber} created`);
+      } else {
+        await prisma.episode.update({
+          where: { id: existingEp.id },
+          data: { videoUrl: ep.videoUrl }
+        });
+        console.log(`  └─ 🔄 Episode ${ep.episodeNumber} updated with real stream link`);
       }
     }
 
