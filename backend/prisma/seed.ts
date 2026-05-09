@@ -62,6 +62,7 @@ async function main() {
       description: 'In the desolate wilderness, a small child raised by an orphan village rises to conquer the heavens.',
       studio: 'Foch Film',
       releaseYear: 2021,
+      imdbRating: 8.2,
       posterUrl: '/static/uploads/posters/perfect-world.jpg',
       bannerUrl: '/static/uploads/banners/perfect-world-banner.jpg',
       episodes: [
@@ -97,6 +98,7 @@ async function main() {
       description: 'Tang San, having committed a forbidden crime in his martial sect, reincarnates in Soul Land with twin high-tier spirits.',
       studio: 'Sparkly Key Animation Studio',
       releaseYear: 2018,
+      imdbRating: 8.6,
       posterUrl: '/static/uploads/posters/soul-land.jpg',
       bannerUrl: '/static/uploads/banners/soul-land-banner.jpg',
       episodes: [
@@ -120,6 +122,7 @@ async function main() {
       description: 'An ordinary village boy accidentally gains entry into an esoteric sect and begins his journey of cautious cultivation.',
       studio: 'Original Force',
       releaseYear: 2020,
+      imdbRating: 9.0,
       posterUrl: '/static/uploads/posters/mortals-journey.jpg',
       bannerUrl: '/static/uploads/banners/mortals-journey-banner.jpg',
       episodes: [
@@ -155,12 +158,18 @@ async function main() {
           releaseYear: item.releaseYear,
           posterUrl: item.posterUrl,
           bannerUrl: item.bannerUrl,
+          imdbRating: item.imdbRating,
         },
       });
       console.log(`✅ Movie created: ${item.title}`);
     } else {
-      movie = existingMovie;
-      console.log(`ℹ️ Movie already exists: ${item.title}`);
+      movie = await prisma.movie.update({
+        where: { id: existingMovie.id },
+        data: {
+          imdbRating: item.imdbRating,
+        },
+      });
+      console.log(`ℹ️ Movie updated with IMDb: ${item.title}`);
     }
 
     // Seed Episodes

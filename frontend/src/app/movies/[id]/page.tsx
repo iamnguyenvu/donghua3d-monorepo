@@ -125,6 +125,7 @@ export default function MovieDetails() {
           rating: 9.2,
           expertRating: 9.4,
           audienceRating: 9.0,
+          imdbRating: 8.2,
           createdAt: new Date().toISOString(),
           leaderboard: { globalTier: Tier.S, tierScore: 94.5, rank: 1 },
           episodes: mockEpisodes
@@ -204,6 +205,11 @@ export default function MovieDetails() {
               <span className="border border-zinc-800 bg-zinc-950/60 text-amber-400 px-2.5 py-1.5 rounded-[4px] text-[10px] font-extrabold tracking-wider uppercase flex items-center gap-1">
                 ⭐ {movie.rating > 0 ? movie.rating.toFixed(1) : '9.0'} / 10
               </span>
+              {movie.imdbRating && (
+                <span className="border border-zinc-800 bg-zinc-950/60 text-[#F5C518] px-2.5 py-1.5 rounded-[4px] text-[10px] font-extrabold tracking-wider uppercase flex items-center gap-1.5">
+                  <span className="bg-[#F5C518] text-black px-1 rounded-[2px] font-black">IMDb</span> {movie.imdbRating.toFixed(1)} / 10
+                </span>
+              )}
               <span className="border border-zinc-800 bg-zinc-950/60 text-zinc-300 px-2.5 py-1.5 rounded-[4px] text-[10px] font-extrabold tracking-wider uppercase">
                 {movie.releaseYear}
               </span>

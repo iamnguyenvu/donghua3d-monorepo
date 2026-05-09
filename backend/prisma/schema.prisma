@@ -57,6 +57,7 @@ model Movie {
   rating         Float                  @default(0.0)
   expertRating   Float                  @default(0.0)
   audienceRating Float                  @default(0.0)
+  imdbRating     Float?
   createdAt      DateTime               @default(now()) @db.Timestamptz
   updatedAt      DateTime               @updatedAt @db.Timestamptz
   episodes       Episode[]
