@@ -74,9 +74,9 @@ jobs:
           JWT_SECRET: ${{ secrets.JWT_SECRET }}
         run: |
           ssh -o StrictHostKeyChecking=no ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} "
-            # Navigate to project working directory
-            mkdir -p /var/www/donghua3d
-            cd /var/www/donghua3d
+            # Navigate to project working directory in user's home space
+            mkdir -p /home/ubuntu/donghua3d
+            cd /home/ubuntu/donghua3d
             
             # Sync source code repository
             if [ ! -d .git ]; then
