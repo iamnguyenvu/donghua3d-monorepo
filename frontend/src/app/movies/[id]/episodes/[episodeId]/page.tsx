@@ -111,6 +111,7 @@ export default function WatchEpisode() {
       if (nextEpisode && movie) {
         router.push(`/movies/${movie.id}/episodes/${nextEpisode.id}`);
       }
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setAutoplayCountdown(null);
       return;
     }

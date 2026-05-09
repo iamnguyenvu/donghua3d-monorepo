@@ -55,6 +55,7 @@ export default function PremiumPlayer({
   useEffect(() => {
     const saved = localStorage.getItem('donghua3d_selected_quality');
     if (saved === '1080p' || saved === '4K') {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setSelectedQuality(saved);
     }
   }, []);
@@ -207,6 +208,7 @@ function CustomControls({
     if (saved && remote) {
       const parsed = parseFloat(saved);
       if (!isNaN(parsed)) {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setPlaybackSpeed(parsed);
         remote.changePlaybackRate(parsed);
       }
