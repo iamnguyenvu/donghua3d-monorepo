@@ -9,14 +9,14 @@ import {
   Info, Plus, Check 
 } from 'lucide-react';
 import Header from '@/components/Header';
-import { catalogApi, ratingApi, MovieWithEpisodes, ReviewPayload, watchlistApi, Tier } from '@/lib/api';
+import { catalogApi, ratingApi, MovieWithEpisodes, ReviewPayload, watchlistApi, Tier, MoviePayload } from '@/lib/api';
 
 export default function MovieDetails() {
   const params = useParams() as { id: string };
   const [movie, setMovie] = useState<MovieWithEpisodes | null>(null);
   const [reviews, setReviews] = useState<ReviewPayload[]>([]);
   const [loading, setLoading] = useState(true);
-  const [relatedParts, setRelatedParts] = useState<any[]>([]);
+  const [relatedParts, setRelatedParts] = useState<MoviePayload[]>([]);
 
   // Watchlist integration
   const [watchlistIds, setWatchlistIds] = useState<Set<string>>(new Set());
@@ -93,7 +93,7 @@ export default function MovieDetails() {
 
           const relatedRes = await catalogApi.getMovies({ search: baseTitle });
           if (relatedRes.success && relatedRes.data) {
-            const filtered = relatedRes.data.filter((m: any) => m.id !== movieData.id);
+            const filtered = relatedRes.data.filter((m: MoviePayload) => m.id !== movieData.id);
             setRelatedParts(filtered);
           }
         } catch (err) {
@@ -312,10 +312,12 @@ export default function MovieDetails() {
                     className="flex items-center gap-3.5 p-3.5 bg-zinc-950/30 border border-zinc-900 hover:border-violet-500/40 hover:bg-violet-500/5 rounded-[4px] w-64 flex-shrink-0 transition-all duration-300 group no-underline shadow-sm"
                   >
                     <div className="w-12 h-16 rounded-[2px] overflow-hidden bg-zinc-950 flex-shrink-0 relative">
-                      <img
+                      <Image
                         src={part.posterUrl || '/static/uploads/default_poster.jpg'}
                         alt={part.title}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-all duration-300"
+                        fill
+                        sizes="48px"
+                        className="object-cover group-hover:scale-105 transition-all duration-300"
                       />
                     </div>
                     <div className="flex flex-col min-w-0">

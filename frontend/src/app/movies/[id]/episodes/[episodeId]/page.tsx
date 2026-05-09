@@ -10,7 +10,7 @@ import Header from '@/components/Header';
 import PremiumPlayer from '@/components/PremiumPlayer';
 import { 
   catalogApi, ratingApi, commentApi, 
-  EpisodePayload, MoviePayload, MovieWithEpisodes, ReviewPayload, CommentPayload 
+  EpisodePayload, MovieWithEpisodes, ReviewPayload, CommentPayload 
 } from '@/lib/api';
 
 export default function WatchEpisode() {
