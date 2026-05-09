@@ -10,7 +10,8 @@
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
     "prisma:studio": "prisma studio",
-    "seed": "ts-node prisma/seed.ts"
+    "seed": "ts-node prisma/seed.ts",
+    "update-studios": "ts-node src/scripts/update_studios.ts"
   },
   "prisma": {
     "seed": "ts-node prisma/seed.ts"
