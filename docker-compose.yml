@@ -33,7 +33,7 @@ services:
       JWT_SECRET: ${JWT_SECRET:-production_secure_jwt_secret_key_2026_donghua}
       STORAGE_PROVIDER: "LOCAL"
       UPLOAD_DIR: "/app/uploads"
-      CLIENT_URL: "http://localhost"
+      CLIENT_URL: "https://donghua3d.me"
     volumes:
       - ./backend:/app
       - /app/node_modules
@@ -52,7 +52,7 @@ services:
     ports:
       - "3000:3000"
     environment:
-      NEXT_PUBLIC_API_URL: "http://localhost/api"
+      NEXT_PUBLIC_API_URL: "https://donghua3d.me/api"
     volumes:
       - ./frontend:/app
       - /app/node_modules
