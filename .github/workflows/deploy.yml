@@ -63,6 +63,36 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Secure Cryptographic Diagnostics for Secrets
+        run: |
+          echo "==== Cryptographic Diagnostics (No values leaked) ===="
+          echo "VPS_HOST length: ${#VPS_HOST} chars"
+          echo "VPS_USER length: ${#VPS_USER} chars"
+          echo "VPS_SSH_KEY length: ${#VPS_SSH_KEY} chars"
+          
+          # Check for illegal surrounding quotes in secrets
+          if [[ "$VPS_HOST" == \"*\" || "$VPS_HOST" == \'*\' ]]; then
+            echo "::error:: SECURITY ALERT: VPS_HOST has illegal surrounding quotes! Please remove quotes in GitHub Secrets."
+          fi
+          if [[ "$VPS_USER" == \"*\" || "$VPS_USER" == \'*\' ]]; then
+            echo "::error:: SECURITY ALERT: VPS_USER has illegal surrounding quotes! Please remove quotes in GitHub Secrets."
+          fi
+          if [[ "$VPS_SSH_KEY" == \"*\" || "$VPS_SSH_KEY" == \'*\' ]]; then
+            echo "::error:: SECURITY ALERT: VPS_SSH_KEY has illegal surrounding quotes! Please remove quotes in GitHub Secrets."
+          fi
+          
+          # Check for SSH key validity and integrity
+          if [[ "$VPS_SSH_KEY" == *'-----BEGIN'* && "$VPS_SSH_KEY" == *'-----END'* ]]; then
+            echo "SUCCESS: SSH Private Key headers and footers are verified and intact."
+          else
+            echo "::error:: FORMAT ALERT: VPS_SSH_KEY is missing -----BEGIN ----- or -----END ----- headers/footers! Please re-copy the key exactly from your file."
+          fi
+          echo "======================================================="
+        env:
+          VPS_HOST: ${{ secrets.VPS_HOST }}
+          VPS_USER: ${{ secrets.VPS_USER }}
+          VPS_SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
+
       - name: Execute Remote SSH Commands for Rolling Deployment
         uses: appleboy/ssh-action@v1.0.3
         env:
