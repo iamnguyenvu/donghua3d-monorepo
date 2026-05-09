@@ -4,7 +4,7 @@ WORKDIR /app
 
 # Cache package dependencies
 COPY package*.json ./
-RUN npm ci
+RUN npm ci --legacy-peer-deps
 
 # Copy source code and build Next.js application
 COPY . .
