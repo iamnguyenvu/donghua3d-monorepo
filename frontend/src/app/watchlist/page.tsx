@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { Heart, Star, Film, Loader2, ArrowLeft, Trash2, LayoutGrid } from 'lucide-react';
+import { Heart, Star, Film, Loader2, ArrowLeft, Trash2, LayoutGrid, Play } from 'lucide-react';
 import Header from '../../components/Header';
 import { watchlistApi, authApi, MoviePayload, UserPayload } from '../../lib/api';
 
@@ -108,18 +108,30 @@ export default function WatchlistPage() {
             {watchlist.map((movie) => (
               <div key={movie.id} className="group flex flex-col gap-2 relative">
                 {/* Poster Frame */}
-                <div className="relative overflow-hidden rounded-[4px] border border-zinc-900/60 aspect-[2/3] bg-zinc-950 transition-all duration-300 hover:scale-[1.03] hover:border-zinc-750 shadow-md">
+                <div className="relative overflow-hidden rounded-[6px] border border-zinc-900/60 aspect-[2/3] bg-zinc-950 transition-all duration-500 hover:scale-[1.04] hover:border-violet-500/50 hover:shadow-[0_0_25px_rgba(139,92,246,0.25)] shadow-lg">
                   {/* Poster Image link */}
                   <Link href={`/movies/${movie.id}`} className="block w-full h-full relative">
                     <Image
                       src={movie.posterUrl || '/static/uploads/default_poster.jpg'}
                       alt={movie.title}
                       fill
-                      className="object-cover transition-transform duration-550 group-hover:scale-105"
+                      sizes="(max-width: 768px) 50vw, (max-width: 1200px) 25vw, 20vw"
+                      className="object-cover object-top transition-transform duration-700 ease-out group-hover:scale-110"
                     />
+                    {/* Gradient overlay for cinematic shadow depth */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-[#050508]/90 via-[#050508]/15 to-transparent opacity-60 transition-opacity duration-300 group-hover:opacity-80" />
+
+                    {/* Quick premium micro-info displaying on hover */}
+                    <div className="absolute inset-0 flex flex-col justify-end p-3 bg-[#050508]/60 backdrop-blur-[2px] opacity-0 group-hover:opacity-100 transition-all duration-350 ease-out z-20">
+                      <div className="flex items-center justify-center w-8 h-8 rounded-full bg-violet-600 text-white mx-auto mb-2.5 shadow-lg transform translate-y-4 group-hover:translate-y-0 transition-all duration-350 delay-75">
+                        <Play className="w-4 h-4 fill-white ml-0.5" />
+                      </div>
+                      <span className="text-[9px] font-black tracking-widest text-violet-400 uppercase text-center block">{movie.studio || 'Donghua'}</span>
+                      <span className="text-[10px] font-extrabold text-zinc-300 text-center block mt-0.5">{movie.releaseYear}</span>
+                    </div>
                     
                     {/* Rating Badge */}
-                    <div className="absolute top-2.5 right-2.5 bg-black/85 border border-amber-400/20 text-amber-400 px-1.5 py-0.5 rounded-[2px] text-[9px] font-extrabold flex items-center gap-0.5 z-10 shadow-md select-none">
+                    <div className="absolute top-2.5 right-2.5 bg-black/80 backdrop-blur-md border border-amber-400/25 text-amber-400 px-1.5 py-1 rounded-[4px] text-[9px] font-extrabold flex items-center gap-0.5 z-10 shadow-md select-none">
                       {movie.rating > 0 ? (
                         <>
                           <Star className="w-2.5 h-2.5 fill-amber-400 text-amber-400" />

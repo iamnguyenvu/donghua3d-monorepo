@@ -328,24 +328,38 @@ export default function Home() {
               .slice(0, 5)
               .map(movie => (
                 <Link href={`/movies/${movie.id}`} key={movie.id} className="no-underline group flex flex-col gap-2">
-                  <div className="relative overflow-hidden rounded-[4px] border border-zinc-900/60 aspect-[3/4] cursor-pointer transition-all duration-300 hover:scale-[1.03] hover:border-zinc-700 bg-zinc-950 shadow-md">
+                  {/* Poster Container with premium cinematic hover and shadow */}
+                  <div className="relative overflow-hidden rounded-[6px] border border-zinc-900/60 aspect-[2/3] cursor-pointer transition-all duration-500 hover:scale-[1.04] hover:border-violet-500/50 hover:shadow-[0_0_25px_rgba(139,92,246,0.25)] bg-zinc-950 shadow-lg">
+                    {/* Poster Image using top alignment to avoid cropping heads */}
                     <div className="relative w-full h-full">
                       <Image
                         src={movie.posterUrl || '/static/uploads/default_poster.jpg'}
                         alt={movie.title}
                         fill
-                        className="object-cover transition-transform duration-550 group-hover:scale-105"
+                        sizes="(max-width: 768px) 50vw, (max-width: 1200px) 25vw, 20vw"
+                        className="object-cover object-top transition-transform duration-700 ease-out group-hover:scale-110"
                       />
+                      {/* Gradient overlay for cinematic shadow depth */}
+                      <div className="absolute inset-0 bg-gradient-to-t from-[#050508]/90 via-[#050508]/15 to-transparent opacity-60 transition-opacity duration-300 group-hover:opacity-80" />
+                    </div>
+
+                    {/* Quick premium micro-info displaying on hover */}
+                    <div className="absolute inset-0 flex flex-col justify-end p-3 bg-[#050508]/60 backdrop-blur-[2px] opacity-0 group-hover:opacity-100 transition-all duration-350 ease-out z-20">
+                      <div className="flex items-center justify-center w-8 h-8 rounded-full bg-violet-600 text-white mx-auto mb-2.5 shadow-lg transform translate-y-4 group-hover:translate-y-0 transition-all duration-350 delay-75">
+                        <Play className="w-4 h-4 fill-white ml-0.5" />
+                      </div>
+                      <span className="text-[9px] font-black tracking-widest text-violet-400 uppercase text-center block">{movie.studio}</span>
+                      <span className="text-[10px] font-extrabold text-zinc-300 text-center block mt-0.5">{movie.releaseYear}</span>
                     </div>
 
                     {/* Rating star badge in top-right with amber star */}
-                    <div className="absolute top-2.5 right-2.5 bg-black/75 backdrop-blur-md border border-amber-400/20 text-amber-400 px-2 py-1 rounded-[4px] text-[10px] font-extrabold flex items-center gap-1 z-10 shadow-md">
+                    <div className="absolute top-2.5 right-2.5 bg-black/80 backdrop-blur-md border border-amber-400/25 text-amber-400 px-2 py-1 rounded-[4px] text-[10px] font-extrabold flex items-center gap-1 z-10 shadow-md">
                       <Star className="w-3 h-3 fill-amber-400 text-amber-400" />
                       {movie.rating > 0 ? movie.rating.toFixed(1) : '9.0'}
                     </div>
 
                     {/* Trending label in top-left */}
-                    <div className="absolute top-2.5 left-2.5 bg-violet-600/90 text-white text-[8px] font-extrabold tracking-widest px-2 py-1 rounded-[2px] z-10 shadow-md">
+                    <div className="absolute top-2.5 left-2.5 bg-gradient-to-r from-violet-600 to-indigo-600 text-white text-[8px] font-extrabold tracking-widest px-2 py-1.5 rounded-[4px] z-10 shadow-md">
                       HOT S-TIER
                     </div>
                   </div>
@@ -423,19 +437,31 @@ export default function Home() {
             {filteredMovies.map((movie) => (
               <Link href={`/movies/${movie.id}`} key={movie.id} className="no-underline group flex flex-col gap-2">
                 {/* Poster Frame */}
-                <div className="relative overflow-hidden rounded-[4px] border border-zinc-900/60 aspect-[2/3] cursor-pointer transition-all duration-300 hover:scale-[1.03] hover:border-zinc-750 bg-zinc-950 shadow-md">
+                <div className="relative overflow-hidden rounded-[6px] border border-zinc-900/60 aspect-[2/3] cursor-pointer transition-all duration-500 hover:scale-[1.04] hover:border-violet-500/50 hover:shadow-[0_0_25px_rgba(139,92,246,0.25)] bg-zinc-950 shadow-lg">
                   {/* Poster Image */}
                   <div className="relative w-full h-full">
                     <Image
                       src={movie.posterUrl || '/static/uploads/default_poster.jpg'}
                       alt={movie.title}
                       fill
-                      className="object-cover transition-transform duration-550 group-hover:scale-105"
+                      sizes="(max-width: 768px) 50vw, (max-width: 1200px) 25vw, 20vw"
+                      className="object-cover object-top transition-transform duration-700 ease-out group-hover:scale-110"
                     />
+                    {/* Gradient overlay for cinematic shadow depth */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-[#050508]/90 via-[#050508]/15 to-transparent opacity-60 transition-opacity duration-300 group-hover:opacity-80" />
+                  </div>
+
+                  {/* Quick premium micro-info displaying on hover */}
+                  <div className="absolute inset-0 flex flex-col justify-end p-3 bg-[#050508]/60 backdrop-blur-[2px] opacity-0 group-hover:opacity-100 transition-all duration-350 ease-out z-20">
+                    <div className="flex items-center justify-center w-8 h-8 rounded-full bg-violet-600 text-white mx-auto mb-2.5 shadow-lg transform translate-y-4 group-hover:translate-y-0 transition-all duration-350 delay-75">
+                      <Play className="w-4 h-4 fill-white ml-0.5" />
+                    </div>
+                    <span className="text-[9px] font-black tracking-widest text-violet-400 uppercase text-center block">{movie.studio || 'Donghua'}</span>
+                    <span className="text-[10px] font-extrabold text-zinc-300 text-center block mt-0.5">{movie.releaseYear}</span>
                   </div>
 
                   {/* Rating Badge */}
-                  <div className="absolute top-2.5 right-2.5 bg-black/85 border border-amber-400/20 text-amber-400 px-1.5 py-0.5 rounded-[2px] text-[9px] font-extrabold flex items-center gap-0.5 z-10 shadow-md select-none">
+                  <div className="absolute top-2.5 right-2.5 bg-black/80 backdrop-blur-md border border-amber-400/25 text-amber-400 px-1.5 py-1 rounded-[4px] text-[9px] font-extrabold flex items-center gap-0.5 z-10 shadow-md select-none">
                     {movie.rating > 0 ? (
                       <>
                         <Star className="w-2.5 h-2.5 fill-amber-400 text-amber-400" />
@@ -448,7 +474,7 @@ export default function Home() {
 
                   {/* Global Tier Badge */}
                   {movie.leaderboard && (
-                    <div className="absolute top-2.5 left-2.5 bg-black/85 px-1.5 py-0.5 rounded-[2px] border border-zinc-800 text-[8px] font-extrabold tracking-wider z-10 shadow-md" style={{
+                    <div className="absolute top-2.5 left-2.5 bg-black/80 backdrop-blur-md px-2 py-1 rounded-[4px] border border-zinc-800 text-[8px] font-extrabold tracking-wider z-10 shadow-md" style={{
                       color: movie.leaderboard.globalTier === 'S' ? '#ff7f7f' : movie.leaderboard.globalTier === 'A' ? '#ffbf7f' : '#bfff7f'
                     }}>
                       {movie.leaderboard.globalTier}-TIER

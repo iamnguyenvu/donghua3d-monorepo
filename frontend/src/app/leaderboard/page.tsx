@@ -161,7 +161,7 @@ export default function LeaderboardAndTiers() {
                               src={it.movie.posterUrl}
                               alt={it.movie.title}
                               fill
-                              className="object-cover"
+                              className="object-cover object-top"
                             />
                           </div>
                         ))
@@ -261,7 +261,7 @@ export default function LeaderboardAndTiers() {
                           src={row.movie.posterUrl}
                           alt={row.movie.title}
                           fill
-                          className="object-cover"
+                          className="object-cover object-top"
                         />
                       </div>
 
