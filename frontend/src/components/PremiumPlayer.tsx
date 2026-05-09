@@ -30,6 +30,7 @@ interface PremiumPlayerProps {
   onSeek?: (time: number) => void;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   playerRef?: React.RefObject<any>;
+  onEnded?: () => void;
 }
 
 export default function PremiumPlayer({
@@ -45,9 +46,23 @@ export default function PremiumPlayer({
   onPlay,
   onPause,
   onSeek,
-  playerRef
+  playerRef,
+  onEnded
 }: PremiumPlayerProps) {
   const [selectedQuality, setSelectedQuality] = useState<'1080p' | '4K'>('1080p');
+
+  // Load selected quality from localStorage on mount (hydration-safe)
+  useEffect(() => {
+    const saved = localStorage.getItem('donghua3d_selected_quality');
+    if (saved === '1080p' || saved === '4K') {
+      setSelectedQuality(saved);
+    }
+  }, []);
+
+  const handleSetQuality = (q: '1080p' | '4K') => {
+    setSelectedQuality(q);
+    localStorage.setItem('donghua3d_selected_quality', q);
+  };
 
   // Compute active source dynamically
   const activeSrc = selectedQuality === '4K' && videoUrl4k ? videoUrl4k : src;
@@ -68,6 +83,7 @@ export default function PremiumPlayer({
         currentTime={initialProgress}
         onPlay={onPlay}
         onPause={onPause}
+        onEnded={onEnded}
         onSeeked={() => {
           if (onSeek && playerRef?.current) {
             onSeek(playerRef.current.currentTime);
@@ -99,7 +115,7 @@ export default function PremiumPlayer({
           outroEnd={outroEnd}
           onProgressPulse={onProgressPulse}
           selectedQuality={selectedQuality}
-          setSelectedQuality={setSelectedQuality}
+          setSelectedQuality={handleSetQuality}
           videoUrl4k={videoUrl4k}
         />
       </MediaPlayer>
@@ -185,6 +201,18 @@ function CustomControls({
   const [showSettings, setShowSettings] = useState(false);
   const [playbackSpeed, setPlaybackSpeed] = useState(1);
 
+  // Load saved playback speed from localStorage on mount (hydration-safe)
+  useEffect(() => {
+    const saved = localStorage.getItem('donghua3d_playback_speed');
+    if (saved && remote) {
+      const parsed = parseFloat(saved);
+      if (!isNaN(parsed)) {
+        setPlaybackSpeed(parsed);
+        remote.changePlaybackRate(parsed);
+      }
+    }
+  }, [remote]);
+
   // Compute Skip buttons visibility dynamically on render - ZERO state overhead, zero re-render loops!
   const showIntroSkip = currentTime >= introStart && currentTime <= introEnd && introEnd > introStart;
   const showOutroSkip = currentTime >= outroStart && currentTime <= outroEnd && outroEnd > outroStart;
@@ -259,6 +287,7 @@ function CustomControls({
   const changeSpeed = (speed: number) => {
     remote.changePlaybackRate(speed);
     setPlaybackSpeed(speed);
+    localStorage.setItem('donghua3d_playback_speed', speed.toString());
     setShowSettings(false);
   };
 

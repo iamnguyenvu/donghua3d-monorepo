@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import { 
   ArrowLeft, Star, MessageSquare, Loader2, Send, Flag 
 } from 'lucide-react';
@@ -10,16 +10,20 @@ import Header from '@/components/Header';
 import PremiumPlayer from '@/components/PremiumPlayer';
 import { 
   catalogApi, ratingApi, commentApi, 
-  EpisodePayload, MoviePayload, ReviewPayload, CommentPayload 
+  EpisodePayload, MoviePayload, MovieWithEpisodes, ReviewPayload, CommentPayload 
 } from '@/lib/api';
 
 export default function WatchEpisode() {
   const params = useParams() as { id: string; episodeId: string };
+  const router = useRouter();
   
   const [episode, setEpisode] = useState<EpisodePayload | null>(null);
-  const [movie, setMovie] = useState<MoviePayload | null>(null);
+  const [movie, setMovie] = useState<MovieWithEpisodes | null>(null);
   const [loading, setLoading] = useState(true);
   const [initialProgress, setInitialProgress] = useState(0);
+
+  // Autoplay State
+  const [autoplayCountdown, setAutoplayCountdown] = useState<number | null>(null);
 
   // Social Panel State
   const [reviews, setReviews] = useState<ReviewPayload[]>([]);
@@ -81,7 +85,8 @@ export default function WatchEpisode() {
           expertRating: 9.4,
           audienceRating: 9.0,
           releaseYear: 2021,
-        } as unknown as MoviePayload);
+          episodes: [],
+        } as unknown as MovieWithEpisodes);
       }
       setLoading(false);
     }
@@ -91,6 +96,35 @@ export default function WatchEpisode() {
   const handleProgressPulse = (currentTime: number, isCompleted: boolean) => {
     if (episode) {
       catalogApi.saveWatchHistory(episode.id, currentTime, isCompleted);
+    }
+  };
+
+  // Find next episode
+  const nextEpisode = movie?.episodes && episode
+    ? movie.episodes.find(ep => ep.episodeNumber === episode.episodeNumber + 1)
+    : null;
+
+  // Autoplay countdown timer
+  useEffect(() => {
+    if (autoplayCountdown === null) return;
+    if (autoplayCountdown === 0) {
+      if (nextEpisode && movie) {
+        router.push(`/movies/${movie.id}/episodes/${nextEpisode.id}`);
+      }
+      setAutoplayCountdown(null);
+      return;
+    }
+
+    const timer = setTimeout(() => {
+      setAutoplayCountdown(prev => (prev !== null ? prev - 1 : null));
+    }, 1000);
+
+    return () => clearTimeout(timer);
+  }, [autoplayCountdown, nextEpisode, movie, router]);
+
+  const handleVideoEnded = () => {
+    if (nextEpisode) {
+      setAutoplayCountdown(5); // Start 5s countdown
     }
   };
 
@@ -159,6 +193,37 @@ export default function WatchEpisode() {
     <div className="min-h-screen bg-[#050508] text-zinc-100 flex flex-col font-sans pb-24">
       <Header />
 
+      {/* Autoplay Next Episode Glassmorphic Overlay */}
+      {autoplayCountdown !== null && nextEpisode && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-[#050508]/85 backdrop-blur-md animate-fade-in select-none">
+          <div className="p-8 bg-zinc-950/80 border border-zinc-900 rounded-[4px] text-center max-w-sm w-full mx-4 shadow-[0_0_50px_rgba(139,92,246,0.3)] flex flex-col items-center">
+            <div className="relative mb-5 flex items-center justify-center">
+              <div className="w-16 h-16 rounded-full border-4 border-violet-500/20 border-t-violet-500 animate-spin"></div>
+              <span className="absolute text-lg font-black text-white">{autoplayCountdown}</span>
+            </div>
+            <h3 className="text-sm font-black text-white uppercase tracking-wider mb-2">Chuẩn bị chuyển tập tiếp theo</h3>
+            <p className="text-xs text-zinc-400 mb-6 truncate max-w-full">Tập {nextEpisode.episodeNumber}: {nextEpisode.title}</p>
+            <div className="flex items-center gap-3 w-full">
+              <button
+                onClick={() => {
+                  router.push(`/movies/${movie.id}/episodes/${nextEpisode.id}`);
+                  setAutoplayCountdown(null);
+                }}
+                className="flex-grow py-2.5 bg-violet-600 hover:bg-violet-700 text-white font-extrabold text-[10px] uppercase tracking-wider rounded-[2px] cursor-pointer transition-all border-0 outline-none"
+              >
+                Chuyển Ngay
+              </button>
+              <button
+                onClick={() => setAutoplayCountdown(null)}
+                className="flex-grow py-2.5 bg-transparent border border-zinc-800 hover:border-zinc-600 text-zinc-400 hover:text-white font-extrabold text-[10px] uppercase tracking-wider rounded-[2px] cursor-pointer transition-all outline-none"
+              >
+                Hủy
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* ==============================================================================
          CINEMATIC WATCH PLAYER BLOCK (Layout 02 Netflix Style - Custom Vidstack Player)
          ============================================================================== */}
@@ -180,6 +245,7 @@ export default function WatchEpisode() {
           outroEnd={episode.outroEnd}
           initialProgress={initialProgress}
           onProgressPulse={handleProgressPulse}
+          onEnded={handleVideoEnded}
         />
 
         {/* EPISODE DETAILS INFO */}

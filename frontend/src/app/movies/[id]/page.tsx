@@ -16,6 +16,7 @@ export default function MovieDetails() {
   const [movie, setMovie] = useState<MovieWithEpisodes | null>(null);
   const [reviews, setReviews] = useState<ReviewPayload[]>([]);
   const [loading, setLoading] = useState(true);
+  const [relatedParts, setRelatedParts] = useState<any[]>([]);
 
   // Watchlist integration
   const [watchlistIds, setWatchlistIds] = useState<Set<string>>(new Set());
@@ -74,11 +75,29 @@ export default function MovieDetails() {
       setLoading(true);
       const res = await catalogApi.getMovie(params.id);
       if (res.success && res.data) {
-        setMovie(res.data);
+        const movieData = res.data;
+        setMovie(movieData);
         
         const reviewRes = await ratingApi.getReviews(params.id);
         if (reviewRes.success && reviewRes.data) {
           setReviews(reviewRes.data);
+        }
+
+        // Fetch related parts of the series using a semantic root title match
+        try {
+          const baseTitle = movieData.title
+            .replace(/(phần\s+\d+|season\s+\d+|\s+p\d+|\s+part\s+\d+|\s+\d+)/gi, '')
+            .replace(/\s*:\s*.*/, '')
+            .replace(/\s*\(.*\)/, '')
+            .trim();
+
+          const relatedRes = await catalogApi.getMovies({ search: baseTitle });
+          if (relatedRes.success && relatedRes.data) {
+            const filtered = relatedRes.data.filter((m: any) => m.id !== movieData.id);
+            setRelatedParts(filtered);
+          }
+        } catch (err) {
+          console.error('Failed to fetch related seasons:', err);
         }
       } else {
         // Mock fallback data matching our pre-seeded catalog for instant local presentation
@@ -279,6 +298,37 @@ export default function MovieDetails() {
         
         {/* LEFT COLUMN: LIST OF EPISODES (2/3 Grid) */}
         <div className="lg:col-span-2 flex flex-col gap-6">
+          {/* Related Seasons / Parts Section */}
+          {relatedParts.length > 0 && (
+            <div className="mb-4 p-5 bg-[#0a0a0d]/80 backdrop-blur-sm border border-zinc-900/80 rounded-[4px] shadow-lg select-none">
+              <h3 className="text-[10px] font-black text-violet-400 tracking-widest uppercase border-l-2 border-violet-500 pl-3 mb-4">
+                Các Phần Khác Của Series Này
+              </h3>
+              <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-zinc-850">
+                {relatedParts.map((part) => (
+                  <Link
+                    key={part.id}
+                    href={`/movies/${part.id}`}
+                    className="flex items-center gap-3.5 p-3.5 bg-zinc-950/30 border border-zinc-900 hover:border-violet-500/40 hover:bg-violet-500/5 rounded-[4px] w-64 flex-shrink-0 transition-all duration-300 group no-underline shadow-sm"
+                  >
+                    <div className="w-12 h-16 rounded-[2px] overflow-hidden bg-zinc-950 flex-shrink-0 relative">
+                      <img
+                        src={part.posterUrl || '/static/uploads/default_poster.jpg'}
+                        alt={part.title}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-all duration-300"
+                      />
+                    </div>
+                    <div className="flex flex-col min-w-0">
+                      <span className="text-[9px] text-zinc-550 font-bold uppercase truncate">{part.studio || 'Unknown Studio'}</span>
+                      <h4 className="text-xs font-black text-white group-hover:text-violet-400 truncate mt-0.5 transition-colors leading-relaxed">{part.title}</h4>
+                      <span className="text-[10px] text-violet-400 font-bold mt-1 uppercase">{part.releaseYear}</span>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          )}
+
           <div className="flex items-center gap-2 border-b border-zinc-900/60 pb-4">
             <h2 className="text-base font-black text-white tracking-wider uppercase border-l-2 border-violet-500 pl-3">
               Danh Sách Tập Phim
