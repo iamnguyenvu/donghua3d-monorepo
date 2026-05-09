@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { Film, Search, User, LogOut, Loader2, ChevronDown, Bell } from 'lucide-react';
+import { Film, Search, User, LogOut, Loader2, ChevronDown, Bell, Menu, X } from 'lucide-react';
 import { authApi, UserPayload } from '../lib/api';
 
 interface HeaderProps {
@@ -13,6 +13,7 @@ interface HeaderProps {
 export default function Header({ onSearchChange }: HeaderProps) {
   const pathname = usePathname();
   const router = useRouter();
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [searchVal, setSearchVal] = useState('');
   const [user, setUser] = useState<UserPayload | null>(null);
   const [loading, setLoading] = useState(true);
@@ -86,21 +87,30 @@ export default function Header({ onSearchChange }: HeaderProps) {
   return (
     <>
       <header className="fixed top-0 left-0 right-0 z-50 bg-[#050508]/90 backdrop-blur-md select-none border-b border-zinc-900/50">
-        <div className="max-w-[1440px] mx-auto w-full px-6 md:px-12 lg:px-16 h-20 md:h-[88px] flex items-center justify-between">
+        <div className="max-w-[1440px] mx-auto w-full px-4 sm:px-6 md:px-12 lg:px-16 h-20 md:h-[88px] flex items-center justify-between">
           {/* Left Side: Logo + Navigation clustered together */}
-          <div className="flex items-center gap-10 md:gap-14">
+          <div className="flex items-center gap-4 sm:gap-10 md:gap-14">
+            {/* Mobile Hamburger Button */}
+            <button
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="lg:hidden p-2 text-zinc-400 hover:text-white bg-transparent border-0 cursor-pointer outline-none flex items-center justify-center transition-colors"
+              title="Menu"
+            >
+              {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+            </button>
+
             {/* Logo Brand */}
-            <Link href="/" className="flex items-center gap-3 text-white no-underline group select-none flex-shrink-0">
-              <div className="p-2 rounded-[4px] bg-violet-600 flex items-center justify-center transition-all duration-300 group-hover:bg-violet-500 shadow-md">
-                <Film className="w-4.5 h-4.5 text-white" />
+            <Link href="/" className="flex items-center gap-2 sm:gap-3 text-white no-underline group select-none flex-shrink-0">
+              <div className="p-1.5 sm:p-2 rounded-[4px] bg-violet-600 flex items-center justify-center transition-all duration-300 group-hover:bg-violet-500 shadow-md">
+                <Film className="w-4 sm:w-4.5 h-4 sm:h-4.5 text-white" />
               </div>
-              <span className="font-sans font-black text-lg md:text-xl tracking-wider text-white">
+              <span className="font-sans font-black text-base sm:text-lg md:text-xl tracking-wider text-white">
                 DONGHUA<span className="text-violet-500">3D</span>
               </span>
             </Link>
 
-            {/* Navigation Tabs */}
-            <nav className="flex items-center gap-6 md:gap-8 select-none">
+            {/* Navigation Tabs (Desktop only: hidden lg:flex) */}
+            <nav className="hidden lg:flex items-center gap-6 md:gap-8 select-none">
               <Link
                 href="/"
                 className={`relative text-xs font-black uppercase tracking-wider no-underline transition-colors duration-200 py-2.5 ${
@@ -138,10 +148,10 @@ export default function Header({ onSearchChange }: HeaderProps) {
           </div>
 
           {/* Right Side: Search + Actions clustered together */}
-          <div className="flex items-center gap-6 flex-shrink-0">
-            {/* Search Bar Input Container (Flex row - 100% overlap proof) */}
+          <div className="flex items-center gap-4 sm:gap-6 flex-shrink-0">
+            {/* Search Bar Input Container (Desktop only: hidden md:flex) */}
             {onSearchChange && (
-              <div className="flex items-center gap-3 px-4 py-2.5 rounded-[4px] bg-black/50 border border-zinc-800/80 focus-within:border-violet-500/80 focus-within:bg-black/85 transition-all duration-300 w-48 lg:w-64 hidden md:flex shadow-inner">
+              <div className="flex items-center gap-3 px-4 py-2.5 rounded-[4px] bg-black/50 border border-zinc-800/80 focus-within:border-violet-500/80 focus-within:bg-black/85 transition-all duration-300 w-40 sm:w-48 lg:w-64 hidden md:flex shadow-inner">
                 <Search className="w-4 h-4 text-zinc-400 flex-shrink-0 transition-colors" />
                 <input
                   type="text"
@@ -159,29 +169,29 @@ export default function Header({ onSearchChange }: HeaderProps) {
               {loading ? (
                 <Loader2 className="w-4 h-4 text-zinc-400 animate-spin" />
               ) : user ? (
-                <div className="flex items-center gap-5 pl-5 border-l border-zinc-850">
+                <div className="flex items-center gap-3 sm:gap-5 pl-3 sm:pl-5 border-l border-zinc-850">
                   {/* Notification Bell with Violet Indicator Dot */}
                   <div className="relative cursor-pointer hover:text-white text-zinc-400 p-2 transition-colors hidden sm:block" title="Thông báo">
                     <Bell className="w-4.5 h-4.5 transition-transform hover:scale-110 duration-200" />
                     <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 rounded-full bg-violet-600 ring-2 ring-[#050508]" />
                   </div>
 
-                  <div className="flex items-center gap-3.5">
-                    <div className="flex flex-col text-right">
-                      <span className="text-xs font-black text-white max-w-[120px] truncate tracking-tight">{user.email.split('@')[0]}</span>
-                      <span className="text-[9px] text-violet-400 font-black uppercase tracking-widest mt-0.5">Rep: {user.reputationScore}</span>
+                  <div className="flex items-center gap-2 sm:gap-3.5">
+                    <div className="flex flex-col text-right hidden xs:flex">
+                      <span className="text-[11px] sm:text-xs font-black text-white max-w-[80px] sm:max-w-[120px] truncate tracking-tight">{user.email.split('@')[0]}</span>
+                      <span className="text-[8px] sm:text-[9px] text-violet-400 font-black uppercase tracking-widest mt-0.5">Rep: {user.reputationScore}</span>
                     </div>
-                    <div className="flex items-center gap-1.5 group cursor-pointer" title="Hồ sơ">
-                      <div className="w-9 h-9 rounded-[4px] bg-violet-600 text-white font-black flex items-center justify-center text-sm shadow-md transition-all duration-300 group-hover:scale-105 group-hover:bg-violet-500 ring-1 ring-violet-500/30">
+                    <div className="flex items-center gap-1 group cursor-pointer" title="Hồ sơ">
+                      <div className="w-8 sm:w-9 h-8 sm:h-9 rounded-[4px] bg-violet-600 text-white font-black flex items-center justify-center text-xs sm:text-sm shadow-md transition-all duration-300 group-hover:scale-105 group-hover:bg-violet-500 ring-1 ring-violet-500/30">
                         {user.email[0].toUpperCase()}
                       </div>
-                      <ChevronDown className="w-4 h-4 text-zinc-500 group-hover:text-zinc-300 transition-colors" />
+                      <ChevronDown className="w-3.5 sm:w-4 h-3.5 sm:h-4 text-zinc-500 group-hover:text-zinc-300 transition-colors" />
                     </div>
                   </div>
 
                   <button
                     onClick={handleLogout}
-                    className="p-2.5 rounded-[4px] bg-zinc-950 border border-zinc-800 hover:border-violet-500/30 text-zinc-400 hover:text-violet-400 hover:bg-zinc-900 transition-all duration-300 cursor-pointer outline-none ml-1 flex items-center justify-center"
+                    className="p-2 rounded-[4px] bg-zinc-950 border border-zinc-800 hover:border-violet-500/30 text-zinc-400 hover:text-violet-400 hover:bg-zinc-900 transition-all duration-300 cursor-pointer outline-none ml-1 sm:ml-2 flex items-center justify-center"
                     title="Đăng xuất"
                   >
                     <LogOut className="w-4 h-4" />
@@ -190,16 +200,87 @@ export default function Header({ onSearchChange }: HeaderProps) {
               ) : (
                 <button
                   onClick={() => { setAuthMode('login'); setShowModal(true); }}
-                  className="rounded-[4px] px-5 py-3 bg-violet-600 hover:bg-violet-700 text-white font-extrabold text-[11px] uppercase tracking-wider flex items-center gap-2 transition-all cursor-pointer outline-none border-0 shadow-md hover:shadow-[0_4px_20px_rgba(124,58,237,0.3)] active:scale-95"
+                  className="rounded-[4px] px-3 sm:px-5 py-2 sm:py-3 bg-violet-600 hover:bg-violet-700 text-white font-extrabold text-[10px] sm:text-[11px] uppercase tracking-wider flex items-center gap-1.5 sm:gap-2 transition-all cursor-pointer outline-none border-0 shadow-md hover:shadow-[0_4px_20px_rgba(124,58,237,0.3)] active:scale-95"
                 >
-                  <User className="w-4 h-4" />
-                  Đăng Nhập
+                  <User className="w-3.5 sm:w-4 h-3.5 sm:h-4" />
+                  <span className="hidden xxs:inline">Đăng Nhập</span>
                 </button>
               )}
             </div>
           </div>
         </div>
       </header>
+
+      {/* Mobile Sliding Sidebar Menu */}
+      {mobileMenuOpen && (
+        <div className="fixed inset-0 z-[60] lg:hidden select-none">
+          {/* Backdrop */}
+          <div 
+            onClick={() => setMobileMenuOpen(false)}
+            className="absolute inset-0 bg-black/85 backdrop-blur-md transition-opacity duration-300"
+          />
+          {/* Sidebar Panel */}
+          <div className="absolute top-20 left-0 bottom-0 w-72 bg-[#050508]/98 border-r border-zinc-900/80 p-6 flex flex-col gap-6 shadow-2xl transition-transform duration-300 ease-out">
+            {/* Quick Profile stats on Mobile Sidebar */}
+            {user && (
+              <div className="flex items-center gap-3.5 border-b border-zinc-900/80 pb-5 mb-1">
+                <div className="w-10 h-10 rounded-[4px] bg-violet-600 text-white font-black flex items-center justify-center text-sm shadow-md ring-1 ring-violet-500/30">
+                  {user.email[0].toUpperCase()}
+                </div>
+                <div className="flex flex-col">
+                  <span className="text-xs font-black text-white truncate max-w-[160px]">{user.email.split('@')[0]}</span>
+                  <span className="text-[9px] text-violet-400 font-black uppercase tracking-widest mt-0.5">Uy tín: {user.reputationScore} Rep</span>
+                </div>
+              </div>
+            )}
+
+            {/* Nav Links */}
+            <nav className="flex flex-col gap-2">
+              <Link
+                href="/"
+                onClick={() => setMobileMenuOpen(false)}
+                className={`text-xs font-black uppercase tracking-wider no-underline transition-colors duration-200 py-3.5 px-4 rounded-[4px] flex items-center justify-between ${
+                  pathname === '/' ? 'text-white bg-violet-600/10 border-l-2 border-violet-500' : 'text-zinc-400 hover:text-white hover:bg-zinc-950/40'
+                }`}
+              >
+                Trang Chủ
+              </Link>
+              <Link
+                href="/leaderboard"
+                onClick={() => setMobileMenuOpen(false)}
+                className={`text-xs font-black uppercase tracking-wider no-underline transition-colors duration-200 py-3.5 px-4 rounded-[4px] flex items-center justify-between ${
+                  pathname === '/leaderboard' ? 'text-white bg-violet-600/10 border-l-2 border-violet-500' : 'text-zinc-400 hover:text-white hover:bg-zinc-950/40'
+                }`}
+              >
+                Bảng Xếp Hạng
+              </Link>
+              <Link
+                href="/watchlist"
+                onClick={() => setMobileMenuOpen(false)}
+                className={`text-xs font-black uppercase tracking-wider no-underline transition-colors duration-200 py-3.5 px-4 rounded-[4px] flex items-center justify-between ${
+                  pathname === '/watchlist' ? 'text-white bg-violet-600/10 border-l-2 border-violet-500' : 'text-zinc-400 hover:text-white hover:bg-zinc-950/40'
+                }`}
+              >
+                Danh Sách Của Tôi
+              </Link>
+            </nav>
+
+            {/* Mobile Search Bar inside Sidebar (if handler provided) */}
+            {onSearchChange && (
+              <div className="flex items-center gap-3 px-4 py-3 rounded-[4px] bg-black/60 border border-zinc-900 focus-within:border-violet-500/80 transition-all duration-300 mt-auto shadow-inner">
+                <Search className="w-4 h-4 text-zinc-500 flex-shrink-0" />
+                <input
+                  type="text"
+                  placeholder="Tìm kiếm phim..."
+                  value={searchVal}
+                  onChange={handleSearch}
+                  className="w-full bg-transparent text-zinc-100 placeholder-zinc-600 text-xs outline-none border-0 p-0 focus:ring-0 focus:outline-none"
+                />
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* Auth Modal Overlay */}
       {showModal && (
