@@ -1,0 +1,116 @@
+name: Donghua3D Production Deployment
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  validate:
+    name: Lint & Compile Validation Check
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+          cache-dependency-path: |
+            backend/package-lock.json
+            frontend/package-lock.json
+
+      # Validate Backend
+      - name: Install backend dependencies
+        run: |
+          cd backend
+          npm ci
+
+      - name: Generate Prisma Client
+        run: |
+          cd backend
+          npx prisma generate
+
+      - name: Compile Backend TypeScript
+        run: |
+          cd backend
+          npm run build
+
+      # Validate Frontend
+      - name: Install frontend dependencies
+        run: |
+          cd frontend
+          npm ci --legacy-peer-deps
+
+      - name: Run Frontend Lint
+        run: |
+          cd frontend
+          npm run lint
+
+      - name: Verify Frontend Strict Types
+        run: |
+          cd frontend
+          npx tsc --noEmit
+
+  deploy:
+    name: Deploy to VPS Server via SSH
+    needs: validate
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Configure SSH Private Key
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.VPS_SSH_KEY }}
+
+      - name: Execute Remote SSH Commands for Rolling Deployment
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
+        run: |
+          ssh -o StrictHostKeyChecking=no ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} "
+            # Navigate to project working directory
+            mkdir -p /var/www/donghua3d
+            cd /var/www/donghua3d
+            
+            # Sync source code repository
+            if [ ! -d .git ]; then
+              git clone https://github.com/iamnguyenvu/donghua3d-monorepo.git .
+            else
+              git fetch origin main
+              git reset --hard origin/main
+            fi
+            
+            # Write dynamic server .env configuration safely
+            cat <<EOF > backend/.env
+            DATABASE_URL=\"$DATABASE_URL\"
+            PORT=5000
+            JWT_SECRET=\"$JWT_SECRET\"
+            STORAGE_PROVIDER=\"LOCAL\"
+            UPLOAD_DIR=\"/app/uploads\"
+            CLIENT_URL=\"https://donghua3d.me\"
+            EOF
+            
+            # Write frontend production public variable configurations
+            cat <<EOF > frontend/.env.production
+            NEXT_PUBLIC_API_URL=\"https://donghua3d.me/api\"
+            EOF
+            
+            # Deploy optimized multi-container cluster
+            docker compose down --remove-orphans
+            docker compose up --build -d db backend frontend nginx
+            
+            # Wait for database container to boot completely
+            sleep 5
+            
+            # Force schema sync in the backend container
+            docker compose exec -T backend npx prisma db push --accept-data-loss
+            
+            # Prune obsolete images to reclaim server disk space
+            docker image prune -f
+          "
