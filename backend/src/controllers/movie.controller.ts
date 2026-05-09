@@ -17,9 +17,10 @@ router.get('/movies', async (req: AuthenticatedRequest, res: Response, next: Nex
       whereClause.releaseYear = parseInt(year as string, 10);
     }
     if (search) {
+      const searchStr = search as string;
       whereClause.OR = [
-        { title: { contains: search as string, mode: 'insensitive' } },
-        { altTitles: { path: '$', equals: search as string } } // Simple check on JSONB
+        { title: { contains: searchStr, mode: 'insensitive' } },
+        { altTitles: { array_contains: searchStr } }
       ];
     }
 

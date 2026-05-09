@@ -41,6 +41,18 @@ export default function Header({ onSearchChange }: HeaderProps) {
     fetchMe();
   }, []);
 
+  // Professional Escape Key handler to close drawer or modal instantly
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setMobileMenuOpen(false);
+        setShowModal(false);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value;
     setSearchVal(val);
@@ -284,7 +296,7 @@ export default function Header({ onSearchChange }: HeaderProps) {
 
       {/* Auth Modal Overlay */}
       {showModal && (
-        <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4 animate-fade-in-up">
+        <div className="fixed inset-0 z-[100] bg-black/85 backdrop-blur-md flex items-center justify-center p-4 animate-fade-in-up">
           <div className="w-full max-w-sm p-6 relative rounded-[4px] bg-[#0c0c0f] border border-zinc-800/80 shadow-2xl">
             <button
               onClick={() => setShowModal(false)}

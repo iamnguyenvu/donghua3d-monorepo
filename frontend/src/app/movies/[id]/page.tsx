@@ -21,6 +21,7 @@ export default function MovieDetails() {
   // Watchlist integration
   const [watchlistIds, setWatchlistIds] = useState<Set<string>>(new Set());
   const [watchlistActionLoading, setWatchlistActionLoading] = useState(false);
+  const [episodeLayout, setEpisodeLayout] = useState<'grid' | 'compact'>('grid');
 
   useEffect(() => {
     async function loadWatchlist() {
@@ -77,6 +78,8 @@ export default function MovieDetails() {
       if (res.success && res.data) {
         const movieData = res.data;
         setMovie(movieData);
+        // Dynamically update document title for premium SEO
+        document.title = `${movieData.title} - Xem Donghua 3D Vietsub Thuyết Minh | Donghua3D`;
         
         const reviewRes = await ratingApi.getReviews(params.id);
         if (reviewRes.success && reviewRes.data) {
@@ -149,6 +152,7 @@ export default function MovieDetails() {
           leaderboard: { globalTier: Tier.S, tierScore: 94.5, rank: 1 },
           episodes: mockEpisodes
         });
+        document.title = "Perfect World (Thế Giới Hoàn Mỹ) - Xem Donghua 3D Vietsub Thuyết Minh | Donghua3D";
       }
       setLoading(false);
     }
@@ -331,52 +335,96 @@ export default function MovieDetails() {
             </div>
           )}
 
-          <div className="flex items-center gap-2 border-b border-zinc-900/60 pb-4">
+          <div className="flex items-center justify-between border-b border-zinc-900/60 pb-4 flex-wrap gap-2">
             <h2 className="text-base font-black text-white tracking-wider uppercase border-l-2 border-violet-500 pl-3">
               Danh Sách Tập Phim
             </h2>
+            <div className="flex items-center bg-zinc-950/80 p-1 rounded-[4px] border border-zinc-900 select-none">
+              <button
+                onClick={() => setEpisodeLayout('grid')}
+                className={`px-3 py-1.5 rounded-[3px] text-[10px] font-black uppercase tracking-wider transition-all cursor-pointer border-0 outline-none ${
+                  episodeLayout === 'grid'
+                    ? 'bg-violet-600 text-white shadow-sm'
+                    : 'text-zinc-500 hover:text-zinc-300 bg-transparent'
+                }`}
+              >
+                Chi Tiết
+              </button>
+              <button
+                onClick={() => setEpisodeLayout('compact')}
+                className={`px-3 py-1.5 rounded-[3px] text-[10px] font-black uppercase tracking-wider transition-all cursor-pointer border-0 outline-none ${
+                  episodeLayout === 'compact'
+                    ? 'bg-violet-600 text-white shadow-sm'
+                    : 'text-zinc-500 hover:text-zinc-300 bg-transparent'
+                }`}
+              >
+                Rút Gọn
+              </button>
+            </div>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-            {movie.episodes && movie.episodes.length > 0 ? (
-              movie.episodes.map((ep) => (
-                <Link
-                  href={`/movies/${movie.id}/episodes/${ep.id}`}
-                  key={ep.id}
-                  className="bg-[#0c0c0f]/40 border border-zinc-900/60 hover:border-zinc-800 rounded-[4px] overflow-hidden flex flex-col group transition-all duration-300 shadow-md no-underline"
-                >
-                  <div className="relative aspect-video w-full bg-zinc-950">
-                    <Image
-                      src={ep.thumbnail || movie.posterUrl || '/static/uploads/default_thumb.jpg'}
-                      alt={ep.title}
-                      fill
-                      className="object-cover transition-transform duration-550 group-hover:scale-103"
-                    />
-                    <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                      <div className="p-2.5 rounded-[4px] bg-violet-600 text-white shadow-2xl scale-95 group-hover:scale-100 transition-all duration-200">
-                        <Play className="w-3.5 h-3.5 fill-white text-white" />
+          {episodeLayout === 'grid' ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+              {movie.episodes && movie.episodes.length > 0 ? (
+                movie.episodes.map((ep) => (
+                  <Link
+                    href={`/movies/${movie.id}/episodes/${ep.id}`}
+                    key={ep.id}
+                    className="bg-[#0c0c0f]/40 border border-zinc-900/60 hover:border-zinc-800 rounded-[4px] overflow-hidden flex flex-col group transition-all duration-300 shadow-md no-underline"
+                  >
+                    <div className="relative aspect-video w-full bg-zinc-950">
+                      <Image
+                        src={ep.thumbnail || movie.posterUrl || '/static/uploads/default_thumb.jpg'}
+                        alt={ep.title}
+                        fill
+                        className="object-cover transition-transform duration-550 group-hover:scale-103"
+                      />
+                      <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                        <div className="p-2.5 rounded-[4px] bg-violet-600 text-white shadow-2xl scale-95 group-hover:scale-100 transition-all duration-200">
+                          <Play className="w-3.5 h-3.5 fill-white text-white" />
+                        </div>
                       </div>
                     </div>
-                  </div>
 
-                  <div className="p-4 flex flex-col gap-1 select-none">
-                    <span className="text-[9px] text-violet-500 font-black uppercase tracking-widest">Tập {ep.episodeNumber}</span>
-                    <h3 className="text-xs font-bold text-white group-hover:text-violet-400 transition-colors truncate mt-0.5">
-                      {ep.title}
-                    </h3>
-                    <p className="text-[11px] text-zinc-500 truncate-2-lines leading-relaxed mt-0.5">
-                      {ep.description}
-                    </p>
-                  </div>
-                </Link>
-              ))
-            ) : (
-              <div className="col-span-2 text-center py-12 bg-zinc-950/40 border border-zinc-900 rounded-[4px] p-6 select-none">
-                <Info className="w-6 h-6 text-zinc-650 mx-auto mb-2" />
-                <p className="text-xs text-zinc-550 italic">Chưa có tập phim nào được phát hành.</p>
-              </div>
-            )}
-          </div>
+                    <div className="p-4 flex flex-col gap-1 select-none">
+                      <span className="text-[9px] text-violet-500 font-black uppercase tracking-widest">Tập {ep.episodeNumber}</span>
+                      <h3 className="text-xs font-bold text-white group-hover:text-violet-400 transition-colors truncate mt-0.5">
+                        {ep.title}
+                      </h3>
+                      <p className="text-[11px] text-zinc-500 truncate-2-lines leading-relaxed mt-0.5">
+                        {ep.description}
+                      </p>
+                    </div>
+                  </Link>
+                ))
+              ) : (
+                <div className="col-span-2 text-center py-12 bg-zinc-950/40 border border-zinc-900 rounded-[4px] p-6 select-none">
+                  <Info className="w-6 h-6 text-zinc-650 mx-auto mb-2" />
+                  <p className="text-xs text-zinc-550 italic">Chưa có tập phim nào được phát hành.</p>
+                </div>
+              )}
+            </div>
+          ) : (
+            <div className="grid grid-cols-3 xxs:grid-cols-4 xs:grid-cols-5 sm:grid-cols-6 md:grid-cols-8 gap-3">
+              {movie.episodes && movie.episodes.length > 0 ? (
+                movie.episodes.map((ep) => (
+                  <Link
+                    href={`/movies/${movie.id}/episodes/${ep.id}`}
+                    key={ep.id}
+                    className="p-3 bg-[#0c0c0f]/80 border border-zinc-900/85 hover:border-violet-500/50 hover:bg-violet-500/10 rounded-[4px] text-center flex flex-col justify-center items-center group transition-all duration-300 no-underline shadow-md cursor-pointer"
+                  >
+                    <span className="text-[9px] text-zinc-500 group-hover:text-violet-400 font-extrabold uppercase tracking-widest transition-colors">TẬP</span>
+                    <span className="text-sm font-black text-white group-hover:text-violet-300 mt-0.5 transition-colors">{ep.episodeNumber}</span>
+                  </Link>
+                ))
+              ) : (
+                <div className="col-span-full text-center py-12 bg-zinc-950/40 border border-zinc-900 rounded-[4px] p-6 select-none">
+                  <Info className="w-6 h-6 text-zinc-650 mx-auto mb-2" />
+                  <p className="text-xs text-zinc-550 italic">Chưa có tập phim nào được phát hành.</p>
+                </div>
+              )}
+            </div>
+          )}
         </div>
 
         {/* RIGHT COLUMN: REVIEWS FEEDBACK & BRAND TIERS (1/3 Grid) */}
