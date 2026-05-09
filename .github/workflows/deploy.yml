@@ -93,6 +93,16 @@ jobs:
           VPS_USER: ${{ secrets.VPS_USER }}
           VPS_SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
 
+      - name: Copy Repository Files to VPS via SCP
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          port: 22
+          source: "."
+          target: "/home/ubuntu/donghua3d"
+
       - name: Execute Remote SSH Commands for Rolling Deployment
         uses: appleboy/ssh-action@v1.0.3
         env:
@@ -106,16 +116,7 @@ jobs:
           envs: DATABASE_URL,JWT_SECRET
           script: |
             # Navigate to project working directory in user's home space
-            mkdir -p /home/ubuntu/donghua3d
             cd /home/ubuntu/donghua3d
-            
-            # Sync source code repository
-            if [ ! -d .git ]; then
-              git clone https://github.com/iamnguyenvu/donghua3d-monorepo.git .
-            else
-              git fetch origin main
-              git reset --hard origin/main
-            fi
             
             # Write dynamic server .env configuration safely
             cat <<EOF > backend/.env
