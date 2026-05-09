@@ -100,7 +100,7 @@ jobs:
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_SSH_KEY }}
           port: 22
-          source: "."
+          source: "backend/**,frontend/**,nginx/**,docker-compose.yml"
           target: "/home/ubuntu/donghua3d"
 
       - name: Execute Remote SSH Commands for Rolling Deployment
@@ -113,6 +113,7 @@ jobs:
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_SSH_KEY }}
           port: 22
+          script_stop: true
           envs: DATABASE_URL,JWT_SECRET
           script: |
             # Navigate to project working directory in user's home space
