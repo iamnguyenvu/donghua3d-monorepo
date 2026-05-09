@@ -21,6 +21,7 @@ const fallbacks: MoviePayload[] = [
     rating: 9.2,
     expertRating: 9.4,
     audienceRating: 9.0,
+    imdbRating: 8.2,
     createdAt: new Date().toISOString(),
     leaderboard: { globalTier: Tier.S, tierScore: 94.5, rank: 1 }
   },
@@ -36,6 +37,7 @@ const fallbacks: MoviePayload[] = [
     rating: 8.8,
     expertRating: 8.9,
     audienceRating: 8.7,
+    imdbRating: 8.6,
     createdAt: new Date().toISOString(),
     leaderboard: { globalTier: Tier.A, tierScore: 86.2, rank: 2 }
   },
@@ -51,6 +53,7 @@ const fallbacks: MoviePayload[] = [
     rating: 9.0,
     expertRating: 9.2,
     audienceRating: 8.8,
+    imdbRating: 9.0,
     createdAt: new Date().toISOString(),
     leaderboard: { globalTier: Tier.S, tierScore: 91.0, rank: 3 }
   }
@@ -214,6 +217,11 @@ export default function Home() {
             <span className="border border-zinc-800 bg-zinc-950/60 text-amber-400 px-2.5 py-1.5 rounded-[4px] text-[10px] font-extrabold tracking-wider uppercase flex items-center gap-1">
               ⭐ {heroMovie.rating > 0 ? heroMovie.rating.toFixed(1) : '9.0'} / 10
             </span>
+            {heroMovie.imdbRating && (
+              <span className="border border-zinc-800 bg-zinc-950/60 text-[#F5C518] px-2.5 py-1.5 rounded-[4px] text-[10px] font-extrabold tracking-wider uppercase flex items-center gap-1.5">
+                <span className="bg-[#F5C518] text-black px-1 rounded-[2px] font-black">IMDb</span> {heroMovie.imdbRating.toFixed(1)} / 10
+              </span>
+            )}
             <span className="border border-zinc-800 bg-zinc-950/60 text-zinc-300 px-2.5 py-1.5 rounded-[4px] text-[10px] font-extrabold tracking-wider uppercase">
               {heroMovie.releaseYear}
             </span>

@@ -63,7 +63,8 @@ export class ScraperService {
             studio: ophimMovie.studio || 'Unknown Studio',
             rating: 8.5, // Default premium placeholder ratings
             expertRating: 8.7,
-            audienceRating: 8.3
+            audienceRating: 8.3,
+            imdbRating: ophimMovie.imdb_rating ? parseFloat(ophimMovie.imdb_rating) : null
           }
         });
 

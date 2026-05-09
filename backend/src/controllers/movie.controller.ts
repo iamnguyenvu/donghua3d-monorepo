@@ -82,7 +82,7 @@ router.get('/movies/:id', async (req: AuthenticatedRequest, res: Response, next:
 // 3. POST /api/movies - Create New Movie Catalog (Admin Only)
 router.post('/movies', requireRole([Role.ADMIN]), async (req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> => {
   try {
-    const { title, altTitles, description, studio, releaseYear, posterUrl, bannerUrl } = req.body;
+    const { title, altTitles, description, studio, releaseYear, posterUrl, bannerUrl, imdbRating } = req.body;
 
     if (!title || !releaseYear) {
       res.status(400).json({
@@ -101,6 +101,7 @@ router.post('/movies', requireRole([Role.ADMIN]), async (req: AuthenticatedReque
         releaseYear: parseInt(releaseYear as string, 10),
         posterUrl,
         bannerUrl,
+        imdbRating: imdbRating ? parseFloat(imdbRating as string) : null,
       },
     });
 

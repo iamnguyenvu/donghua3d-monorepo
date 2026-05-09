@@ -143,6 +143,7 @@ export interface MoviePayload {
   rating: number;
   expertRating: number;
   audienceRating: number;
+  imdbRating?: number | null;
   createdAt: string;
   leaderboard?: LeaderboardPayload;
 }

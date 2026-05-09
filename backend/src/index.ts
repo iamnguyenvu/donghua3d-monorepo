@@ -1,5 +1,7 @@
 import express, { Response, NextFunction } from 'express';
 import cors from 'cors';
+import { createServer } from 'http';
+import { Server } from 'socket.io';
 import { config } from './config';
 import { authenticateJWT, AuthenticatedRequest } from './middleware/auth.middleware';
 
@@ -12,7 +14,21 @@ import tierRouter from './controllers/tier.controller';
 import watchlistRouter from './controllers/watchlist.controller';
 import scraperRouter from './controllers/scraper.controller';
 
+// Import Services & Gateways
+import { cronService } from './services/cron.service';
+import { setupWatchPartyGateway } from './gateways/watchparty.gateway';
+
 const app = express();
+const httpServer = createServer(app);
+
+// Initialize Socket.io server with CORS policy
+const io = new Server(httpServer, {
+  cors: {
+    origin: [config.clientUrl, 'http://localhost:3000'],
+    methods: ['GET', 'POST'],
+    credentials: true,
+  }
+});
 
 // 1. Global Middlewares
 app.use(cors({
@@ -53,10 +69,16 @@ app.use((err: any, _req: AuthenticatedRequest, res: Response, _next: NextFunctio
   });
 });
 
-// 5. Start server listener
-app.listen(config.port, () => {
+// Activate Real-time WebSockets
+setupWatchPartyGateway(io);
+
+// 5. Start server listener using httpServer instead of app to enable WebSockets
+httpServer.listen(config.port, () => {
   console.log(`========================================================`);
   console.log(` 🚀 DONGHUA3D EXPRESS RUNNING ON PORT ${config.port} [${config.nodeEnv.toUpperCase()}]`);
   console.log(` API Endpoint: http://localhost:${config.port}`);
   console.log(`========================================================`);
+
+  // Start background scheduled cron tasks
+  cronService.startCronJobs();
 });
