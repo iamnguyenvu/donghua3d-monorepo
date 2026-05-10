@@ -36,12 +36,20 @@ router.get('/movies', async (req: AuthenticatedRequest, res: Response, next: Nex
       orderBy: orderByClause,
       include: {
         leaderboard: true,
+        _count: {
+          select: { episodes: true }
+        }
       }
     });
 
+    const mappedMovies = movies.map((m: any) => ({
+      ...m,
+      episodeCount: m._count?.episodes ?? 0
+    }));
+
     res.status(200).json({
       success: true,
-      data: movies,
+      data: mappedMovies,
     });
   } catch (err) {
     next(err);

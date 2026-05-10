@@ -29,7 +29,10 @@ const fallbacks: MoviePayload[] = [
     audienceRating: 9.0,
     imdbRating: 8.2,
     createdAt: new Date().toISOString(),
-    leaderboard: { globalTier: Tier.S, tierScore: 94.5, rank: 1 }
+    leaderboard: { globalTier: Tier.S, tierScore: 94.5, rank: 1 },
+    episodeCount: 168,
+    viewsCount: 45300,
+    airingDay: 'Friday'
   },
   {
     id: 'sl-1',
@@ -45,7 +48,10 @@ const fallbacks: MoviePayload[] = [
     audienceRating: 8.7,
     imdbRating: 8.6,
     createdAt: new Date().toISOString(),
-    leaderboard: { globalTier: Tier.A, tierScore: 86.2, rank: 2 }
+    leaderboard: { globalTier: Tier.A, tierScore: 86.2, rank: 2 },
+    episodeCount: 263,
+    viewsCount: 92400,
+    airingDay: 'Saturday'
   },
   {
     id: 'mj-1',
@@ -61,7 +67,10 @@ const fallbacks: MoviePayload[] = [
     audienceRating: 8.8,
     imdbRating: 9.0,
     createdAt: new Date().toISOString(),
-    leaderboard: { globalTier: Tier.S, tierScore: 91.0, rank: 3 }
+    leaderboard: { globalTier: Tier.S, tierScore: 91.0, rank: 3 },
+    episodeCount: 110,
+    viewsCount: 52100,
+    airingDay: 'Sunday'
   }
 ];
 
