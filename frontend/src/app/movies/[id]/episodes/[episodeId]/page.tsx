@@ -10,7 +10,8 @@ import Header from '@/components/Header';
 import PremiumPlayer from '@/components/PremiumPlayer';
 import { 
   catalogApi, ratingApi, commentApi, 
-  EpisodePayload, MovieWithEpisodes, ReviewPayload, CommentPayload 
+  EpisodePayload, MovieWithEpisodes, ReviewPayload, CommentPayload,
+  cleanEpisodeTitle
 } from '@/lib/api';
 
 export default function WatchEpisode() {
@@ -203,7 +204,7 @@ export default function WatchEpisode() {
               <span className="absolute text-lg font-black text-white">{autoplayCountdown}</span>
             </div>
             <h3 className="text-sm font-black text-white uppercase tracking-wider mb-2">Chuẩn bị chuyển tập tiếp theo</h3>
-            <p className="text-xs text-zinc-400 mb-6 truncate max-w-full">Tập {nextEpisode.episodeNumber}: {nextEpisode.title}</p>
+            <p className="text-xs text-zinc-400 mb-6 truncate max-w-full">Tập {nextEpisode.episodeNumber}: {cleanEpisodeTitle(nextEpisode.title, nextEpisode.episodeNumber)}</p>
             <div className="flex items-center gap-3 w-full">
               <button
                 onClick={() => {
@@ -239,7 +240,7 @@ export default function WatchEpisode() {
           src={episode.videoUrl}
           videoUrl4k={episode.videoUrl4k}
           isVipOnly={episode.isVipOnly}
-          title={episode.title}
+          title={cleanEpisodeTitle(episode.title, episode.episodeNumber)}
           introStart={episode.introStart}
           introEnd={episode.introEnd}
           outroStart={episode.outroStart}
@@ -257,7 +258,7 @@ export default function WatchEpisode() {
             <span>Tập {episode.episodeNumber}</span>
           </div>
           <h1 className="text-xl md:text-2xl font-black text-white uppercase tracking-wider mb-2">
-            {episode.title}
+            {cleanEpisodeTitle(episode.title, episode.episodeNumber)}
           </h1>
           <p className="text-xs text-zinc-400 leading-relaxed max-w-4xl">
             {episode.description}
@@ -280,15 +281,16 @@ export default function WatchEpisode() {
               <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider">Bạn đánh giá tập phim này bao nhiêu?</span>
               
               {/* Star selector buttons */}
-              <div className="flex items-center gap-1.5">
+              <div className="flex flex-wrap items-center justify-between sm:justify-start gap-1">
                 {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((star) => (
                   <button
                     key={star}
                     type="button"
                     onClick={() => setUserRating(star)}
-                    className="p-1 bg-transparent border-0 cursor-pointer transition-transform hover:scale-125 outline-none"
+                    className="p-1.5 xs:p-2 sm:p-1 bg-transparent border-0 cursor-pointer transition-transform hover:scale-125 outline-none flex items-center justify-center"
+                    title={`Đánh giá ${star}/10 sao`}
                   >
-                    <Star className={`w-4 h-4 ${star <= userRating ? 'fill-amber-400 text-amber-400' : 'text-zinc-750'}`} />
+                    <Star className={`w-6 h-6 xs:w-7 xs:h-7 sm:w-5 sm:h-5 md:w-4 md:h-4 ${star <= userRating ? 'fill-amber-400 text-amber-400' : 'text-zinc-750'}`} />
                   </button>
                 ))}
               </div>
@@ -356,7 +358,7 @@ export default function WatchEpisode() {
                 required
               />
 
-              <div className="flex items-center justify-between">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 w-full">
                 <label className="flex items-center gap-2 cursor-pointer text-[10px] text-zinc-400 select-none uppercase font-bold tracking-wider">
                   <input
                     type="checkbox"
@@ -370,7 +372,7 @@ export default function WatchEpisode() {
                 <button
                   type="submit"
                   disabled={submittingComment}
-                  className="py-2 px-4 rounded-[4px] bg-violet-600 hover:bg-violet-700 text-white font-extrabold text-[11px] uppercase tracking-wider transition-all duration-200 active:scale-95 shadow-md disabled:opacity-50 flex items-center gap-1.5 cursor-pointer outline-none border-0"
+                  className="py-2.5 px-4 rounded-[4px] bg-violet-600 hover:bg-violet-700 text-white font-extrabold text-[11px] uppercase tracking-wider transition-all duration-200 active:scale-95 shadow-md disabled:opacity-50 flex items-center justify-center gap-1.5 cursor-pointer outline-none border-0 w-full sm:w-auto"
                 >
                   <Send className="w-3 h-3" />
                   Gửi Bình Luận
