@@ -262,7 +262,7 @@ export default function MovieDetails() {
               </span>
             </div>
 
-            <p className="max-w-2xl text-xs md:text-sm text-zinc-400 leading-relaxed truncate-3-lines" style={{ textShadow: '0 1px 3px rgba(0,0,0,0.9)' }}>
+            <p className="max-w-2xl text-xs md:text-sm text-zinc-400 leading-relaxed line-clamp-3" style={{ textShadow: '0 1px 3px rgba(0,0,0,0.9)' }}>
               {movie.description}
             </p>
 
@@ -426,7 +426,7 @@ export default function MovieDetails() {
                       <h3 className="text-xs font-bold text-white group-hover:text-violet-400 transition-colors truncate mt-0.5">
                         {cleanEpisodeTitle(ep.title, ep.episodeNumber)}
                       </h3>
-                      <p className="text-[11px] text-zinc-500 truncate-2-lines leading-relaxed mt-0.5">
+                      <p className="text-[11px] text-zinc-500 line-clamp-2 leading-relaxed mt-0.5">
                         {ep.description}
                       </p>
                     </div>
