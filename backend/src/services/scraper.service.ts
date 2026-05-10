@@ -191,13 +191,38 @@ export class ScraperService {
             }
           });
 
+          // Clean episode title
+          let cleanEpTitle = ep.filename || `Tập ${episodeNumber}`;
+          cleanEpTitle = cleanEpTitle.replace(/\.(mp4|m3u8|mkv|avi|flv|ts)$/i, '');
+          const lowerEp = cleanEpTitle.toLowerCase();
+          const isUglyFile = (cleanEpTitle.split('.').length > 3 || cleanEpTitle.split('_').length > 3 || cleanEpTitle.split('-').length > 3) && (
+            lowerEp.includes('hevc') ||
+            lowerEp.includes('h264') ||
+            lowerEp.includes('h265') ||
+            lowerEp.includes('x264') ||
+            lowerEp.includes('x265') ||
+            lowerEp.includes('4k') ||
+            lowerEp.includes('1080p') ||
+            lowerEp.includes('720p') ||
+            lowerEp.includes('engsub') ||
+            lowerEp.includes('vietsub') ||
+            lowerEp.includes('tvh') ||
+            lowerEp.includes('gb88') ||
+            lowerEp.includes('sub') ||
+            /s\d+e\d+/i.test(lowerEp) ||
+            /s\d+/i.test(lowerEp)
+          );
+          if (isUglyFile) {
+            cleanEpTitle = `Tập ${episodeNumber}`;
+          }
+
           if (!existingEp) {
             // Create Episode
             await prisma.episode.create({
               data: {
                 movieId: movie.id,
                 episodeNumber,
-                title: ep.filename || `Tập ${episodeNumber}`,
+                title: cleanEpTitle,
                 description: `Tập phim thứ ${episodeNumber} của bộ phim ${movie.title}`,
                 videoUrl,
                 duration: 1200.0, // default 20 mins
@@ -210,7 +235,7 @@ export class ScraperService {
               where: { id: existingEp.id },
               data: {
                 videoUrl,
-                title: ep.filename || existingEp.title
+                title: cleanEpTitle
               }
             });
           }

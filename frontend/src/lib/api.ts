@@ -407,6 +407,35 @@ export function cleanEpisodeTitle(title: string, episodeNumber?: number): string
   if (!title) return episodeNumber ? `Tập ${episodeNumber}` : '';
   
   let clean = title;
+
+  // Remove common video file extensions first
+  clean = clean.replace(/\.(mp4|m3u8|mkv|avi|flv|ts)$/i, '');
+
+  // Detect and clean ugly video filenames (containing dots/underscores/dashes and video quality terms)
+  const lower = clean.toLowerCase();
+  const isUglyFile = (clean.split('.').length > 3 || clean.split('_').length > 3 || clean.split('-').length > 3) && (
+    lower.includes('hevc') ||
+    lower.includes('h264') ||
+    lower.includes('h265') ||
+    lower.includes('x264') ||
+    lower.includes('x265') ||
+    lower.includes('4k') ||
+    lower.includes('1080p') ||
+    lower.includes('720p') ||
+    lower.includes('engsub') ||
+    lower.includes('vietsub') ||
+    lower.includes('tvh') ||
+    lower.includes('gb88') ||
+    lower.includes('sub') ||
+    /s\d+e\d+/i.test(lower) ||
+    /s\d+/i.test(lower)
+  );
+
+  if (isUglyFile) {
+    if (episodeNumber) {
+      return `Tập ${episodeNumber}`;
+    }
+  }
   
   // Remove common ugly prefixes (like EP01, EP_01, Tập 1, etc.)
   clean = clean.replace(/^(?:ep|episode|tập)\s*\d+[\s_:\-]*/i, '');
@@ -429,7 +458,8 @@ export function cleanEpisodeTitle(title: string, episodeNumber?: number): string
       lowerClean === 'chúa tể huyền bí' ||
       lowerClean === 'mục thần ký' ||
       lowerClean === 'tập' || 
-      lowerClean === 'episode') {
+      lowerClean === 'episode' ||
+      (/^[a-z0-9\s_\-\.]+$/i.test(lowerClean) && (lowerClean.includes('episode') || lowerClean.includes('ep') || lowerClean.includes('tap')))) {
     if (episodeNumber) {
       return `Tập ${episodeNumber}`;
     }

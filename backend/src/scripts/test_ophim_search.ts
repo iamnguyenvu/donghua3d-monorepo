@@ -1,12 +1,31 @@
 // Using native global fetch in Node v20
 
 const QUERIES = [
-  'dau-pha',
-  'dau-la',
+  'kiem-lai',
+  'con-ra-the-thong',
+  'o-re',
   'tu-xuyen',
-  'thieu-nien-ca-hanh',
-  'bat-luong-nhan',
-  'the-gioi-hoan-my'
+  'tham-khong',
+  'tram-than',
+  'ngich-thien',
+  'tuong-da',
+  'than-mo',
+  'dao-yeu-hanh',
+  'huyen-gioi',
+  'gia-thien',
+  'bach-luyen',
+  'thien-tuong',
+  'tu-la-vo-than',
+  'quan-huu-van',
+  'dai-duong-thua-phong',
+  'ta-la-dao-tong',
+  'tru-tien',
+  'ma-thoi-den',
+  'ling-lung',
+  'nhat-niem',
+  'de-nhat-danh-sach',
+  'tien-nghich',
+  'hoa-phung'
 ];
 
 async function testSearch(keyword: string) {
