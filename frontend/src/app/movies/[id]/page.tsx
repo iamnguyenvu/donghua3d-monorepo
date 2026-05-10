@@ -1,12 +1,12 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useParams } from 'next/navigation';
 import { 
   Star, Play, Film, ArrowLeft, Loader2, Award, 
-  Info, Plus, Check 
+  Info, Plus, Check, Search 
 } from 'lucide-react';
 import Header from '@/components/Header';
 import { catalogApi, ratingApi, MovieWithEpisodes, ReviewPayload, watchlistApi, Tier, MoviePayload, getPosterPosition, cleanEpisodeTitle } from '@/lib/api';
@@ -23,13 +23,27 @@ export default function MovieDetails() {
   const [watchlistActionLoading, setWatchlistActionLoading] = useState(false);
   const [episodeLayout, setEpisodeLayout] = useState<'grid' | 'compact'>('grid');
   const [sortAsc, setSortAsc] = useState(true);
+  const [episodeSearchQuery, setEpisodeSearchQuery] = useState('');
 
-  const sortedEpisodes = movie?.episodes 
-    ? [...movie.episodes].sort((a, b) => sortAsc 
-        ? a.episodeNumber - b.episodeNumber 
-        : b.episodeNumber - a.episodeNumber
-      )
-    : [];
+  const filteredAndSortedEpisodes = useMemo(() => {
+    if (!movie?.episodes) return [];
+    let eps = [...movie.episodes];
+
+    if (episodeSearchQuery) {
+      const q = episodeSearchQuery.toLowerCase().trim();
+      eps = eps.filter(ep => 
+        ep.episodeNumber.toString() === q ||
+        ep.episodeNumber.toString().includes(q) ||
+        ep.title.toLowerCase().includes(q) ||
+        (ep.description && ep.description.toLowerCase().includes(q))
+      );
+    }
+
+    return eps.sort((a, b) => sortAsc 
+      ? a.episodeNumber - b.episodeNumber 
+      : b.episodeNumber - a.episodeNumber
+    );
+  }, [movie?.episodes, episodeSearchQuery, sortAsc]);
 
   useEffect(() => {
     if (typeof window !== 'undefined' && window.innerWidth < 640) {
@@ -339,14 +353,14 @@ export default function MovieDetails() {
                   <Link
                     key={part.id}
                     href={`/movies/${part.id}`}
-                    className="flex items-center gap-3.5 p-3.5 bg-zinc-950/30 border border-zinc-900 hover:border-violet-500/40 hover:bg-violet-500/5 rounded-[4px] w-64 flex-shrink-0 transition-all duration-300 group no-underline shadow-sm"
+                    className="flex items-center gap-3.5 p-3.5 bg-zinc-950/30 border border-zinc-900 hover:border-violet-500/40 hover:bg-violet-500/5 rounded-[4px] w-64 sm:w-72 lg:w-80 xl:w-96 flex-shrink-0 transition-all duration-300 group no-underline shadow-sm"
                   >
-                    <div className="w-12 h-16 rounded-[2px] overflow-hidden bg-zinc-950 flex-shrink-0 relative border border-zinc-900/60">
+                    <div className="w-12 h-16 sm:w-14 sm:h-20 rounded-[2px] overflow-hidden bg-zinc-950 flex-shrink-0 relative border border-zinc-900/60">
                       <Image
                         src={part.posterUrl || '/static/uploads/default_poster.jpg'}
                         alt={part.title}
                         fill
-                        sizes="48px"
+                        sizes="56px"
                         className={`object-cover group-hover:scale-105 transition-all duration-300 ${getPosterPosition(part.title)}`}
                       />
                     </div>
@@ -373,11 +387,31 @@ export default function MovieDetails() {
             </div>
           )}
 
-          <div className="flex items-center justify-between border-b border-zinc-900/60 pb-4 flex-wrap gap-2">
-            <h2 className="text-base font-black text-white tracking-wider uppercase border-l-2 border-violet-500 pl-3">
-              Danh Sách Tập Phim
-            </h2>
-            <div className="flex items-center gap-3 select-none">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-zinc-900/60 pb-4 gap-4">
+            <div className="flex flex-col xs:flex-row xs:items-center gap-3">
+              <h2 className="text-base font-black text-white tracking-wider uppercase border-l-2 border-violet-500 pl-3">
+                Danh Sách Tập Phim
+              </h2>
+              {movie?.episodes && movie.episodes.length > 0 && (
+                <span className="text-[10px] font-bold text-zinc-500 bg-zinc-900/40 border border-zinc-900/60 px-1.5 py-0.5 rounded-[2px] w-fit">
+                  {movie.episodes.length} Tập
+                </span>
+              )}
+            </div>
+
+            <div className="flex items-center gap-3 select-none flex-wrap sm:flex-nowrap">
+              {/* Sleek Episode Search Input */}
+              <div className="flex items-center gap-2 px-3 py-1.5 rounded-[4px] bg-zinc-950/85 border border-zinc-900 focus-within:border-violet-500/50 focus-within:bg-zinc-950 transition-all duration-300 w-full sm:w-44 h-9">
+                <Search className="w-3.5 h-3.5 text-zinc-550 flex-shrink-0" />
+                <input
+                  type="text"
+                  placeholder="Tìm số tập, tên..."
+                  value={episodeSearchQuery}
+                  onChange={(e) => setEpisodeSearchQuery(e.target.value)}
+                  className="bg-transparent text-zinc-200 placeholder-zinc-650 text-[11px] font-black outline-none border-0 p-0 focus:ring-0 focus:outline-none w-full"
+                />
+              </div>
+
               <button
                 onClick={() => setSortAsc(!sortAsc)}
                 className="px-3 py-1.5 bg-zinc-950/85 hover:bg-zinc-900 border border-zinc-900 text-[10px] font-black uppercase tracking-wider text-zinc-400 hover:text-white transition-all cursor-pointer rounded-[4px] h-9"
@@ -411,13 +445,13 @@ export default function MovieDetails() {
           </div>
 
           {episodeLayout === 'grid' ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-              {sortedEpisodes && sortedEpisodes.length > 0 ? (
-                sortedEpisodes.map((ep) => (
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              {filteredAndSortedEpisodes && filteredAndSortedEpisodes.length > 0 ? (
+                filteredAndSortedEpisodes.map((ep) => (
                   <Link
                     href={`/movies/${movie.id}/episodes/${ep.id}`}
                     key={ep.id}
-                    className="bg-[#0c0c0f]/40 border border-zinc-900/60 hover:border-zinc-800 rounded-[4px] overflow-hidden flex flex-col group transition-all duration-300 shadow-md no-underline"
+                    className="bg-[#0c0c0f]/40 border border-zinc-900/60 hover:border-zinc-800 rounded-[4px] overflow-hidden flex flex-col group transition-all duration-300 shadow-md no-underline animate-fade-in"
                   >
                     <div className="relative aspect-video w-full bg-zinc-950">
                       <Image
@@ -445,20 +479,22 @@ export default function MovieDetails() {
                   </Link>
                 ))
               ) : (
-                <div className="col-span-2 text-center py-12 bg-zinc-950/40 border border-zinc-900 rounded-[4px] p-6 select-none">
+                <div className="col-span-full text-center py-12 bg-zinc-950/40 border border-zinc-900 rounded-[4px] p-6 select-none">
                   <Info className="w-6 h-6 text-zinc-650 mx-auto mb-2" />
-                  <p className="text-xs text-zinc-550 italic">Chưa có tập phim nào được phát hành.</p>
+                  <p className="text-xs text-zinc-550 italic">
+                    {episodeSearchQuery ? 'Không tìm thấy tập phim nào khớp với từ khóa tìm kiếm.' : 'Chưa có tập phim nào được phát hành.'}
+                  </p>
                 </div>
               )}
             </div>
           ) : (
-            <div className="grid grid-cols-3 xxs:grid-cols-4 xs:grid-cols-5 sm:grid-cols-6 md:grid-cols-8 gap-3">
-              {sortedEpisodes && sortedEpisodes.length > 0 ? (
-                sortedEpisodes.map((ep) => (
+            <div className="grid grid-cols-3 xxs:grid-cols-4 xs:grid-cols-5 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-10 xl:grid-cols-12 2xl:grid-cols-14 gap-3">
+              {filteredAndSortedEpisodes && filteredAndSortedEpisodes.length > 0 ? (
+                filteredAndSortedEpisodes.map((ep) => (
                   <Link
                     href={`/movies/${movie.id}/episodes/${ep.id}`}
                     key={ep.id}
-                    className="p-3 bg-[#0c0c0f]/80 border border-zinc-900/85 hover:border-violet-500/50 hover:bg-violet-500/10 rounded-[4px] text-center flex flex-col justify-center items-center group transition-all duration-300 no-underline shadow-md cursor-pointer"
+                    className="p-3 bg-[#0c0c0f]/80 border border-zinc-900/85 hover:border-violet-500/50 hover:bg-violet-500/10 rounded-[4px] text-center flex flex-col justify-center items-center group transition-all duration-300 no-underline shadow-md cursor-pointer animate-fade-in"
                   >
                     <span className="text-[9px] text-zinc-500 group-hover:text-violet-400 font-extrabold uppercase tracking-widest transition-colors">TẬP</span>
                     <span className="text-sm font-black text-white group-hover:text-violet-300 mt-0.5 transition-colors">{ep.episodeNumber}</span>
@@ -467,7 +503,9 @@ export default function MovieDetails() {
               ) : (
                 <div className="col-span-full text-center py-12 bg-zinc-950/40 border border-zinc-900 rounded-[4px] p-6 select-none">
                   <Info className="w-6 h-6 text-zinc-650 mx-auto mb-2" />
-                  <p className="text-xs text-zinc-550 italic">Chưa có tập phim nào được phát hành.</p>
+                  <p className="text-xs text-zinc-550 italic">
+                    {episodeSearchQuery ? 'Không tìm thấy tập phim nào khớp với từ khóa tìm kiếm.' : 'Chưa có tập phim nào được phát hành.'}
+                  </p>
                 </div>
               )}
             </div>
