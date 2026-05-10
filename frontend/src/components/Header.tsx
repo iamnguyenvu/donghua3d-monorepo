@@ -129,6 +129,13 @@ export default function Header({ onSearchChange }: HeaderProps) {
     }
   };
 
+  const handleLogoClick = (e: React.MouseEvent) => {
+    if (pathname === '/') {
+      e.preventDefault();
+      window.location.href = '/';
+    }
+  };
+
   const handleLogout = () => {
     authApi.logout();
     setUser(null);
@@ -151,7 +158,7 @@ export default function Header({ onSearchChange }: HeaderProps) {
             </button>
 
             {/* Logo Brand */}
-            <Link href="/" className="flex items-center gap-2 sm:gap-3 text-white no-underline group select-none flex-shrink-0">
+            <Link href="/" onClick={handleLogoClick} className="flex items-center gap-2 sm:gap-3 text-white no-underline group select-none flex-shrink-0">
               <div className="p-1.5 sm:p-2 rounded-[4px] bg-violet-600 flex items-center justify-center transition-all duration-300 group-hover:bg-violet-500 shadow-md">
                 <Film className="w-4 sm:w-4.5 h-4 sm:h-4.5 text-white" />
               </div>
@@ -164,6 +171,7 @@ export default function Header({ onSearchChange }: HeaderProps) {
             <nav className="hidden lg:flex items-center gap-6 md:gap-8 select-none">
               <Link
                 href="/"
+                onClick={handleLogoClick}
                 className={`relative text-xs font-black uppercase tracking-wider no-underline transition-colors duration-200 py-2.5 ${
                   pathname === '/' ? 'text-white' : 'text-zinc-400 hover:text-white'
                 }`}
