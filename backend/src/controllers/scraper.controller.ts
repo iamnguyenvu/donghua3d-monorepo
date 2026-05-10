@@ -49,8 +49,9 @@ router.post('/sync-movie', requireRole([Role.ADMIN]), async (req: AuthenticatedR
 router.post('/sync-latest', requireRole([Role.ADMIN]), async (req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> => {
   try {
     const page = parseInt(req.body.page as string || '1', 10);
+    const onlyExisting = req.body.onlyExisting === true || req.body.onlyExisting === 'true';
 
-    const result = await scraperService.syncLatestHoathinh(page);
+    const result = await scraperService.syncLatestHoathinh(page, onlyExisting);
 
     res.status(200).json({
       success: true,
