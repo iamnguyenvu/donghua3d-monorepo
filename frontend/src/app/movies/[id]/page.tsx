@@ -22,6 +22,15 @@ export default function MovieDetails() {
   const [watchlistIds, setWatchlistIds] = useState<Set<string>>(new Set());
   const [watchlistActionLoading, setWatchlistActionLoading] = useState(false);
   const [episodeLayout, setEpisodeLayout] = useState<'grid' | 'compact'>('grid');
+  const [sortAsc, setSortAsc] = useState(true);
+
+  const sortedEpisodes = React.useMemo(() => {
+    if (!movie?.episodes) return [];
+    return [...movie.episodes].sort((a, b) => sortAsc 
+      ? a.episodeNumber - b.episodeNumber 
+      : b.episodeNumber - a.episodeNumber
+    );
+  }, [movie?.episodes, sortAsc]);
 
   useEffect(() => {
     if (typeof window !== 'undefined' && window.innerWidth < 640) {
@@ -261,13 +270,24 @@ export default function MovieDetails() {
             {/* Premium Interactive Action CTA Bar */}
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3.5 mt-2.5 w-full sm:w-auto flex-wrap">
               {movie.episodes && movie.episodes.length > 0 ? (
-                <Link
-                  href={`/movies/${movie.id}/episodes/${movie.episodes[0].id}`}
-                  className="px-6 py-3.5 rounded-[4px] bg-violet-600 hover:bg-violet-700 text-white font-extrabold flex items-center justify-center gap-2 text-[11px] uppercase tracking-wider transition-all duration-300 hover:scale-[1.03] active:scale-95 shadow-[0_4px_20px_rgba(124,58,237,0.3)] hover:shadow-[0_4px_25px_rgba(124,58,237,0.5)] border-0 outline-none no-underline w-full sm:w-auto"
-                >
-                  <Play className="w-4 h-4 fill-white text-white" />
-                  Phát Tập 1
-                </Link>
+                <>
+                  <Link
+                    href={`/movies/${movie.id}/episodes/${movie.episodes[0].id}`}
+                    className="px-6 py-3.5 rounded-[4px] bg-violet-600 hover:bg-violet-700 text-white font-extrabold flex items-center justify-center gap-2 text-[11px] uppercase tracking-wider transition-all duration-300 hover:scale-[1.03] active:scale-95 shadow-[0_4px_20px_rgba(124,58,237,0.3)] hover:shadow-[0_4px_25px_rgba(124,58,237,0.5)] border-0 outline-none no-underline w-full sm:w-auto"
+                  >
+                    <Play className="w-4 h-4 fill-white text-white" />
+                    Phát Tập 1
+                  </Link>
+
+                  {movie.episodes.length > 1 && (
+                    <Link
+                      href={`/movies/${movie.id}/episodes/${[...movie.episodes].sort((a, b) => b.episodeNumber - a.episodeNumber)[0].id}`}
+                      className="px-6 py-3.5 rounded-[4px] bg-gradient-to-r from-violet-750 to-indigo-750 hover:from-violet-650 hover:to-indigo-650 text-white font-extrabold flex items-center justify-center gap-2 text-[11px] uppercase tracking-wider transition-all duration-300 hover:scale-[1.03] active:scale-95 shadow-[0_4px_20px_rgba(139,92,246,0.3)] hover:shadow-[0_4px_25px_rgba(139,92,246,0.5)] border-0 outline-none no-underline w-full sm:w-auto"
+                    >
+                      <span>⚡ Tập Mới Nhất ({movie.episodes.length})</span>
+                    </Link>
+                  )}
+                </>
               ) : (
                 <button
                   disabled
@@ -346,34 +366,43 @@ export default function MovieDetails() {
             <h2 className="text-base font-black text-white tracking-wider uppercase border-l-2 border-violet-500 pl-3">
               Danh Sách Tập Phim
             </h2>
-            <div className="flex items-center bg-zinc-950/80 p-1 rounded-[4px] border border-zinc-900 select-none">
+            <div className="flex items-center gap-3 select-none">
               <button
-                onClick={() => setEpisodeLayout('grid')}
-                className={`px-3 py-1.5 rounded-[3px] text-[10px] font-black uppercase tracking-wider transition-all cursor-pointer border-0 outline-none ${
-                  episodeLayout === 'grid'
-                    ? 'bg-violet-600 text-white shadow-sm'
-                    : 'text-zinc-500 hover:text-zinc-300 bg-transparent'
-                }`}
+                onClick={() => setSortAsc(!sortAsc)}
+                className="px-3 py-1.5 bg-zinc-950/85 hover:bg-zinc-900 border border-zinc-900 text-[10px] font-black uppercase tracking-wider text-zinc-400 hover:text-white transition-all cursor-pointer rounded-[4px] h-9"
               >
-                Chi Tiết
+                Xếp: {sortAsc ? 'Cũ nhất' : 'Mới nhất'}
               </button>
-              <button
-                onClick={() => setEpisodeLayout('compact')}
-                className={`px-3 py-1.5 rounded-[3px] text-[10px] font-black uppercase tracking-wider transition-all cursor-pointer border-0 outline-none ${
-                  episodeLayout === 'compact'
-                    ? 'bg-violet-600 text-white shadow-sm'
-                    : 'text-zinc-500 hover:text-zinc-300 bg-transparent'
-                }`}
-              >
-                Rút Gọn
-              </button>
+
+              <div className="flex items-center bg-zinc-950/80 p-1 rounded-[4px] border border-zinc-900 h-9">
+                <button
+                  onClick={() => setEpisodeLayout('grid')}
+                  className={`px-3 py-1.5 rounded-[3px] text-[10px] font-black uppercase tracking-wider transition-all cursor-pointer border-0 outline-none ${
+                    episodeLayout === 'grid'
+                      ? 'bg-violet-600 text-white shadow-sm'
+                      : 'text-zinc-500 hover:text-zinc-300 bg-transparent'
+                  }`}
+                >
+                  Chi Tiết
+                </button>
+                <button
+                  onClick={() => setEpisodeLayout('compact')}
+                  className={`px-3 py-1.5 rounded-[3px] text-[10px] font-black uppercase tracking-wider transition-all cursor-pointer border-0 outline-none ${
+                    episodeLayout === 'compact'
+                      ? 'bg-violet-600 text-white shadow-sm'
+                      : 'text-zinc-500 hover:text-zinc-300 bg-transparent'
+                  }`}
+                >
+                  Rút Gọn
+                </button>
+              </div>
             </div>
           </div>
 
           {episodeLayout === 'grid' ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-              {movie.episodes && movie.episodes.length > 0 ? (
-                movie.episodes.map((ep) => (
+              {sortedEpisodes && sortedEpisodes.length > 0 ? (
+                sortedEpisodes.map((ep) => (
                   <Link
                     href={`/movies/${movie.id}/episodes/${ep.id}`}
                     key={ep.id}
@@ -413,8 +442,8 @@ export default function MovieDetails() {
             </div>
           ) : (
             <div className="grid grid-cols-3 xxs:grid-cols-4 xs:grid-cols-5 sm:grid-cols-6 md:grid-cols-8 gap-3">
-              {movie.episodes && movie.episodes.length > 0 ? (
-                movie.episodes.map((ep) => (
+              {sortedEpisodes && sortedEpisodes.length > 0 ? (
+                sortedEpisodes.map((ep) => (
                   <Link
                     href={`/movies/${movie.id}/episodes/${ep.id}`}
                     key={ep.id}

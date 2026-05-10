@@ -23,6 +23,11 @@ export default function WatchEpisode() {
   const [loading, setLoading] = useState(true);
   const [initialProgress, setInitialProgress] = useState(0);
 
+  // Selector Utility States
+  const [episodeSearch, setEpisodeSearch] = useState('');
+  const [sortAsc, setSortAsc] = useState(true);
+  const [selectedServer, setSelectedServer] = useState<'VIP 1 (Cloudflare R2)' | 'VIP 2 (Amazon S3)'>('VIP 1 (Cloudflare R2)');
+
   // Autoplay State
   const [autoplayCountdown, setAutoplayCountdown] = useState<number | null>(null);
 
@@ -95,8 +100,43 @@ export default function WatchEpisode() {
   }, [params.id, params.episodeId]);
 
   const handleProgressPulse = (currentTime: number, isCompleted: boolean) => {
-    if (episode) {
+    if (episode && movie) {
       catalogApi.saveWatchHistory(episode.id, currentTime, isCompleted);
+
+      // Save to local watch history for Header Popover instant rendering
+      try {
+        const localHistoryStr = localStorage.getItem('donghua3d_local_watch_history') || '[]';
+        const historyList = JSON.parse(localHistoryStr) as Array<{
+          id: string;
+          episodeId: string;
+          movieId: string;
+          movieTitle: string;
+          episodeNumber: number;
+          progress: number;
+          duration: number;
+          thumbnail: string;
+          updatedAt: string;
+        }>;
+
+        // Remove duplicates of same movie to keep history clean
+        const filteredList = historyList.filter(item => item.movieId !== movie.id);
+        const newItem = {
+          id: episode.id,
+          episodeId: episode.id,
+          movieId: movie.id,
+          movieTitle: movie.title,
+          episodeNumber: episode.episodeNumber,
+          progress: currentTime,
+          duration: episode.duration || 1200,
+          thumbnail: episode.thumbnail || movie.posterUrl || '',
+          updatedAt: new Date().toISOString()
+        };
+
+        const updatedList = [newItem, ...filteredList].slice(0, 10); // Keep top 10 recent
+        localStorage.setItem('donghua3d_local_watch_history', JSON.stringify(updatedList));
+      } catch (err) {
+        console.error('Failed to save local watch history:', err);
+      }
     }
   };
 
@@ -263,6 +303,96 @@ export default function WatchEpisode() {
           <p className="text-xs text-zinc-400 leading-relaxed max-w-4xl">
             {episode.description}
           </p>
+        </div>
+
+        {/* ==============================================================================
+           PREMIUM EPISODE SELECTOR & CDN SERVERS PANEL
+           ============================================================================== */}
+        <div className="mt-8 bg-[#09090d]/60 border border-zinc-900/80 rounded-[4px] p-6 shadow-xl select-none">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-zinc-900/60 pb-5">
+            <div>
+              <h2 className="text-sm font-black text-white uppercase tracking-wider mb-1 flex items-center gap-2">
+                Danh Sách Tập Phim
+              </h2>
+              <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-wider">
+                Tổng cộng: {movie.episodes?.length || 0} tập • Đang chiếu chất lượng Ultra HD 4K
+              </p>
+            </div>
+
+            {/* Server CDN Selector & Sorting Controls */}
+            <div className="flex flex-wrap items-center gap-3">
+              {/* Server indicator */}
+              <div className="flex items-center gap-2 bg-zinc-950/80 border border-zinc-900 px-3 py-2 rounded-[2px]">
+                <span className="text-[9px] font-black text-zinc-500 uppercase tracking-widest">Nguồn:</span>
+                <select 
+                  value={selectedServer}
+                  onChange={(e) => setSelectedServer(e.target.value as any)}
+                  className="bg-transparent border-0 text-[10px] font-black text-violet-400 focus:outline-none cursor-pointer uppercase tracking-wider"
+                >
+                  <option value="VIP 1 (Cloudflare R2)" className="bg-zinc-950 text-white">VIP 1 (Cloudflare R2)</option>
+                  <option value="VIP 2 (Amazon S3)" className="bg-zinc-950 text-white">VIP 2 (Amazon S3)</option>
+                </select>
+              </div>
+
+              {/* Sorting Toggle button */}
+              <button
+                onClick={() => setSortAsc(!sortAsc)}
+                className="px-3 py-2 bg-zinc-950 hover:bg-zinc-900 border border-zinc-900 text-[10px] font-black uppercase tracking-wider text-zinc-400 hover:text-white transition-all cursor-pointer rounded-[2px]"
+              >
+                Thứ tự: {sortAsc ? 'Cũ nhất' : 'Mới nhất'}
+              </button>
+
+              {/* Search box for episodes */}
+              <div className="relative">
+                <input
+                  type="text"
+                  placeholder="Tìm số tập..."
+                  value={episodeSearch}
+                  onChange={(e) => setEpisodeSearch(e.target.value)}
+                  className="w-32 px-3 py-2 bg-zinc-950 focus:bg-zinc-900 border border-zinc-900 focus:border-zinc-800 rounded-[2px] text-[10px] text-white placeholder-zinc-600 font-bold focus:outline-none transition-all uppercase tracking-wider"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Episode Grid Buttons */}
+          <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-10 xl:grid-cols-12 gap-2.5 mt-5 max-h-[280px] overflow-y-auto pr-1">
+            {(() => {
+              const filtered = (movie.episodes || [])
+                .filter(ep => ep.episodeNumber.toString().includes(episodeSearch));
+              
+              const sorted = [...filtered].sort((a, b) => 
+                sortAsc ? a.episodeNumber - b.episodeNumber : b.episodeNumber - a.episodeNumber
+              );
+
+              if (sorted.length === 0) {
+                return (
+                  <div className="col-span-full py-8 text-center text-[10px] text-zinc-500 font-bold uppercase tracking-wider italic">
+                    Không tìm thấy tập phim phù hợp.
+                  </div>
+                );
+              }
+
+              return sorted.map((ep) => {
+                const isActive = ep.id === episode.id;
+                return (
+                  <Link
+                    key={ep.id}
+                    href={`/movies/${movie.id}/episodes/${ep.id}`}
+                    className={`
+                      py-3 text-center rounded-[2px] font-black text-xs transition-all no-underline flex flex-col justify-center items-center cursor-pointer border
+                      ${isActive 
+                        ? 'bg-gradient-to-br from-violet-600/90 to-indigo-600/90 border-violet-500 text-white shadow-[0_0_15px_rgba(139,92,246,0.4)] hover:from-violet-500 hover:to-indigo-500 scale-105 z-10' 
+                        : 'bg-zinc-950/60 hover:bg-zinc-900 border-zinc-900/80 text-zinc-400 hover:text-white'
+                      }
+                    `}
+                  >
+                    <span>{ep.episodeNumber}</span>
+                  </Link>
+                );
+              });
+            })()}
+          </div>
         </div>
 
         {/* ==============================================================================

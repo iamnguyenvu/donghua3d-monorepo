@@ -147,6 +147,14 @@ router.get('/episodes/:id', async (req: AuthenticatedRequest, res: Response, nex
       return;
     }
 
+    // Proactively increment parent movie's viewsCount in the background (non-blocking)
+    prisma.movie.update({
+      where: { id: episode.movieId },
+      data: { viewsCount: { increment: 1 } }
+    }).catch(err => {
+      console.error(`[Views Counter Error] Failed to increment views count for movie ${episode.movieId}:`, err.message);
+    });
+
     // Resolve user watch progress if logged in
     let watchProgress = 0.0;
     let watchCompleted = false;

@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { Film, Search, User, LogOut, Loader2, ChevronDown, Bell, Menu, X } from 'lucide-react';
+import { Film, Search, User, LogOut, Loader2, ChevronDown, Bell, Menu, X, Clock } from 'lucide-react';
 import { authApi, UserPayload } from '../lib/api';
 
 interface HeaderProps {
@@ -18,6 +18,44 @@ export default function Header({ onSearchChange }: HeaderProps) {
   const [user, setUser] = useState<UserPayload | null>(null);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
+
+  // Watch History popover state
+  interface LocalWatchHistoryItem {
+    id: string;
+    episodeId: string;
+    movieId: string;
+    movieTitle: string;
+    episodeNumber: number;
+    progress: number;
+    duration: number;
+    thumbnail: string;
+    updatedAt: string;
+  }
+  const [watchHistory, setWatchHistory] = useState<LocalWatchHistoryItem[]>([]);
+
+  const loadWatchHistory = () => {
+    try {
+      const stored = localStorage.getItem('donghua3d_local_watch_history');
+      if (stored) {
+        setWatchHistory(JSON.parse(stored));
+      }
+    } catch (err) {
+      console.error('Failed to parse watch history:', err);
+    }
+  };
+
+  useEffect(() => {
+    loadWatchHistory();
+    
+    // Auto-sync history across tabs instantly
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === 'donghua3d_local_watch_history') {
+        loadWatchHistory();
+      }
+    };
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
+  }, []);
   const [authMode, setAuthMode] = useState<'login' | 'register'>('login');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -186,6 +224,58 @@ export default function Header({ onSearchChange }: HeaderProps) {
                   <div className="relative cursor-pointer hover:text-white text-zinc-400 p-2 transition-colors hidden sm:block" title="Thông báo">
                     <Bell className="w-4.5 h-4.5 transition-transform hover:scale-110 duration-200" />
                     <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 rounded-full bg-violet-600 ring-2 ring-[#050508]" />
+                  </div>
+
+                  {/* ==============================================================================
+                     POPOVER LỊCH SỬ XEM PHIM CAO CẤP TRÊN HEADER
+                     ============================================================================== */}
+                  <div className="relative group select-none hidden sm:block">
+                    <button 
+                      onClick={loadWatchHistory}
+                      className="flex items-center gap-1.5 text-zinc-400 hover:text-white text-xs font-bold bg-transparent border-0 cursor-pointer outline-none p-2 transition-colors"
+                    >
+                      <Clock className="w-4.5 h-4.5 text-violet-400" />
+                      <span>Lịch Sử</span>
+                    </button>
+
+                    {/* Dropdown Menu trượt xuất hiện mượt mà khi hover */}
+                    <div className="absolute right-0 top-full pt-2 w-80 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 transform translate-y-2 group-hover:translate-y-0 z-50">
+                      <div className="bg-[#0c0c10]/95 backdrop-blur-xl border border-zinc-900 rounded-[4px] p-4 shadow-[0_10px_40px_rgba(0,0,0,0.8)] flex flex-col gap-3">
+                        <div className="flex items-center justify-between border-b border-zinc-900/60 pb-2">
+                          <span className="text-[10px] font-black text-white uppercase tracking-wider">Tập phim vừa xem</span>
+                          <Link href="/watchlist" className="text-[10px] text-violet-400 hover:text-violet-300 font-bold no-underline uppercase tracking-wider">Xem tất cả</Link>
+                        </div>
+
+                        {/* Danh sách các mục lịch sử */}
+                        <div className="flex flex-col gap-2.5 max-h-[250px] overflow-y-auto pr-1">
+                          {watchHistory.length > 0 ? (
+                            watchHistory.map((hist) => (
+                              <Link 
+                                key={hist.id} 
+                                href={`/movies/${hist.movieId}/episodes/${hist.episodeId}`}
+                                className="flex items-center gap-3 p-1.5 rounded-[2px] bg-zinc-950/40 hover:bg-zinc-900 border border-transparent hover:border-zinc-850/60 transition-all no-underline"
+                              >
+                                {/* Thẻ ảnh nhỏ đại diện tập */}
+                                <div className="w-16 h-10 rounded-[2px] bg-zinc-900 overflow-hidden flex-shrink-0 relative border border-zinc-850">
+                                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                                  <img src={hist.thumbnail || '/placeholder_thumb.png'} alt="thumbnail" className="w-full h-full object-cover" />
+                                  {/* Thanh tiến độ nhỏ dưới ảnh */}
+                                  <div className="absolute bottom-0 left-0 h-1 bg-violet-600" style={{ width: `${Math.min(100, (hist.progress / hist.duration) * 100)}%` }} />
+                                </div>
+                                <div className="flex flex-col gap-0.5 overflow-hidden text-left">
+                                  <span className="text-[11px] font-bold text-zinc-200 truncate">{hist.movieTitle}</span>
+                                  <span className="text-[9px] font-semibold text-zinc-550">Tập {hist.episodeNumber} - Đang xem {Math.max(1, Math.floor(hist.progress / 60))}m</span>
+                                </div>
+                              </Link>
+                            ))
+                          ) : (
+                            <div className="text-center py-6 text-[11px] text-zinc-600 italic">
+                              Bạn chưa xem bộ phim nào gần đây.
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
                   </div>
 
                   <div className="flex items-center gap-2 sm:gap-3.5">

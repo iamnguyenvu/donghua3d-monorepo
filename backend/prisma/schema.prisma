@@ -54,12 +54,19 @@ model Movie {
   posterUrl      String?                @db.VarChar(512)
   studio         String?                @db.VarChar(255)
   releaseYear    Int
+  viewsCount     Int                    @default(0) // Popularity views counter
+  airingDay      Int?                   // Optional day of week (1=Mon, ..., 7=Sun)
+  seriesId       String?                @db.Uuid
+  seriesLabel    String?                @db.VarChar(255) // Quick series label (e.g. "Season 2", "Movie")
   rating         Float                  @default(0.0)
   expertRating   Float                  @default(0.0)
   audienceRating Float                  @default(0.0)
   imdbRating     Float?
   createdAt      DateTime               @default(now()) @db.Timestamptz
   updatedAt      DateTime               @updatedAt @db.Timestamptz
+  
+  // Relations
+  series         MovieSeries?           @relation(fields: [seriesId], references: [id], onDelete: SetNull)
   episodes       Episode[]
   ratings        Rating[]
   comments       Comment[]
@@ -68,6 +75,15 @@ model Movie {
   watchlist      Watchlist[]
 
   @@index([releaseYear(sort: Desc), rating(sort: Desc)], name: "idx_movie_release_rating")
+  @@index([viewsCount(sort: Desc)], name: "idx_movie_popularity")
+}
+
+// 2b. MovieSeries Entity Model
+model MovieSeries {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name      String   @db.VarChar(255) // E.g. "Đấu Phá Thương Khung Universe"
+  createdAt DateTime @default(now()) @db.Timestamptz
+  movies    Movie[]
 }
 
 // 3. Episode Entity Model

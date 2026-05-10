@@ -1,6 +1,55 @@
 import { prisma } from '../db';
 import { Tier } from '@prisma/client';
 
+/**
+ * Bản đồ đè tên phim chuẩn Hán-Việt cổ phong cao cấp
+ */
+const TITLE_OVERRIDE_MAP: Record<string, string> = {
+  'thon-tinh-bau-troi': 'Thôn Phệ Tinh Không',
+  'swallowed-star': 'Thôn Phệ Tinh Không',
+  'dai-chua-te-3d': 'Đại Chúa Tể',
+  'the-great-ruler': 'Đại Chúa Tể',
+  'dau-la-dai-luc-2': 'Đấu La Đại Lục 2: Tuyệt Thế Đường Môn',
+  'soul-land-2': 'Đấu La Đại Lục 2: Tuyệt Thế Đường Môn',
+  'renegade-immortal': 'Tiên Nghịch',
+  'perfect-world': 'Thế Giới Hoàn Mỹ',
+  'shrouding-the-heavens': 'Già Thiên',
+  'against-the-gods': 'Nghịch Thiên Tà Thần',
+};
+
+/**
+ * Hàm làm sạch và chuẩn hóa tiêu đề phim trước khi lưu vào Cơ sở dữ liệu
+ */
+export function normalizeMovieTitle(name: string, slug: string): string {
+  const cleanSlug = slug.toLowerCase().trim();
+  const cleanName = name.toLowerCase().trim();
+
+  // 1. Kiểm tra trong từ điển ánh xạ thủ công
+  for (const [key, value] of Object.entries(TITLE_OVERRIDE_MAP)) {
+    if (cleanSlug.includes(key) || cleanName.includes(key)) {
+      return value;
+    }
+  }
+
+  // 2. Xử lý xóa bỏ các tag rác thường có ở scraper lậu
+  let finalTitle = name;
+  const junkTags = [
+    /\s*-\s*free/gi,
+    /\s*-\s*china/gi,
+    /\s*-\s*comic/gi,
+    /\s*\(3D\)/gi,
+    /\s*3D\s*$/gi,
+    /\s*Thuyết Minh/gi,
+    /\s*Phần \d+ TM/gi
+  ];
+
+  for (const tag of junkTags) {
+    finalTitle = finalTitle.replace(tag, '');
+  }
+
+  return finalTitle.trim();
+}
+
 export class ScraperService {
   /**
    * Helper function to strip HTML tags from a string
@@ -51,12 +100,13 @@ export class ScraperService {
 
       const ophimMovie = data.movie;
       const cleanDesc = this.stripHtml(ophimMovie.content || '');
+      const normalizedTitle = normalizeMovieTitle(ophimMovie.name, slug);
 
       // Check if movie already exists in our database
       let movie = await prisma.movie.findFirst({
         where: {
           OR: [
-            { title: ophimMovie.name },
+            { title: normalizedTitle },
             { title: ophimMovie.origin_name }
           ]
         }
@@ -72,16 +122,16 @@ export class ScraperService {
 
       if (!movie) {
         // Create new movie catalog
-        console.log(`🤖 [Scraper] Movie not found. Creating catalog: "${ophimMovie.name}"...`);
+        console.log(`🤖 [Scraper] Movie not found. Creating catalog: "${normalizedTitle}"...`);
         movie = await prisma.movie.create({
           data: {
-            title: ophimMovie.name,
+            title: normalizedTitle,
             altTitles: [ophimMovie.origin_name, ...(ophimMovie.sub_doc ? [ophimMovie.sub_doc] : [])],
             description: cleanDesc,
             releaseYear,
             posterUrl,
             bannerUrl,
-            studio: this.guessStudio(ophimMovie.name, ophimMovie.origin_name),
+            studio: this.guessStudio(normalizedTitle, ophimMovie.origin_name),
             rating: 8.5, // Default premium placeholder ratings
             expertRating: 8.7,
             audienceRating: 8.3,
