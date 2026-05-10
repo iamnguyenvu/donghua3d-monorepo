@@ -5,9 +5,14 @@ import { scraperService } from '../services/scraper.service';
 async function run() {
   console.log('🤖 [Fix Doupo] Bắt đầu sửa lỗi cào nhầm bản Đấu Phá Thương Khung Phần 2 người đóng...');
 
-  // 1. Tìm bản ghi sai
+  // 1. Tìm bản ghi sai theo tiêu đề
   const incorrectMovie = await prisma.movie.findFirst({
-    where: { slug: 'dau-pha-thuong-khung-phan-2' }
+    where: {
+      OR: [
+        { title: 'Đấu Phá Thương Khung (Phần 2)' },
+        { title: 'Đấu Phá Thương Khung Phần 2' }
+      ]
+    }
   });
 
   if (incorrectMovie) {
@@ -34,11 +39,6 @@ async function run() {
     });
     console.log(`   - Đã xóa ${deletedWatchlists.count} mục danh sách phát liên kết.`);
 
-    const deletedScrapingLogs = await prisma.scrapingLog.deleteMany({
-      where: { movieId: incorrectMovie.id }
-    });
-    console.log(`   - Đã xóa ${deletedScrapingLogs.count} lịch sử cào liên kết.`);
-
     // Xóa bảng xếp hạng toàn cầu
     await prisma.globalTierLeaderboard.deleteMany({
       where: { movieId: incorrectMovie.id }
@@ -51,7 +51,7 @@ async function run() {
     });
     console.log(`✅ Đã xóa hoàn toàn phim cào nhầm "${incorrectMovie.title}" ra khỏi cơ sở dữ liệu.`);
   } else {
-    console.log('💡 Không tìm thấy phim có slug "dau-pha-thuong-khung-phan-2" trong cơ sở dữ liệu.');
+    console.log('💡 Không tìm thấy phim có tiêu đề "Đấu Phá Thương Khung (Phần 2)" trong cơ sở dữ liệu.');
   }
 
   // 2. Tìm hoặc tạo MovieSeries "Vũ Trụ Đấu Phá Thương Khung"
