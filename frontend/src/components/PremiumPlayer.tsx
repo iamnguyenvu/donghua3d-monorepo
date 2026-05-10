@@ -77,7 +77,6 @@ export default function PremiumPlayer({
         ref={playerRef}
         src={activeSrc}
         title={title}
-        aspectRatio={16/9}
         load="visible"
         playsInline
         crossOrigin="anonymous"

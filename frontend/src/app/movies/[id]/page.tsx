@@ -9,7 +9,7 @@ import {
   Info, Plus, Check 
 } from 'lucide-react';
 import Header from '@/components/Header';
-import { catalogApi, ratingApi, MovieWithEpisodes, ReviewPayload, watchlistApi, Tier, MoviePayload } from '@/lib/api';
+import { catalogApi, ratingApi, MovieWithEpisodes, ReviewPayload, watchlistApi, Tier, MoviePayload, getPosterPosition, cleanEpisodeTitle } from '@/lib/api';
 
 export default function MovieDetails() {
   const params = useParams() as { id: string };
@@ -22,6 +22,12 @@ export default function MovieDetails() {
   const [watchlistIds, setWatchlistIds] = useState<Set<string>>(new Set());
   const [watchlistActionLoading, setWatchlistActionLoading] = useState(false);
   const [episodeLayout, setEpisodeLayout] = useState<'grid' | 'compact'>('grid');
+
+  useEffect(() => {
+    if (typeof window !== 'undefined' && window.innerWidth < 640) {
+      setEpisodeLayout('compact');
+    }
+  }, []);
 
   useEffect(() => {
     async function loadWatchlist() {
@@ -252,11 +258,11 @@ export default function MovieDetails() {
             </p>
 
             {/* Premium Interactive Action CTA Bar */}
-            <div className="flex items-center gap-3.5 mt-2.5 flex-wrap">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3.5 mt-2.5 w-full sm:w-auto flex-wrap">
               {movie.episodes && movie.episodes.length > 0 ? (
                 <Link
                   href={`/movies/${movie.id}/episodes/${movie.episodes[0].id}`}
-                  className="px-6 py-3.5 rounded-[4px] bg-violet-600 hover:bg-violet-700 text-white font-extrabold flex items-center gap-2 text-[11px] uppercase tracking-wider transition-all duration-300 hover:scale-105 active:scale-95 shadow-[0_4px_20px_rgba(124,58,237,0.3)] hover:shadow-[0_4px_25px_rgba(124,58,237,0.5)] border-0 outline-none no-underline"
+                  className="px-6 py-3.5 rounded-[4px] bg-violet-600 hover:bg-violet-700 text-white font-extrabold flex items-center justify-center gap-2 text-[11px] uppercase tracking-wider transition-all duration-300 hover:scale-[1.03] active:scale-95 shadow-[0_4px_20px_rgba(124,58,237,0.3)] hover:shadow-[0_4px_25px_rgba(124,58,237,0.5)] border-0 outline-none no-underline w-full sm:w-auto"
                 >
                   <Play className="w-4 h-4 fill-white text-white" />
                   Phát Tập 1
@@ -264,7 +270,7 @@ export default function MovieDetails() {
               ) : (
                 <button
                   disabled
-                  className="px-6 py-3.5 rounded-[4px] bg-zinc-900 border border-zinc-850 text-zinc-660 font-extrabold flex items-center gap-2 text-[11px] uppercase tracking-wider select-none opacity-50"
+                  className="px-6 py-3.5 rounded-[4px] bg-zinc-900 border border-zinc-850 text-zinc-660 font-extrabold flex items-center justify-center gap-2 text-[11px] uppercase tracking-wider select-none opacity-50 w-full sm:w-auto"
                 >
                   <Play className="w-4 h-4" />
                   Sắp Ra Mắt
@@ -274,7 +280,7 @@ export default function MovieDetails() {
               <button
                 onClick={() => toggleWatchlist(movie.id)}
                 disabled={watchlistActionLoading}
-                className="px-6 py-3.5 rounded-[4px] bg-white/5 border border-white/10 hover:bg-white/10 hover:border-white/20 text-white font-extrabold flex items-center gap-2 text-[11px] uppercase tracking-wider transition-all duration-300 active:scale-95 cursor-pointer outline-none"
+                className="px-6 py-3.5 rounded-[4px] bg-white/5 border border-white/10 hover:bg-white/10 hover:border-white/20 text-white font-extrabold flex items-center justify-center gap-2 text-[11px] uppercase tracking-wider transition-all duration-300 active:scale-95 cursor-pointer outline-none w-full sm:w-auto"
               >
                 {watchlistActionLoading ? (
                   <Loader2 className="w-4 h-4 animate-spin text-white" />
@@ -321,7 +327,7 @@ export default function MovieDetails() {
                         alt={part.title}
                         fill
                         sizes="48px"
-                        className="object-cover group-hover:scale-105 transition-all duration-300"
+                        className={`object-cover group-hover:scale-105 transition-all duration-300 ${getPosterPosition(part.title)}`}
                       />
                     </div>
                     <div className="flex flex-col min-w-0">
@@ -375,7 +381,7 @@ export default function MovieDetails() {
                     <div className="relative aspect-video w-full bg-zinc-950">
                       <Image
                         src={ep.thumbnail || movie.posterUrl || '/static/uploads/default_thumb.jpg'}
-                        alt={ep.title}
+                        alt={cleanEpisodeTitle(ep.title, ep.episodeNumber)}
                         fill
                         className="object-cover transition-transform duration-550 group-hover:scale-103"
                       />
@@ -389,7 +395,7 @@ export default function MovieDetails() {
                     <div className="p-4 flex flex-col gap-1 select-none">
                       <span className="text-[9px] text-violet-500 font-black uppercase tracking-widest">Tập {ep.episodeNumber}</span>
                       <h3 className="text-xs font-bold text-white group-hover:text-violet-400 transition-colors truncate mt-0.5">
-                        {ep.title}
+                        {cleanEpisodeTitle(ep.title, ep.episodeNumber)}
                       </h3>
                       <p className="text-[11px] text-zinc-500 truncate-2-lines leading-relaxed mt-0.5">
                         {ep.description}

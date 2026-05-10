@@ -371,3 +371,59 @@ export const watchlistApi = {
   }
 };
 
+/**
+ * Returns a customized Tailwind object position class based on movie title to ensure
+ * optimal framing and cropping of poster images on various card ratios and mobile viewports.
+ */
+export function getPosterPosition(title: string): string {
+  const t = title.toLowerCase();
+  if (t.includes('kiếm lai')) return 'object-[28%_15%]';
+  if (t.includes('còn ra thể thống')) return 'object-center';
+  if (t.includes('to be hero')) return 'object-center';
+  if (t.includes('chúa tể huyền bí')) return 'object-[50%_25%]';
+  if (t.includes('mục thần ký')) return 'object-[50%_25%]';
+  if (t.includes('đấu phá thương khung')) return 'object-center';
+  return 'object-top'; // default fallback for standard upright portraits
+}
+
+/**
+ * Clean up scraped raw/ugly titles dynamically before rendering them in the UI.
+ * e.g., "EP01_ The Swords - Free - China - Comic - - -" => "Tập 1"
+ */
+export function cleanEpisodeTitle(title: string, episodeNumber?: number): string {
+  if (!title) return episodeNumber ? `Tập ${episodeNumber}` : '';
+  
+  let clean = title;
+  
+  // Remove common ugly prefixes (like EP01, EP_01, Tập 1, etc.)
+  clean = clean.replace(/^(?:ep|episode|tập)\s*\d+[\s_:\-]*/i, '');
+  
+  // Remove common ugly suffixes (like - Free, - China, - Comic, etc.)
+  // Handles multiple combinations of these strings, with optional dashes or separators
+  clean = clean.replace(/\s*(?:-|\||\s)\s*(?:free|china|comic|vietsub|raw|hoathinh|sub|cartoon|anime|thuyetminh|lồng tiếng|longtieng).*$/gi, '');
+  
+  // Clean trailing punctuation or separators
+  clean = clean.replace(/[\s\-\|:_]+$/, '');
+  
+  // If the title is left empty, or matches generic anime words (e.g., "The Swords" for Kiếm Lai, "Lord of Mysteries" for Chúa Tể Huyền Bí, etc.)
+  // we default to "Tập [episodeNumber]" to look clean and neat.
+  const lowerClean = clean.toLowerCase().trim();
+  if (!clean || 
+      lowerClean === 'the swords' || 
+      lowerClean === 'lord of mysteries' || 
+      lowerClean === 'lord of the mysteries' ||
+      lowerClean === 'kiếm lai' || 
+      lowerClean === 'chúa tể huyền bí' ||
+      lowerClean === 'mục thần ký' ||
+      lowerClean === 'tập' || 
+      lowerClean === 'episode') {
+    if (episodeNumber) {
+      return `Tập ${episodeNumber}`;
+    }
+  }
+  
+  return clean.trim() || (episodeNumber ? `Tập ${episodeNumber}` : '');
+}
+
+
+
