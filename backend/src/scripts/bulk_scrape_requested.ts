@@ -12,7 +12,7 @@ interface SeriesGroup {
   items: ScrapeItem[];
 }
 
-// 23 nhóm sê-ri mới theo đúng yêu cầu bổ sung của người dùng
+// 20 nhóm sê-ri mới hoạt hình 3D chính tông theo đúng yêu cầu bổ sung của người dùng
 const SERIES_GROUPS: SeriesGroup[] = [
   {
     seriesName: 'Vũ Trụ Kiếm Lai',
@@ -29,16 +29,10 @@ const SERIES_GROUPS: SeriesGroup[] = [
     ]
   },
   {
-    seriesName: 'Vũ Trụ Ở Rể',
-    items: [
-      { slug: 'o-re', label: 'Trọn Bộ' }
-    ]
-  },
-  {
     seriesName: 'Vũ Trụ Tử Xuyên',
     items: [
-      { slug: 'tu-xuyen-quang-minh-tam-kiet', label: 'Phần 1' },
-      { slug: 'tu-xuyen-phan-2', label: 'Phần 2' }
+      { slug: 'tu-xuyen', label: 'Phần 1' },
+      { slug: 'tu-xuyen-phan-2-2025', label: 'Phần 2' }
     ]
   },
   {
@@ -56,14 +50,7 @@ const SERIES_GROUPS: SeriesGroup[] = [
   {
     seriesName: 'Nghịch Thiên Tà Thần',
     items: [
-      { slug: 'nghich-thien-ta-than', label: 'Trọn Bộ' }
-    ]
-  },
-  {
-    seriesName: 'Vũ Trụ Tương Dạ',
-    items: [
-      { slug: 'tuong-da', label: 'Phần 1' },
-      { slug: 'tuong-da-2', label: 'Phần 2' }
+      { slug: 'nghich-thien-ta-than', label: 'Phần 1' }
     ]
   },
   {
@@ -130,15 +117,6 @@ const SERIES_GROUPS: SeriesGroup[] = [
       { slug: 'tru-tien-2021', label: 'Phần 1' },
       { slug: 'tru-tien-phan-2', label: 'Phần 2' },
       { slug: 'tru-tien-phan-3', label: 'Phần 3' }
-    ]
-  },
-  {
-    seriesName: 'Vũ Trụ Ma Thổi Đèn',
-    items: [
-      { slug: 'ma-thoi-den-tinh-tuyet-co-thanh', label: 'Tinh Tuyệt Cổ Thành' },
-      { slug: 'ma-thoi-den-me-dong-long-linh', label: 'Mê Động Long Lĩnh' },
-      { slug: 'ma-thoi-den-van-nam-trung-coc', label: 'Vân Nam Trùng Cốc' },
-      { slug: 'ma-thoi-den-nam-hai-quy-hu-2023', label: 'Nam Hải Quy Hư' }
     ]
   },
   {
