@@ -129,6 +129,12 @@ export interface LeaderboardPayload {
   globalTier: Tier;
   tierScore: number;
   rank?: number;
+  s_tier_count?: number;
+  a_tier_count?: number;
+  b_tier_count?: number;
+  c_tier_count?: number;
+  d_tier_count?: number;
+  f_tier_count?: number;
 }
 
 export interface MoviePayload {
