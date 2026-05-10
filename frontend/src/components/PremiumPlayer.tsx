@@ -8,6 +8,7 @@ import {
   useMediaRemote
 } from '@vidstack/react';
 import Hls from 'hls.js';
+import 'vidstack/styles/base.css';
 import { 
   Play, Pause, Volume2, VolumeX, Maximize2, Minimize2, 
   SkipForward, Settings, Loader2, Sparkles

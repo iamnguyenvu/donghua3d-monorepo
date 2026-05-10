@@ -136,3 +136,30 @@ h1, h2, h3, h4, h5, h6 {
   }
 }
 
+/* ==============================================================================
+   📺 IRONCLAD SCALE & CENTERING SYSTEM FOR DONGHUA3D PREMIUM PLAYER
+   ============================================================================== */
+media-player {
+  width: 100% !important;
+  height: 100% !important;
+  display: block !important;
+  overflow: hidden !important;
+}
+
+media-player video,
+media-player [data-media-provider],
+media-player [data-video],
+media-outlet,
+media-outlet video,
+.vds-media-outlet,
+.vds-media-outlet video,
+.vds-video {
+  width: 100% !important;
+  height: 100% !important;
+  max-width: 100% !important;
+  max-height: 100% !important;
+  object-fit: contain !important;
+  display: block !important;
+  margin: auto !important;
+}
+
