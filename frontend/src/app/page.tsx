@@ -531,17 +531,32 @@ export default function Home() {
                     )}
                   </div>
 
-                  {/* Global Tier Badge */}
+                  {/* Global Tier Badge (Only shown if genuinely voted or S-Tier to keep layout clean and prestige high) */}
                   {movie.leaderboard && (
+                    movie.leaderboard.globalTier === 'S' ||
+                    (movie.leaderboard.s_tier_count || 0) +
+                    (movie.leaderboard.a_tier_count || 0) +
+                    (movie.leaderboard.b_tier_count || 0) +
+                    (movie.leaderboard.c_tier_count || 0) +
+                    (movie.leaderboard.d_tier_count || 0) +
+                    (movie.leaderboard.f_tier_count || 0) > 0
+                  ) && (
                     <div className="absolute top-2.5 left-2.5 bg-black/80 backdrop-blur-md px-2 py-1 rounded-[4px] border border-zinc-800 text-[8px] font-extrabold tracking-wider z-10 shadow-md" style={{
                       color: movie.leaderboard.globalTier === 'S' ? '#ff7f7f' : movie.leaderboard.globalTier === 'A' ? '#ffbf7f' : '#bfff7f'
                     }}>
                       {movie.leaderboard.globalTier}-TIER
                     </div>
                   )}
+
+                  {/* Episode Badge on Poster (Premium OTT styling matching hoathinh3d.co & hh3d.cx) */}
+                  {movie.episodeCount !== undefined && movie.episodeCount > 0 && (
+                    <div className="absolute bottom-2.5 left-2.5 bg-gradient-to-r from-violet-600 to-indigo-600 text-white font-black px-2 py-0.5 rounded-[3px] text-[9.5px] uppercase tracking-wider shadow-lg z-10 select-none">
+                      Tập {movie.episodeCount}
+                    </div>
+                  )}
                 </div>
 
-                {/* Movie Info — dual-title + episode badge + views */}
+                {/* Movie Info — dual-title + views + studio */}
                 <div className="flex flex-col gap-0.5 mt-1 select-none">
                   <h3 className="text-[12px] font-bold text-white group-hover:text-violet-400 transition-colors truncate leading-tight">
                     {movie.title}
@@ -552,19 +567,16 @@ export default function Home() {
                     </p>
                   )}
                   <div className="flex items-center justify-between text-[10px] text-zinc-550 mt-0.5 gap-1 flex-wrap">
-                    <div className="flex items-center gap-1.5">
-                      {movie.episodeCount !== undefined && movie.episodeCount > 0 && (
-                        <span className="font-extrabold text-violet-400 bg-violet-600/10 border border-violet-500/25 px-1.5 py-0.5 rounded-[2px] text-[9px] uppercase tracking-wider whitespace-nowrap">
-                          Tập {movie.episodeCount}
-                        </span>
-                      )}
+                    <span className="text-[10px] text-zinc-400 font-semibold whitespace-nowrap">
+                      {movie.releaseYear}
                       {movie.viewsCount !== undefined && movie.viewsCount > 0 && (
-                        <span className="text-[9px] text-zinc-500 font-semibold whitespace-nowrap">
-                          👁 {movie.viewsCount >= 1000 ? `${(movie.viewsCount / 1000).toFixed(1)}K` : movie.viewsCount}
-                        </span>
+                        <>
+                          <span className="text-zinc-600 mx-1">•</span>
+                          <span>👁 {movie.viewsCount >= 1000 ? `${(movie.viewsCount / 1000).toFixed(1)}K` : movie.viewsCount}</span>
+                        </>
                       )}
-                    </div>
-                    <span className="text-[9px] font-bold text-zinc-400 bg-zinc-900 px-1 rounded-[2px] uppercase truncate max-w-[70px]">{movie.studio}</span>
+                    </span>
+                    <span className="text-[9px] font-bold text-zinc-400 bg-zinc-900 px-1 rounded-[2px] uppercase truncate max-w-[70px]">{movie.studio || 'Donghua'}</span>
                   </div>
                 </div>
               </Link>
