@@ -5,7 +5,6 @@ import { scraperService } from '../services/scraper.service';
 // Danh sách các phim cốt lõi cần quét cập nhật trực tiếp
 const CORE_TRACKED_SLUGS = [
   // Đấu Phá Thương Khung
-  'dau-pha-thuong-khung',
   'dau-pha-thuong-khung-phan-2',
   'dau-pha-thuong-khung-3',
   'dau-pha-thuong-khung-4',

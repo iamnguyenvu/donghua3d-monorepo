@@ -19,14 +19,12 @@ const SERIES_GROUPS: SeriesGroup[] = [
   {
     seriesName: 'Vũ Trụ Đấu Phá Thương Khung',
     items: [
-      { slug: 'dau-pha-thuong-khung', label: 'Phần 1' },
       { slug: 'dau-pha-thuong-khung-phan-2', label: 'Phần 2' },
       { slug: 'dau-pha-thuong-khung-3', label: 'Phần 3' },
       { slug: 'dau-pha-thuong-khung-4', label: 'Phần 4' },
       { slug: 'dau-pha-thuong-khung-ova-4-duyen-khoi', label: 'Duyên Khởi' },
       { slug: 'dau-pha-thuong-khung-ngoai-truyen', label: 'Hẹn Ước 3 Năm' },
-      { slug: 'dau-pha-thuong-khung-5', label: 'Phần 5' },
-      { slug: 'dau-pha-thuong-khung-thuc-tinh', label: 'Movie' }
+      { slug: 'dau-pha-thuong-khung-5', label: 'Phần 5' }
     ]
   },
   {
