@@ -7,6 +7,12 @@ import { Star, Play, Film, ArrowRight, Sparkles, Plus, Check, Loader2, ChevronLe
 import Header from '../components/Header';
 import { catalogApi, MoviePayload, watchlistApi, Tier, getPosterPosition } from '../lib/api';
 
+// Module-level day mapping for weekly schedule filter (stable reference, no useMemo deps issue)
+const DAY_MAP: Record<string, string> = {
+  'Thứ 2': 'Monday', 'Thứ 3': 'Tuesday', 'Thứ 4': 'Wednesday',
+  'Thứ 5': 'Thursday', 'Thứ 6': 'Friday', 'Thứ 7': 'Saturday', 'CN': 'Sunday'
+};
+
 // Pre-seeded high quality default fallback mock items to ensure immediate cinematic rendering
 const fallbacks: MoviePayload[] = [
   {
@@ -72,6 +78,11 @@ export default function Home() {
   // Watchlist states
   const [watchlistIds, setWatchlistIds] = useState<Set<string>>(new Set());
   const [watchlistActionLoading, setWatchlistActionLoading] = useState(false);
+
+  // Weekly schedule filter
+  const DAYS = ['Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6', 'Thứ 7', 'CN'] as const;
+  type DayKey = typeof DAYS[number];
+  const [selectedDay, setSelectedDay] = useState<DayKey | 'all'>('all');
 
   useEffect(() => {
     async function loadCatalog() {
@@ -160,8 +171,11 @@ export default function Home() {
       result.sort((a, b) => a.title.localeCompare(b.title));
     }
 
-    return result;
-  }, [movies, searchQuery, selectedYear, sortBy]);
+    return result.filter(m => {
+      if (selectedDay === 'all') return true;
+      return m.airingDay === DAY_MAP[selectedDay as DayKey];
+    });
+  }, [movies, searchQuery, selectedYear, sortBy, selectedDay]);
 
   // Rotate Hero Carousel slide
   useEffect(() => {
@@ -380,9 +394,54 @@ export default function Home() {
       )}
 
       {/* ==============================================================================
+         WEEKLY SCHEDULE TABS BAR
+         ============================================================================== */}
+      <section className="w-full px-6 md:px-12 lg:px-16 mt-12 select-none">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+          <div className="flex items-center gap-2">
+            <h2 className="text-sm font-black text-white tracking-widest uppercase border-l-2 border-violet-500 pl-3">
+              📅 Lịch Phim Tuần Này
+            </h2>
+          </div>
+          <div className="flex items-center gap-1.5 overflow-x-auto pb-1">
+            <button
+              onClick={() => setSelectedDay('all')}
+              className={`flex-shrink-0 px-3.5 py-1.5 rounded-[4px] text-[10px] font-black uppercase tracking-wider transition-all cursor-pointer border-0 ${
+                selectedDay === 'all'
+                  ? 'bg-violet-600 text-white shadow-md'
+                  : 'bg-zinc-950 text-zinc-400 hover:text-white hover:bg-zinc-900 border border-zinc-900'
+              }`}
+            >
+              Tất Cả
+            </button>
+            {DAYS.map((day) => (
+              <button
+                key={day}
+                onClick={() => setSelectedDay(day)}
+                className={`flex-shrink-0 px-3.5 py-1.5 rounded-[4px] text-[10px] font-black uppercase tracking-wider transition-all cursor-pointer border-0 ${
+                  selectedDay === day
+                    ? 'bg-violet-600 text-white shadow-md'
+                    : 'bg-zinc-950 text-zinc-400 hover:text-white hover:bg-zinc-900 border border-zinc-900'
+                }`}
+              >
+                {day}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Show empty state if no movies airing today */}
+        {selectedDay !== 'all' && filteredMovies.length === 0 && (
+          <div className="text-center py-8 text-[11px] text-zinc-600 italic border border-zinc-900/50 rounded-[4px] bg-zinc-950/30">
+            Chưa có phim nào lên sóng vào {selectedDay} tuần này.
+          </div>
+        )}
+      </section>
+
+      {/* ==============================================================================
          GRID CATALOG & SEARCH FILTERS
          ============================================================================== */}
-      <main className="w-full px-6 md:px-12 lg:px-16 mt-14">
+      <main className="w-full px-6 md:px-12 lg:px-16 mt-10">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 border-b border-zinc-900/60 pb-5 mb-8">
           <div className="flex items-center gap-2">
             <h2 className="text-lg font-black text-white tracking-wider uppercase border-l-2 border-violet-500 pl-3">
@@ -482,14 +541,30 @@ export default function Home() {
                   )}
                 </div>
 
-                {/* Movie Info (Placed below the poster card for an extremely premium list look) */}
+                {/* Movie Info — dual-title + episode badge + views */}
                 <div className="flex flex-col gap-0.5 mt-1 select-none">
                   <h3 className="text-[12px] font-bold text-white group-hover:text-violet-400 transition-colors truncate leading-tight">
                     {movie.title}
                   </h3>
-                  <div className="flex items-center justify-between text-[10px] text-zinc-550">
-                    <span>{movie.releaseYear}</span>
-                    <span className="text-[9px] font-bold text-zinc-400 bg-zinc-900 px-1 py-0.2 rounded-[2px] uppercase">{movie.studio}</span>
+                  {movie.altTitles?.[0] && (
+                    <p className="text-[10px] text-zinc-500 truncate leading-tight">
+                      {movie.altTitles[0]}
+                    </p>
+                  )}
+                  <div className="flex items-center justify-between text-[10px] text-zinc-550 mt-0.5 gap-1 flex-wrap">
+                    <div className="flex items-center gap-1.5">
+                      {movie.episodeCount !== undefined && movie.episodeCount > 0 && (
+                        <span className="font-extrabold text-violet-400 bg-violet-600/10 border border-violet-500/25 px-1.5 py-0.5 rounded-[2px] text-[9px] uppercase tracking-wider whitespace-nowrap">
+                          Tập {movie.episodeCount}
+                        </span>
+                      )}
+                      {movie.viewsCount !== undefined && movie.viewsCount > 0 && (
+                        <span className="text-[9px] text-zinc-500 font-semibold whitespace-nowrap">
+                          👁 {movie.viewsCount >= 1000 ? `${(movie.viewsCount / 1000).toFixed(1)}K` : movie.viewsCount}
+                        </span>
+                      )}
+                    </div>
+                    <span className="text-[9px] font-bold text-zinc-400 bg-zinc-900 px-1 rounded-[2px] uppercase truncate max-w-[70px]">{movie.studio}</span>
                   </div>
                 </div>
               </Link>

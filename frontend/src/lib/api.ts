@@ -146,6 +146,12 @@ export interface MoviePayload {
   imdbRating?: number | null;
   createdAt: string;
   leaderboard?: LeaderboardPayload;
+  // New fields for premium card display
+  episodeCount?: number;
+  viewsCount?: number;
+  airingDay?: string;
+  seriesId?: string;
+  seriesLabel?: string;
 }
 
 export interface EpisodePayload {
@@ -171,6 +177,7 @@ export interface EpisodePayload {
 
 export interface MovieWithEpisodes extends MoviePayload {
   episodes: EpisodePayload[];
+  seriesMovies?: MoviePayload[]; // Related parts in the same series (for switcher panel)
 }
 
 export const catalogApi = {

@@ -26,7 +26,7 @@ export default function WatchEpisode() {
   // Selector Utility States
   const [episodeSearch, setEpisodeSearch] = useState('');
   const [sortAsc, setSortAsc] = useState(true);
-  const [selectedServer, setSelectedServer] = useState<'VIP 1 (Cloudflare R2)' | 'VIP 2 (Amazon S3)'>('VIP 1 (Cloudflare R2)');
+  const [selectedServer, setSelectedServer] = useState<'VIP 1' | 'VIP 2'>('VIP 1');
 
   // Autoplay State
   const [autoplayCountdown, setAutoplayCountdown] = useState<number | null>(null);
@@ -324,14 +324,21 @@ export default function WatchEpisode() {
               {/* Server indicator */}
               <div className="flex items-center gap-2 bg-zinc-950/80 border border-zinc-900 px-3 py-2 rounded-[2px]">
                 <span className="text-[9px] font-black text-zinc-500 uppercase tracking-widest">Nguồn:</span>
-                <select 
-                  value={selectedServer}
-                  onChange={(e) => setSelectedServer(e.target.value as 'VIP 1 (Cloudflare R2)' | 'VIP 2 (Amazon S3)')}
-                  className="bg-transparent border-0 text-[10px] font-black text-violet-400 focus:outline-none cursor-pointer uppercase tracking-wider"
-                >
-                  <option value="VIP 1 (Cloudflare R2)" className="bg-zinc-950 text-white">VIP 1 (Cloudflare R2)</option>
-                  <option value="VIP 2 (Amazon S3)" className="bg-zinc-950 text-white">VIP 2 (Amazon S3)</option>
-                </select>
+                <div className="flex items-center gap-1.5 ml-1">
+                  {(['VIP 1', 'VIP 2'] as const).map((srv) => (
+                    <button
+                      key={srv}
+                      onClick={() => setSelectedServer(srv)}
+                      className={`px-2.5 py-1 rounded-[2px] text-[9px] font-black uppercase tracking-wider transition-all border-0 cursor-pointer ${
+                        selectedServer === srv
+                          ? 'bg-violet-600 text-white shadow-sm'
+                          : 'bg-zinc-900 text-zinc-400 hover:text-white hover:bg-zinc-800'
+                      }`}
+                    >
+                      {srv}
+                    </button>
+                  ))}
+                </div>
               </div>
 
               {/* Sorting Toggle button */}
@@ -354,6 +361,29 @@ export default function WatchEpisode() {
               </div>
             </div>
           </div>
+
+          {/* Series Switcher Panel (shown when movie belongs to a series) */}
+          {movie.seriesMovies && movie.seriesMovies.length > 0 && (
+            <div className="mt-5 pt-4 border-t border-zinc-900/50">
+              <p className="text-[9px] font-black text-zinc-500 uppercase tracking-widest mb-2.5">Xem Phần Khác</p>
+              <div className="flex flex-wrap gap-2">
+                {/* Current movie */}
+                <div className="px-3 py-1.5 rounded-[2px] text-[10px] font-black bg-violet-600 text-white border border-violet-500 uppercase tracking-wide select-none">
+                  {movie.seriesLabel || 'Phần Chính'}
+                </div>
+                {/* Other parts in the series */}
+                {movie.seriesMovies.map((part) => (
+                  <Link
+                    key={part.id}
+                    href={`/movies/${part.id}`}
+                    className="px-3 py-1.5 rounded-[2px] text-[10px] font-black bg-zinc-900 hover:bg-zinc-800 text-zinc-300 hover:text-white border border-zinc-800 hover:border-zinc-700 uppercase tracking-wide transition-all no-underline"
+                  >
+                    {part.seriesLabel || part.title}
+                  </Link>
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* Episode Grid Buttons */}
           <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-10 xl:grid-cols-12 gap-2.5 mt-5 max-h-[280px] overflow-y-auto pr-1">
