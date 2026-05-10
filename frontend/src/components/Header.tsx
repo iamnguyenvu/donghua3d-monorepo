@@ -45,6 +45,7 @@ export default function Header({ onSearchChange }: HeaderProps) {
   };
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     loadWatchHistory();
     
     // Auto-sync history across tabs instantly

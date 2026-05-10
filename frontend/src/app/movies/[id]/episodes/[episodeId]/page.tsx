@@ -326,7 +326,7 @@ export default function WatchEpisode() {
                 <span className="text-[9px] font-black text-zinc-500 uppercase tracking-widest">Nguồn:</span>
                 <select 
                   value={selectedServer}
-                  onChange={(e) => setSelectedServer(e.target.value as any)}
+                  onChange={(e) => setSelectedServer(e.target.value as 'VIP 1 (Cloudflare R2)' | 'VIP 2 (Amazon S3)')}
                   className="bg-transparent border-0 text-[10px] font-black text-violet-400 focus:outline-none cursor-pointer uppercase tracking-wider"
                 >
                   <option value="VIP 1 (Cloudflare R2)" className="bg-zinc-950 text-white">VIP 1 (Cloudflare R2)</option>

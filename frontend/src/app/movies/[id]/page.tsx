@@ -24,13 +24,12 @@ export default function MovieDetails() {
   const [episodeLayout, setEpisodeLayout] = useState<'grid' | 'compact'>('grid');
   const [sortAsc, setSortAsc] = useState(true);
 
-  const sortedEpisodes = React.useMemo(() => {
-    if (!movie?.episodes) return [];
-    return [...movie.episodes].sort((a, b) => sortAsc 
-      ? a.episodeNumber - b.episodeNumber 
-      : b.episodeNumber - a.episodeNumber
-    );
-  }, [movie?.episodes, sortAsc]);
+  const sortedEpisodes = movie?.episodes 
+    ? [...movie.episodes].sort((a, b) => sortAsc 
+        ? a.episodeNumber - b.episodeNumber 
+        : b.episodeNumber - a.episodeNumber
+      )
+    : [];
 
   useEffect(() => {
     if (typeof window !== 'undefined' && window.innerWidth < 640) {
