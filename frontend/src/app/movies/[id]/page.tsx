@@ -341,7 +341,7 @@ export default function MovieDetails() {
                     href={`/movies/${part.id}`}
                     className="flex items-center gap-3.5 p-3.5 bg-zinc-950/30 border border-zinc-900 hover:border-violet-500/40 hover:bg-violet-500/5 rounded-[4px] w-64 flex-shrink-0 transition-all duration-300 group no-underline shadow-sm"
                   >
-                    <div className="w-12 h-16 rounded-[2px] overflow-hidden bg-zinc-950 flex-shrink-0 relative">
+                    <div className="w-12 h-16 rounded-[2px] overflow-hidden bg-zinc-950 flex-shrink-0 relative border border-zinc-900/60">
                       <Image
                         src={part.posterUrl || '/static/uploads/default_poster.jpg'}
                         alt={part.title}
@@ -350,10 +350,22 @@ export default function MovieDetails() {
                         className={`object-cover group-hover:scale-105 transition-all duration-300 ${getPosterPosition(part.title)}`}
                       />
                     </div>
-                    <div className="flex flex-col min-w-0">
-                      <span className="text-[9px] text-zinc-550 font-bold uppercase truncate">{part.studio || 'Unknown Studio'}</span>
-                      <h4 className="text-xs font-black text-white group-hover:text-violet-400 truncate mt-0.5 transition-colors leading-relaxed">{part.title}</h4>
-                      <span className="text-[10px] text-violet-400 font-bold mt-1 uppercase">{part.releaseYear}</span>
+                    <div className="flex flex-col min-w-0 flex-1">
+                      <div className="flex items-center gap-1.5 flex-wrap">
+                        {part.seriesLabel ? (
+                          <span className="bg-violet-600/15 text-violet-400 border border-violet-500/25 px-1.5 py-0.5 rounded-[2px] text-[8px] font-black uppercase tracking-wider">
+                            {part.seriesLabel}
+                          </span>
+                        ) : (
+                          <span className="bg-zinc-800/40 text-zinc-400 border border-zinc-800/60 px-1.5 py-0.5 rounded-[2px] text-[8px] font-black uppercase tracking-wider">
+                            Phần Khác
+                          </span>
+                        )}
+                        <span className="text-[9px] text-zinc-500 font-bold uppercase">{part.releaseYear}</span>
+                      </div>
+                      <h4 className="text-xs font-black text-white group-hover:text-violet-400 line-clamp-2 mt-1.5 transition-colors leading-snug">
+                        {part.title}
+                      </h4>
                     </div>
                   </Link>
                 ))}
