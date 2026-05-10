@@ -33,8 +33,8 @@ export class CronService {
     });
 
     try {
-      // Sync the first page of latest hoathinh updates
-      const syncResult = await scraperService.syncLatestHoathinh(1);
+      // Sync the first page of latest hoathinh updates (only existing database movies)
+      const syncResult = await scraperService.syncLatestHoathinh(1, true);
 
       // Update log entry as success
       await prisma.scrapingLog.update({

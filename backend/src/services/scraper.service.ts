@@ -257,9 +257,12 @@ export class ScraperService {
   /**
    * Syncs latest updated list of hoathinh (animations)
    */
-  async syncLatestHoathinh(page: number = 1): Promise<{ success: boolean; syncedCount: number; results: string[] }> {
+  async syncLatestHoathinh(
+    page: number = 1,
+    onlyExisting: boolean = false
+  ): Promise<{ success: boolean; syncedCount: number; results: string[] }> {
     try {
-      console.log(`🤖 [Scraper] Syncing latest updated movies page ${page}...`);
+      console.log(`🤖 [Scraper] Syncing latest updated movies page ${page} (onlyExisting: ${onlyExisting})...`);
       const response = await fetch(`https://ophim1.com/danh-sach/phim-moi-cap-nhat?page=${page}`);
       if (!response.ok) {
         throw new Error(`Failed to fetch updated list. HTTP Status: ${response.status}`);
@@ -274,11 +277,26 @@ export class ScraperService {
       let syncedCount = 0;
 
       for (const item of data.items) {
-        // Since we are Donghua3D, we want to sync relevant high quality hoathinh
-        // We can check if category or general title matches animation, or we can just sync all of them.
-        // Let's first fetch details to verify type if needed, or simply sync all Hoạt Hình.
-        // To be safe and comprehensive, let's sync all "hoathinh" types.
         const slug = item.slug;
+
+        if (onlyExisting) {
+          const normalizedTitle = normalizeMovieTitle(item.name, slug);
+          const existingMovie = await prisma.movie.findFirst({
+            where: {
+              OR: [
+                { title: normalizedTitle },
+                { title: item.origin_name }
+              ]
+            }
+          });
+
+          if (!existingMovie) {
+            console.log(`⏭️ [Scraper] Bỏ qua phim mới slug "${slug}" (Không tồn tại trong DB, tránh cào phim rác)`);
+            results.push(`⏭️ [${slug}] Bỏ qua (Phim không tồn tại trong database)`);
+            continue;
+          }
+        }
+
         const res = await this.syncMovieBySlug(slug);
         if (res.success) {
           syncedCount++;

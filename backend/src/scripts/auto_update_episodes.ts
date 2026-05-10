@@ -94,7 +94,7 @@ async function run() {
     console.log('\n🌟 PHẦN A: Quét các trang phim mới cập nhật gần đây (Trang 1 -> 3)...');
     for (let page = 1; page <= 3; page++) {
       console.log(`🤖 Đang quét danh sách phim mới cập nhật trang ${page}...`);
-      const pageResult = await scraperService.syncLatestHoathinh(page);
+      const pageResult = await scraperService.syncLatestHoathinh(page, true);
       
       if (pageResult.success) {
         totalSynced += pageResult.syncedCount;
