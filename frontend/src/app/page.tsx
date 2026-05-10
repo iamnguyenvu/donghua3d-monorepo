@@ -259,7 +259,7 @@ export default function Home() {
             </span>
           </div>
 
-          <p className="max-w-xl text-xs md:text-sm text-zinc-400 leading-relaxed truncate-3-lines" style={{ textShadow: '0 1px 3px rgba(0,0,0,0.9)' }}>
+          <p className="max-w-xl text-xs md:text-sm text-zinc-400 leading-relaxed line-clamp-3" style={{ textShadow: '0 1px 3px rgba(0,0,0,0.9)' }}>
             {heroMovie.description}
           </p>
 
