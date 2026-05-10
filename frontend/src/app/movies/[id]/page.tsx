@@ -25,9 +25,11 @@ export default function MovieDetails() {
   const [sortAsc, setSortAsc] = useState(true);
   const [episodeSearchQuery, setEpisodeSearchQuery] = useState('');
 
+  const rawEpisodes = movie?.episodes;
+
   const filteredAndSortedEpisodes = useMemo(() => {
-    if (!movie?.episodes) return [];
-    let eps = [...movie.episodes];
+    if (!rawEpisodes) return [];
+    let eps = [...rawEpisodes];
 
     if (episodeSearchQuery) {
       const q = episodeSearchQuery.toLowerCase().trim();
@@ -43,7 +45,7 @@ export default function MovieDetails() {
       ? a.episodeNumber - b.episodeNumber 
       : b.episodeNumber - a.episodeNumber
     );
-  }, [movie?.episodes, episodeSearchQuery, sortAsc]);
+  }, [rawEpisodes, episodeSearchQuery, sortAsc]);
 
   useEffect(() => {
     if (typeof window !== 'undefined' && window.innerWidth < 640) {
