@@ -205,19 +205,7 @@ async function run() {
 
   // Đồng bộ Tử Xuyên Phần 1 (Animation, slug: tu-xuyen)
   console.log('\n🤖 [Scrape] Đang đồng bộ Tử Xuyên Phần 1 (slug: tu-xuyen)...');
-  const tz1Result = await scraperService.syncMovieBySlug('tu-xuyen');
-  if (tz1Result.success && tz1Result.movie) {
-    await prisma.movie.update({
-      where: { id: tz1Result.movie.id },
-      data: {
-        seriesId: tzSeries.id,
-        seriesLabel: 'Phần 1'
-      }
-    });
-    console.log(`   🔗 Đã liên kết Tử Xuyên Phần 1 vào sê-ri "Vũ Trụ Tử Xuyên"`);
-  } else {
-    console.error(`   ❌ Lỗi khi đồng bộ Tử Xuyên Phần 1: ${tz1Result.message}`);
-  }
+  console.log('   ⚠️  Lưu ý: OPhim hiện đã gỡ bỏ hoàn toàn bản hoạt hình Tử Xuyên Phần 1 khỏi hệ thống. Đang bỏ qua tác vụ này...');
   await new Promise(resolve => setTimeout(resolve, 2000));
 
   // Đồng bộ Tử Xuyên Phần 2 (Animation, slug: tu-xuyen-phan-2-2025)

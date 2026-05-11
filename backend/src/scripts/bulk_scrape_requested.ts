@@ -31,7 +31,7 @@ const SERIES_GROUPS: SeriesGroup[] = [
   {
     seriesName: 'Vũ Trụ Tử Xuyên',
     items: [
-      { slug: 'tu-xuyen', label: 'Phần 1' },
+      // { slug: 'tu-xuyen', label: 'Phần 1' }, // Đã bị OPhim gỡ khỏi hệ thống
       { slug: 'tu-xuyen-phan-2-2025', label: 'Phần 2' }
     ]
   },
