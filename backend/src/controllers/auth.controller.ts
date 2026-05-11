@@ -86,6 +86,14 @@ router.post('/login', async (req: AuthenticatedRequest, res: Response, next: Nex
       return;
     }
 
+    if (user.reputationScore <= 0) {
+      res.status(403).json({
+        success: false,
+        error: { code: 'FORBIDDEN', message: 'Tài khoản của bạn đã bị khóa do vi phạm tiêu chuẩn cộng đồng.' },
+      });
+      return;
+    }
+
     const token = generateToken(user);
 
     res.status(200).json({

@@ -144,6 +144,11 @@ router.post('/', requireAuth, async (req: AuthenticatedRequest, res: Response, n
           review,
           isCredible,
         },
+        include: {
+          user: {
+            select: { id: true, email: true, role: true, reputationScore: true },
+          },
+        },
       });
     } else {
       rating = await prisma.rating.create({
@@ -156,6 +161,11 @@ router.post('/', requireAuth, async (req: AuthenticatedRequest, res: Response, n
           review,
           isCredible,
           isApproved: true,
+        },
+        include: {
+          user: {
+            select: { id: true, email: true, role: true, reputationScore: true },
+          },
         },
       });
     }

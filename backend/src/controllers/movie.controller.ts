@@ -38,14 +38,23 @@ router.get('/movies', async (req: AuthenticatedRequest, res: Response, next: Nex
         leaderboard: true,
         _count: {
           select: { episodes: true }
+        },
+        episodes: {
+          orderBy: { episodeNumber: 'desc' },
+          take: 1, 
+          select: { createdAt: true }
         }
       }
     });
 
-    const mappedMovies = movies.map((m: any) => ({
-      ...m,
-      episodeCount: m._count?.episodes ?? 0
-    }));
+    const mappedMovies = movies.map((m: any) => {
+      const lastEpisodeAt = m.episodes?.[0]?.createdAt ?? m.createdAt;
+      return {
+        ...m,
+        updatedAt: lastEpisodeAt,
+        episodeCount: m._count?.episodes ?? 0
+      };
+    });
 
     res.status(200).json({
       success: true,
