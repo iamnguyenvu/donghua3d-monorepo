@@ -154,14 +154,14 @@ export default function LeaderboardAndTiers() {
                         items.map((it) => (
                           <div 
                             key={it.id} 
-                            className="relative group w-16 aspect-video rounded-[2px] overflow-hidden border border-zinc-900/80 cursor-pointer transition-all duration-300 hover:scale-110 hover:border-violet-600 hover:shadow-[0_4px_12px_rgba(124,58,237,0.35)]"
+                            className="relative group w-11 aspect-[2/3] rounded-[2px] overflow-hidden border border-zinc-900/80 cursor-pointer transition-all duration-300 hover:scale-110 hover:border-violet-600 hover:shadow-[0_4px_12px_rgba(124,58,237,0.35)]"
                             title={`${it.movie.title} (${tk}-Tier) ${it.notes ? `- ${it.notes}` : ''}`}
                           >
                             <Image
-                              src={it.movie.bannerUrl || it.movie.posterUrl}
+                              src={it.movie.posterUrl}
                               alt={it.movie.title}
                               fill
-                              className="object-cover"
+                              className="object-cover object-top"
                             />
                           </div>
                         ))
@@ -256,12 +256,12 @@ export default function LeaderboardAndTiers() {
                     </div>
 
                     <div className="flex items-center gap-4">
-                      <div className="w-16 aspect-video rounded-[2px] overflow-hidden border border-zinc-900/60 relative flex-shrink-0 shadow-sm">
+                      <div className="w-10 aspect-[2/3] rounded-[2px] overflow-hidden border border-zinc-900/60 relative flex-shrink-0 shadow-sm">
                         <Image
-                          src={row.movie.bannerUrl || row.movie.posterUrl}
+                          src={row.movie.posterUrl}
                           alt={row.movie.title}
                           fill
-                          className="object-cover"
+                          className="object-cover object-top"
                         />
                       </div>
 

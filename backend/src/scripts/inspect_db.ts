@@ -18,27 +18,6 @@ async function run() {
 
   console.log(`📊 Tổng số phim tìm thấy: ${movies.length}\n`);
 
-  // Tiêu chuẩn live-action để cảnh báo trong bảng kiểm tra
-  const LIVE_ACTION_PATTERNS = [
-    'thanh vân chí',
-    'thức tỉnh',
-    'eternal brotherhood',
-    'quang minh tam kiệt',
-    'my heroic husband',
-    'ở rể',
-    'ever night',
-    'tương dạ',
-    'ma thổi đèn',
-    'candle in the tomb',
-    'mojin',
-    'đấu phá thương khung 2',
-    'fights break sphere 2',
-    'the blood of youth',
-    'snow eagle lord',
-    'nhiên hồn chiến',
-    'the land of warriors'
-  ];
-
   console.log('📋 DANH SÁCH TOÀN BỘ PHIM TRONG DB:');
   console.log('='.repeat(100));
   
@@ -50,31 +29,73 @@ async function run() {
     const descriptionLower = (m.description || '').toLowerCase();
 
     let isLiveAction = false;
-    for (const pattern of LIVE_ACTION_PATTERNS) {
-      if (titleLower.includes(pattern) || altTitlesLower.includes(pattern)) {
-        if (pattern === 'ở rể' && titleLower.includes('vú em tiên tôn')) continue;
-        if (pattern === 'tử xuyên' && (altTitlesLower.includes('purple river') || descriptionLower.includes('purple river'))) continue;
-        if (pattern === 'ở rể' && (titleLower.includes('hoạt hình') || altTitlesLower.includes('donghua') || altTitlesLower.includes('animation'))) continue;
-        isLiveAction = true;
-        break;
-      }
-    }
 
-    // Check ĐPTK live action 2018
-    if (!isLiveAction && titleLower === 'đấu phá thương khung') {
-      if (altTitlesLower.includes('battle through the heaven') && !altTitlesLower.includes('fights break sphere')) {
-        isLiveAction = true;
-      }
-    }
-
-    // Check Tuyết Ưng Lĩnh Chủ Live-Action
-    if (!isLiveAction && titleLower === 'tuyết ưng lĩnh chủ' && altTitlesLower.includes('snow eagle lord')) {
+    // 1. Kiểm tra Đấu Phá Thương Khung S2 Live-Action (34 tập, 2023)
+    if (titleLower.includes('đấu phá thương khung') && (
+      altTitlesLower.includes('fights break sphere season') || 
+      altTitlesLower.includes('battle through the heaven season') || 
+      m.id === '304fab93-4c9f-4d54-9a92-a5662c7bed8c' || 
+      (m.releaseYear === 2023 && m._count.episodes === 34)
+    )) {
       isLiveAction = true;
     }
 
-    // Check Thiếu Niên Ca Hành Live-Action
-    if (!isLiveAction && titleLower === 'thiếu niên ca hành' && altTitlesLower.includes('the blood of youth')) {
+    // 2. Kiểm tra Đấu Phá Thương Khung S1 Live-Action (2018 - Ngô Lỗi)
+    else if (titleLower === 'đấu phá thương khung' && (
+      m.releaseYear === 2018 || 
+      (altTitlesLower.includes('battle through the heaven') && !altTitlesLower.includes('fights break sphere'))
+    )) {
       isLiveAction = true;
+    }
+
+    // 3. Kiểm tra Đấu Phá Thương Khung: Thức Tỉnh (Bản điện ảnh Web 2023)
+    else if (titleLower.includes('thức tỉnh') && titleLower.includes('đấu phá')) {
+      isLiveAction = true;
+    }
+
+    // 4. Kiểm tra Tử Xuyên S2 Live-Action (40 tập, ID đặc thù)
+    else if (titleLower.includes('tử xuyên') && (
+      altTitlesLower.includes('eternal brotherhood') || 
+      m.id === '5a6b9fde-eb64-48c8-b044-cc52f933fdeb'
+    )) {
+      isLiveAction = true;
+    }
+
+    // 5. Kiểm tra các phim thuộc danh sách từ khóa Live-Action chung
+    else {
+      const LIVE_ACTION_PATTERNS = [
+        'thanh vân chí',       // Tru Tiên người đóng
+        'my heroic husband',   // Ở Rể người đóng
+        'ở rể',                // Ở Rể
+        'ever night',          // Tương Dạ người đóng
+        'tương dạ',            // Tương Dạ người đóng
+        'ma thổi đèn',         // Ma Thổi Đèn người đóng
+        'candle in the tomb',  // Ma Thổi Đèn người đóng
+        'mojin',               // Ma Thổi Đèn movie người đóng
+        'the blood of youth',  // Thiếu Niên Ca Hành người đóng
+        'snow eagle lord',     // Tuyết Ưng Lĩnh Chủ người đóng
+        'nhiên hồn chiến',     // Đấu La Đại Lục người đóng
+        'đấu la đại lục: nhiên hồn chiến',
+        'the land of warriors' // Đấu La Đại Lục người đóng
+      ];
+
+      for (const pattern of LIVE_ACTION_PATTERNS) {
+        if (titleLower.includes(pattern) || altTitlesLower.includes(pattern)) {
+          // Ngoại lệ bảo vệ hoạt hình đặc thù
+          if (pattern === 'ở rể' && titleLower.includes('vú em tiên tôn')) continue;
+          if (pattern === 'ở rể' && (titleLower.includes('hoạt hình') || altTitlesLower.includes('donghua') || altTitlesLower.includes('animation'))) continue;
+          
+          isLiveAction = true;
+          break;
+        }
+      }
+    }
+
+    // 6. Kiểm tra Tru Tiên Live-Action (Bản điện ảnh Tiêu Chiến)
+    if (!isLiveAction && titleLower === 'tru tiên') {
+      if (descriptionLower.includes('tiêu chiến') || descriptionLower.includes('lý thấm') || descriptionLower.includes('mạnh mỹ kỳ')) {
+        isLiveAction = true;
+      }
     }
 
     if (isLiveAction) {
