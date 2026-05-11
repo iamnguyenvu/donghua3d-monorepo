@@ -316,6 +316,7 @@ export interface PersonalTierPayload {
     id: string;
     title: string;
     posterUrl: string;
+    bannerUrl?: string;
     rating: number;
   };
 }
@@ -336,6 +337,7 @@ export interface LeaderboardRowPayload {
     id: string;
     title: string;
     posterUrl: string;
+    bannerUrl?: string;
     rating: number;
     studio: string;
     releaseYear: number;
