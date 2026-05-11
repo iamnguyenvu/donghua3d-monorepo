@@ -9,7 +9,7 @@ import {
   Info, Plus, Check, Search 
 } from 'lucide-react';
 import Header from '@/components/Header';
-import { catalogApi, ratingApi, MovieWithEpisodes, ReviewPayload, watchlistApi, Tier, MoviePayload, getPosterPosition, cleanEpisodeTitle } from '@/lib/api';
+import { catalogApi, ratingApi, MovieWithEpisodes, ReviewPayload, watchlistApi, Tier, MoviePayload, cleanEpisodeTitle } from '@/lib/api';
 
 export default function MovieDetails() {
   const params = useParams() as { id: string };
@@ -230,13 +230,13 @@ export default function MovieDetails() {
 
         <div className="relative z-10 w-full px-6 md:px-12 lg:px-16 flex flex-col md:flex-row items-end gap-6 animate-fade-in-up">
           {/* Flat Poster Artwork card */}
-          <div className="w-40 aspect-[2/3] rounded-[4px] overflow-hidden border border-zinc-900/60 shadow-2xl flex-shrink-0 hidden md:block">
+          <div className="w-72 aspect-video rounded-[4px] overflow-hidden border border-zinc-900/60 shadow-2xl flex-shrink-0 hidden md:block relative">
             <Image
-              src={movie.posterUrl || '/static/uploads/default_poster.jpg'}
+              src={movie.bannerUrl || movie.posterUrl || '/static/uploads/default_poster.jpg'}
               alt={movie.title}
-              width={160}
-              height={240}
-              className="w-full h-full object-cover"
+              fill
+              sizes="288px"
+              className="object-cover"
             />
           </div>
 
@@ -357,13 +357,13 @@ export default function MovieDetails() {
                     href={`/movies/${part.id}`}
                     className="flex items-center gap-3.5 p-3.5 bg-zinc-950/30 border border-zinc-900 hover:border-violet-500/40 hover:bg-violet-500/5 rounded-[4px] w-64 sm:w-72 lg:w-80 xl:w-96 flex-shrink-0 transition-all duration-300 group no-underline shadow-sm"
                   >
-                    <div className="w-12 h-16 sm:w-14 sm:h-20 rounded-[2px] overflow-hidden bg-zinc-950 flex-shrink-0 relative border border-zinc-900/60">
+                    <div className="w-20 sm:w-24 aspect-video rounded-[2px] overflow-hidden bg-zinc-950 flex-shrink-0 relative border border-zinc-900/60">
                       <Image
-                        src={part.posterUrl || '/static/uploads/default_poster.jpg'}
+                        src={part.bannerUrl || part.posterUrl || '/static/uploads/default_poster.jpg'}
                         alt={part.title}
                         fill
-                        sizes="56px"
-                        className={`object-cover group-hover:scale-105 transition-all duration-300 ${getPosterPosition(part.title)}`}
+                        sizes="96px"
+                        className="object-cover group-hover:scale-105 transition-all duration-300"
                       />
                     </div>
                     <div className="flex flex-col min-w-0 flex-1">
