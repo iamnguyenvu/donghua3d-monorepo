@@ -12,6 +12,14 @@ import {
   LeaderboardRowPayload, MoviePayload, PersonalTierPayload, Tier 
 } from '@/lib/api';
 
+function removeAccents(str: string): string {
+  return str
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/đ/g, 'd')
+    .replace(/Đ/g, 'D');
+}
+
 export default function LeaderboardAndTiers() {
   const [leaderboard, setLeaderboard] = useState<LeaderboardRowPayload[]>([]);
   const [movies, setMovies] = useState<MoviePayload[]>([]);
@@ -23,6 +31,8 @@ export default function LeaderboardAndTiers() {
   const [selectedTier, setSelectedTier] = useState<Tier>(Tier.S);
   const [tierNotes, setTierNotes] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const [movieSearchQuery, setMovieSearchQuery] = useState('');
+  const [draggedMovieId, setDraggedMovieId] = useState<string | null>(null);
 
   // Load Leaderboard and personal placements
   useEffect(() => {
@@ -145,7 +155,34 @@ export default function LeaderboardAndTiers() {
                 const tk = tierKey as Tier;
                 const items = boardStructure[tk];
                 return (
-                  <div key={tk} className="flex items-stretch min-h-[90px] border-b border-zinc-900/40 last:border-0">
+                  <div 
+                    key={tk} 
+                    onDragOver={(e) => e.preventDefault()}
+                    onDrop={async (e) => {
+                      e.preventDefault();
+                      const mId = e.dataTransfer.getData('text/plain');
+                      if (!mId) return;
+                      
+                      const token = localStorage.getItem('donghua3d_token');
+                      if (!token) {
+                        alert('Vui lòng đăng nhập để có thể lưu bảng xếp hạng cá nhân của bạn!');
+                        return;
+                      }
+
+                      // Visual feedback immediately
+                      setLoading(true);
+                      const res = await tierApi.savePersonalTier(mId, tk, 'Xếp hạng nhanh bằng kéo thả');
+                      if (res.success) {
+                        await reloadLeaderboardAndTiers();
+                      } else {
+                        alert(res.error?.message || 'Có lỗi xảy ra khi lưu.');
+                      }
+                      setLoading(false);
+                    }}
+                    className={`flex items-stretch min-h-[90px] border-b border-zinc-900/40 last:border-0 transition-colors duration-200 ${
+                      draggedMovieId ? 'hover:bg-violet-950/10' : ''
+                    }`}
+                  >
                     <div className={`flex items-center justify-center w-20 text-xl font-black tracking-tighter flex-shrink-0 select-none rounded-l-[2px] ${tierColorsMap[tk]}`}>
                       {tk}
                     </div>
@@ -172,6 +209,77 @@ export default function LeaderboardAndTiers() {
                   </div>
                 );
               })}
+            </div>
+
+            {/* Draggable & Clickable Movie Pool Panel */}
+            <div className="p-5 bg-zinc-950/40 border border-zinc-900 rounded-[4px] flex flex-col gap-4 shadow-lg select-none">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-zinc-900/60 pb-3">
+                <span className="text-[10px] font-black text-zinc-400 uppercase tracking-widest flex items-center gap-1.5">
+                  <Film className="w-3.5 h-3.5 text-violet-500" />
+                  Kho phim chờ xếp hạng (Kéo-Thả hoặc Click)
+                </span>
+                <input
+                  type="text"
+                  placeholder="Tìm phim nhanh..."
+                  value={movieSearchQuery}
+                  onChange={(e) => setMovieSearchQuery(e.target.value)}
+                  className="px-3 py-1.5 bg-[#0c0c0f] focus:bg-zinc-900 border border-zinc-800/80 focus:border-zinc-700 text-[10px] text-white placeholder-zinc-600 font-bold focus:outline-none transition-all uppercase tracking-wider rounded-[2px] w-full sm:w-48"
+                />
+              </div>
+
+              <div className="flex flex-wrap gap-3.5 max-h-[160px] overflow-y-auto p-1.5 custom-scrollbar">
+                {(() => {
+                  const filtered = movies.filter(m => {
+                    if (!movieSearchQuery) return true;
+                    const q = removeAccents(movieSearchQuery.toLowerCase());
+                    return removeAccents(m.title.toLowerCase()).includes(q) ||
+                      m.altTitles.some(alt => removeAccents(alt.toLowerCase()).includes(q));
+                  });
+
+                  if (filtered.length === 0) {
+                    return <span className="text-[10px] text-zinc-600 italic">Không tìm thấy phim phù hợp.</span>;
+                  }
+
+                  return filtered.map((movie) => {
+                    const isAlreadyTiered = personalTiers.some(p => p.movieId === movie.id);
+                    return (
+                      <div
+                        key={movie.id}
+                        draggable={true}
+                        onDragStart={(e) => {
+                          e.dataTransfer.setData('text/plain', movie.id);
+                          setDraggedMovieId(movie.id);
+                        }}
+                        onDragEnd={() => setDraggedMovieId(null)}
+                        onClick={() => {
+                          setSelectedMovieId(movie.id);
+                        }}
+                        className={`relative group w-[54px] aspect-[2/3] rounded-[3px] overflow-hidden border cursor-grab active:cursor-grabbing transition-all duration-300 hover:scale-105 ${
+                          isAlreadyTiered 
+                            ? 'border-zinc-800/50 opacity-40 hover:opacity-100 hover:border-violet-500/50' 
+                            : 'border-zinc-850 hover:border-violet-600 hover:shadow-[0_0_12px_rgba(124,58,237,0.35)]'
+                        } ${selectedMovieId === movie.id ? 'border-violet-500 ring-1 ring-violet-500/50 scale-105 shadow-[0_0_15px_rgba(124,58,237,0.4)]' : ''}`}
+                        title={`${movie.title} ${isAlreadyTiered ? '(Đã có hạng)' : '(Nhấn để chọn nhanh / Kéo để xếp hạng)'}`}
+                      >
+                        <Image
+                          src={movie.posterUrl || '/static/uploads/default_poster.jpg'}
+                          alt={movie.title}
+                          fill
+                          className="object-cover object-top select-none pointer-events-none"
+                        />
+                        {isAlreadyTiered && (
+                          <div className="absolute top-1 right-1 bg-violet-650 text-white rounded-full w-3.5 h-3.5 text-[7px] font-black z-10 shadow-sm flex items-center justify-center">
+                            ✓
+                          </div>
+                        )}
+                      </div>
+                    );
+                  });
+                })()}
+              </div>
+              <p className="text-[8px] text-zinc-550 italic leading-tight">
+                💡 Hướng dẫn: Kéo thẻ phim ở trên và thả trực tiếp vào các dòng S-Tier, A-Tier,... ở bảng xếp hạng phía trên để đặt hạng nhanh, hoặc click để chọn nhanh trong form chỉnh sửa bên dưới.
+              </p>
             </div>
 
             {/* Quick Placement Selector Form Panel using pure Tailwind */}
@@ -242,7 +350,7 @@ export default function LeaderboardAndTiers() {
           <div className="lg:col-span-1 flex flex-col gap-8">
             <div className="flex items-center gap-2">
               <h2 className="text-xs font-black text-zinc-400 tracking-wider uppercase border-l-2 border-zinc-750 pl-2.5 select-none">
-                BXH Toàn Cầu Thực Tế
+                Bảng Thứ Hạng Cộng Đồng Donghua3D
               </h2>
             </div>
 

@@ -132,9 +132,9 @@ export class ScraperService {
             posterUrl,
             bannerUrl,
             studio: this.guessStudio(normalizedTitle, ophimMovie.origin_name),
-            rating: 8.5, // Default premium placeholder ratings
-            expertRating: 8.7,
-            audienceRating: 8.3,
+            rating: 0.0, // Start with honest 0.0 until rated by community
+            expertRating: 0.0,
+            audienceRating: 0.0,
             imdbRating: ophimMovie.imdb_rating ? parseFloat(ophimMovie.imdb_rating) : null
           }
         });
@@ -149,8 +149,8 @@ export class ScraperService {
             c_tier_count: 0,
             d_tier_count: 0,
             f_tier_count: 0,
-            tierScore: 85.0,
-            globalTier: Tier.A // Default A-Tier for seeded high quality donghua
+            tierScore: 0.0,
+            globalTier: Tier.C // Neutral default C-Tier until ranked by community
           }
         });
       } else {

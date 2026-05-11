@@ -471,5 +471,93 @@ export function cleanEpisodeTitle(title: string, episodeNumber?: number): string
   return clean.trim() || (episodeNumber ? `Tập ${episodeNumber}` : '');
 }
 
+// ==============================================================================
+// ADMIN MANAGEMENT ENDPOINTS
+// ==============================================================================
+export interface AdminStatsPayload {
+  totalUsers: number;
+  totalMovies: number;
+  totalComments: number;
+  totalRatings: number;
+  flaggedCommentsCount: number;
+}
+
+export interface AdminUserPayload {
+  id: string;
+  email: string;
+  role: Role;
+  reputationScore: number;
+  createdAt: string;
+  veteranSince?: string;
+}
+
+export interface FlaggedCommentPayload {
+  id: string;
+  userId: string;
+  movieId: string;
+  episodeId?: string;
+  content: string;
+  isSpoiler: boolean;
+  isFlagged: boolean;
+  createdAt: string;
+  user: {
+    id: string;
+    email: string;
+  };
+  movie: {
+    id: string;
+    title: string;
+  };
+  episode?: {
+    id: string;
+    episodeNumber: number;
+  };
+}
+
+export const adminApi = {
+  async getStats(): Promise<ApiResponse<AdminStatsPayload>> {
+    return apiFetch<AdminStatsPayload>('/admin/stats');
+  },
+
+  async getUsers(): Promise<ApiResponse<AdminUserPayload[]>> {
+    return apiFetch<AdminUserPayload[]>('/admin/users');
+  },
+
+  async updateUserRole(id: string, role: Role): Promise<ApiResponse<{ id: string; email: string; role: Role }>> {
+    return apiFetch<{ id: string; email: string; role: Role }>(`/admin/users/${id}/role`, {
+      method: 'POST',
+      body: JSON.stringify({ role }),
+    });
+  },
+
+  async banUser(id: string): Promise<ApiResponse<{ id: string; email: string; reputationScore: number }>> {
+    return apiFetch<{ id: string; email: string; reputationScore: number }>(`/admin/users/${id}/ban`, {
+      method: 'POST',
+    });
+  },
+
+  async unbanUser(id: string): Promise<ApiResponse<{ id: string; email: string; reputationScore: number }>> {
+    return apiFetch<{ id: string; email: string; reputationScore: number }>(`/admin/users/${id}/unban`, {
+      method: 'POST',
+    });
+  },
+
+  async getFlaggedComments(): Promise<ApiResponse<FlaggedCommentPayload[]>> {
+    return apiFetch<FlaggedCommentPayload[]>('/admin/comments/flagged');
+  },
+
+  async dismissCommentFlag(id: string): Promise<ApiResponse<unknown>> {
+    return apiFetch<unknown>(`/admin/comments/${id}/dismiss-flag`, {
+      method: 'POST',
+    });
+  },
+
+  async deleteComment(id: string): Promise<ApiResponse<unknown>> {
+    return apiFetch<unknown>(`/admin/comments/${id}`, {
+      method: 'DELETE',
+    });
+  }
+};
+
 
 
