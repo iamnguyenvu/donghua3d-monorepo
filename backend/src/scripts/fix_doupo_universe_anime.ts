@@ -80,7 +80,7 @@ async function run() {
   console.log('🤖 BƯỚC 3: CÀO ĐỒNG BỘ CÁC PHẦN HOẠT HÌNH 3D CHUẨN XỊN MỊN...');
 
   const animeList = [
-    { slug: 'dau-pha-thuong-khung-2', label: 'Phần 2' },
+    { slug: 'dau-pha-thuong-khung-phan-2', label: 'Phần 2' },
     { slug: 'dau-pha-thuong-khung-3', label: 'Phần 3' },
     { slug: 'dau-pha-thuong-khung-4', label: 'Phần 4' },
     { slug: 'dau-pha-thuong-khung-ova-4-duyen-khoi', label: 'Duyên Khởi' },
