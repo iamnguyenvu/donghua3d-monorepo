@@ -9,12 +9,12 @@ export class CronService {
   startCronJobs() {
     console.log('🤖 [CronService] Initializing scheduled tasks...');
 
-    // Schedule 1: Daily Auto-Scraper running at 00:00 every night (0 0 * * *)
-    cron.schedule('0 0 * * *', async () => {
+    // Schedule 1: Auto-Scraper running every hour (0 * * * *)
+    cron.schedule('0 * * * *', async () => {
       await this.runDailyScraping();
     });
 
-    console.log('🤖 [CronService] Daily movie auto-scraper scheduled at 00:00 every night.');
+    console.log('🤖 [CronService] Hourly movie auto-scraper scheduled (runs at the start of every hour).');
   }
 
   /**
