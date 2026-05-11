@@ -11,6 +11,15 @@ import {
 import Header from '@/components/Header';
 import { catalogApi, ratingApi, MovieWithEpisodes, ReviewPayload, watchlistApi, Tier, MoviePayload, cleanEpisodeTitle } from '@/lib/api';
 
+// Helper to strip diacritics / accents for seamless Vietnamese unaccented search
+function removeAccents(str: string): string {
+  return str
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/đ/g, 'd')
+    .replace(/Đ/g, 'D');
+}
+
 export default function MovieDetails() {
   const params = useParams() as { id: string };
   const [movie, setMovie] = useState<MovieWithEpisodes | null>(null);
@@ -32,12 +41,12 @@ export default function MovieDetails() {
     let eps = [...rawEpisodes];
 
     if (episodeSearchQuery) {
-      const q = episodeSearchQuery.toLowerCase().trim();
+      const q = removeAccents(episodeSearchQuery.toLowerCase().trim());
       eps = eps.filter(ep => 
         ep.episodeNumber.toString() === q ||
         ep.episodeNumber.toString().includes(q) ||
-        ep.title.toLowerCase().includes(q) ||
-        (ep.description && ep.description.toLowerCase().includes(q))
+        removeAccents(ep.title.toLowerCase()).includes(q) ||
+        (ep.description && removeAccents(ep.description.toLowerCase()).includes(q))
       );
     }
 

@@ -7,6 +7,15 @@ import { Star, Play, Film, ArrowRight, Sparkles, Plus, Check, Loader2, ChevronLe
 import Header from '../components/Header';
 import { catalogApi, MoviePayload, watchlistApi, Tier } from '../lib/api';
 
+// Helper to strip diacritics / accents for seamless Vietnamese unaccented search
+function removeAccents(str: string): string {
+  return str
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/đ/g, 'd')
+    .replace(/Đ/g, 'D');
+}
+
 // Module-level day mapping for weekly schedule filter (stable reference, no useMemo deps issue)
 const DAY_MAP: Record<string, string> = {
   'Thứ 2': 'Monday', 'Thứ 3': 'Tuesday', 'Thứ 4': 'Wednesday',
@@ -82,7 +91,7 @@ export default function Home() {
   // Filtering & Sorting values
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedYear, setSelectedYear] = useState<string>('all');
-  const [sortBy, setSortBy] = useState<string>('year');
+  const [sortBy, setSortBy] = useState<string>('updated');
 
   // Watchlist states
   const [watchlistIds, setWatchlistIds] = useState<Set<string>>(new Set());
@@ -159,12 +168,12 @@ export default function Home() {
     let result = [...movies];
 
     if (searchQuery) {
-      const q = searchQuery.toLowerCase();
+      const q = removeAccents(searchQuery.toLowerCase().trim());
       result = result.filter(
         (m) =>
-          m.title.toLowerCase().includes(q) ||
-          m.altTitles.some((alt) => alt.toLowerCase().includes(q)) ||
-          (m.studio && m.studio.toLowerCase().includes(q))
+          removeAccents(m.title.toLowerCase()).includes(q) ||
+          m.altTitles.some((alt) => removeAccents(alt.toLowerCase()).includes(q)) ||
+          (m.studio && removeAccents(m.studio.toLowerCase()).includes(q))
       );
     }
 
@@ -172,7 +181,13 @@ export default function Home() {
       result = result.filter((m) => m.releaseYear === parseInt(selectedYear, 10));
     }
 
-    if (sortBy === 'rating') {
+    if (sortBy === 'updated') {
+      result.sort((a, b) => {
+        const timeA = a.updatedAt ? new Date(a.updatedAt).getTime() : new Date(a.createdAt).getTime();
+        const timeB = b.updatedAt ? new Date(b.updatedAt).getTime() : new Date(b.createdAt).getTime();
+        return timeB - timeA;
+      });
+    } else if (sortBy === 'rating') {
       result.sort((a, b) => b.rating - a.rating);
     } else if (sortBy === 'year') {
       result.sort((a, b) => b.releaseYear - a.releaseYear);

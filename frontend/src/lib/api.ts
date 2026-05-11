@@ -151,6 +151,7 @@ export interface MoviePayload {
   audienceRating: number;
   imdbRating?: number | null;
   createdAt: string;
+  updatedAt?: string;
   leaderboard?: LeaderboardPayload;
   // New fields for premium card display
   episodeCount?: number;
