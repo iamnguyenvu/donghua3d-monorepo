@@ -112,7 +112,7 @@ export default function WatchlistPage() {
                   {/* Poster Image link */}
                   <Link href={`/movies/${movie.id}`} className="block w-full h-full relative">
                     <Image
-                      src={movie.posterUrl || '/static/uploads/default_poster.jpg'}
+                      src={movie.bannerUrl || movie.posterUrl || '/static/uploads/default_poster.jpg'}
                       alt={movie.title}
                       fill
                       sizes="(max-width: 768px) 50vw, (max-width: 1200px) 25vw, 20vw"

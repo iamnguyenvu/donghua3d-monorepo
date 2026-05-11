@@ -227,7 +227,7 @@ export default function MovieDetails() {
       <section className="relative w-full h-[55vh] flex items-end pb-10 overflow-hidden border-b border-zinc-900/40">
         <div className="absolute inset-0 z-0">
           <Image
-            src={movie.bannerUrl || movie.posterUrl || ''}
+            src={movie.posterUrl || movie.bannerUrl || ''}
             alt={movie.title}
             fill
             priority

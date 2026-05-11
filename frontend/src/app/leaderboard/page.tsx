@@ -191,14 +191,14 @@ export default function LeaderboardAndTiers() {
                         items.map((it) => (
                           <div 
                             key={it.id} 
-                            className="relative group w-20 aspect-[16/9] rounded-[2px] overflow-hidden border border-zinc-900/80 cursor-pointer transition-all duration-300 hover:scale-110 hover:border-violet-600 hover:shadow-[0_4px_12px_rgba(124,58,237,0.35)]"
+                            className="relative group w-11 aspect-[2/3] rounded-[2px] overflow-hidden border border-zinc-900/80 cursor-pointer transition-all duration-300 hover:scale-110 hover:border-violet-600 hover:shadow-[0_4px_12px_rgba(124,58,237,0.35)]"
                             title={`${it.movie.title} (${tk}-Tier) ${it.notes ? `- ${it.notes}` : ''}`}
                           >
                             <Image
                               src={it.movie.bannerUrl || it.movie.posterUrl}
                               alt={it.movie.title}
                               fill
-                              className="object-cover object-center"
+                              className="object-cover object-top"
                             />
                           </div>
                         ))
@@ -254,7 +254,7 @@ export default function LeaderboardAndTiers() {
                         onClick={() => {
                           setSelectedMovieId(movie.id);
                         }}
-                        className={`relative group w-[110px] aspect-[16/9] rounded-[3px] overflow-hidden border cursor-grab active:cursor-grabbing transition-all duration-300 hover:scale-105 ${
+                        className={`relative group w-[54px] aspect-[2/3] rounded-[3px] overflow-hidden border cursor-grab active:cursor-grabbing transition-all duration-300 hover:scale-105 ${
                           isAlreadyTiered 
                             ? 'border-zinc-800/50 opacity-40 hover:opacity-100 hover:border-violet-500/50' 
                             : 'border-zinc-850 hover:border-violet-600 hover:shadow-[0_0_12px_rgba(124,58,237,0.35)]'
@@ -265,7 +265,7 @@ export default function LeaderboardAndTiers() {
                           src={movie.bannerUrl || movie.posterUrl || '/static/uploads/default_poster.jpg'}
                           alt={movie.title}
                           fill
-                          className="object-cover object-center select-none pointer-events-none"
+                          className="object-cover object-top select-none pointer-events-none"
                         />
                         {isAlreadyTiered && (
                           <div className="absolute top-1 right-1 bg-violet-650 text-white rounded-full w-3.5 h-3.5 text-[7px] font-black z-10 shadow-sm flex items-center justify-center">
