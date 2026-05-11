@@ -145,6 +145,23 @@ export default function WatchEpisode() {
     ? movie.episodes.find(ep => ep.episodeNumber === episode.episodeNumber + 1)
     : null;
 
+  // Find previous episode
+  const prevEpisode = movie?.episodes && episode
+    ? movie.episodes.find(ep => ep.episodeNumber === episode.episodeNumber - 1)
+    : null;
+
+  const handlePrevEpisode = () => {
+    if (prevEpisode && movie) {
+      router.push(`/movies/${movie.id}/episodes/${prevEpisode.id}`);
+    }
+  };
+
+  const handleNextEpisode = () => {
+    if (nextEpisode && movie) {
+      router.push(`/movies/${movie.id}/episodes/${nextEpisode.id}`);
+    }
+  };
+
   // Autoplay countdown timer
   useEffect(() => {
     if (autoplayCountdown === null) return;
@@ -288,6 +305,8 @@ export default function WatchEpisode() {
           initialProgress={initialProgress}
           onProgressPulse={handleProgressPulse}
           onEnded={handleVideoEnded}
+          onPrevEpisode={prevEpisode ? handlePrevEpisode : undefined}
+          onNextEpisode={nextEpisode ? handleNextEpisode : undefined}
         />
 
         {/* EPISODE DETAILS INFO */}

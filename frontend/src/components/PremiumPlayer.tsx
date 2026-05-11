@@ -11,7 +11,7 @@ import Hls from 'hls.js';
 import 'vidstack/styles/base.css';
 import { 
   Play, Pause, Volume2, VolumeX, Maximize2, Minimize2, 
-  SkipForward, Settings, Loader2, Sparkles
+  SkipForward, SkipBack, Settings, Loader2, Sparkles
 } from 'lucide-react';
 
 interface PremiumPlayerProps {
@@ -32,6 +32,8 @@ interface PremiumPlayerProps {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   playerRef?: React.RefObject<any>;
   onEnded?: () => void;
+  onPrevEpisode?: () => void;
+  onNextEpisode?: () => void;
 }
 
 export default function PremiumPlayer({
@@ -48,7 +50,9 @@ export default function PremiumPlayer({
   onPause,
   onSeek,
   playerRef,
-  onEnded
+  onEnded,
+  onPrevEpisode,
+  onNextEpisode
 }: PremiumPlayerProps) {
   const [selectedQuality, setSelectedQuality] = useState<'1080p' | '4K'>('1080p');
 
@@ -119,6 +123,8 @@ export default function PremiumPlayer({
           selectedQuality={selectedQuality}
           setSelectedQuality={handleSetQuality}
           videoUrl4k={videoUrl4k}
+          onPrevEpisode={onPrevEpisode}
+          onNextEpisode={onNextEpisode}
         />
       </MediaPlayer>
 
@@ -174,6 +180,8 @@ interface CustomControlsProps {
   selectedQuality: '1080p' | '4K';
   setSelectedQuality: (q: '1080p' | '4K') => void;
   videoUrl4k?: string | null;
+  onPrevEpisode?: () => void;
+  onNextEpisode?: () => void;
 }
 
 function CustomControls({
@@ -184,7 +192,9 @@ function CustomControls({
   onProgressPulse,
   selectedQuality,
   setSelectedQuality,
-  videoUrl4k
+  videoUrl4k,
+  onPrevEpisode,
+  onNextEpisode
 }: CustomControlsProps) {
   const remote = useMediaRemote();
 
@@ -198,6 +208,48 @@ function CustomControls({
     fullscreen = false, 
     waiting = false 
   } = useMediaStore();
+
+  // Local State to track mouse inactivity for hiding cursor
+  const [isMouseInactive, setIsMouseInactive] = useState(false);
+
+  // Monitor mouse activity to auto-hide cursor in fullscreen mode
+  useEffect(() => {
+    if (!fullscreen) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setIsMouseInactive(false);
+      return;
+    }
+
+    let timeoutId: NodeJS.Timeout;
+
+    const handleMouseMove = () => {
+      setIsMouseInactive(false);
+      clearTimeout(timeoutId);
+      timeoutId = setTimeout(() => {
+        setIsMouseInactive(true);
+      }, 2500); // 2.5s of inactivity -> hide
+    };
+
+    window.addEventListener('mousemove', handleMouseMove);
+    handleMouseMove();
+
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove);
+      clearTimeout(timeoutId);
+    };
+  }, [fullscreen]);
+
+  // Dynamically toggle cursor-none class on the parent media-player element
+  useEffect(() => {
+    const playerEl = document.querySelector('media-player');
+    if (playerEl) {
+      if (fullscreen && isMouseInactive) {
+        playerEl.classList.add('cursor-none');
+      } else {
+        playerEl.classList.remove('cursor-none');
+      }
+    }
+  }, [fullscreen, isMouseInactive]);
 
   // UI Local States (Only settings and speeds, skip states are computed on render!)
   const [showSettings, setShowSettings] = useState(false);
@@ -245,23 +297,91 @@ function CustomControls({
     remote.seek(outroEnd);
   }, [remote, outroEnd]);
 
-  // Keyboard Shortcuts for skip buttons
+  // Keyboard Shortcuts for skip buttons & general video controls (PC user enhancement)
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       const activeEl = document.activeElement?.tagName;
       if (activeEl === 'INPUT' || activeEl === 'TEXTAREA') return;
 
-      if ((e.key === 's' || e.key === 'S') && showIntroSkip) {
-        handleSkipIntro();
-      }
-      if ((e.key === 'e' || e.key === 'E') && showOutroSkip) {
-        handleSkipOutro();
+      switch (e.code) {
+        // Spacebar: Toggle Play/Pause
+        case 'Space':
+          e.preventDefault();
+          if (paused) {
+            remote.play();
+          } else {
+            remote.pause();
+          }
+          break;
+
+        // ArrowLeft: Seek back 10 seconds
+        case 'ArrowLeft':
+          e.preventDefault();
+          remote.seek(Math.max(0, currentTime - 10));
+          break;
+
+        // ArrowRight: Seek forward 10 seconds
+        case 'ArrowRight':
+          e.preventDefault();
+          remote.seek(Math.min(duration, currentTime + 10));
+          break;
+
+        // KeyM: Toggle Mute
+        case 'KeyM':
+          e.preventDefault();
+          if (muted) {
+            remote.unmute();
+          } else {
+            remote.mute();
+          }
+          break;
+
+        // KeyF: Toggle Fullscreen
+        case 'KeyF':
+          e.preventDefault();
+          if (fullscreen) {
+            remote.exitFullscreen();
+          } else {
+            remote.enterFullscreen();
+          }
+          break;
+
+        // ArrowUp: Increase volume 10%
+        case 'ArrowUp':
+          e.preventDefault();
+          remote.changeVolume(Math.min(1, volume + 0.1));
+          break;
+
+        // ArrowDown: Decrease volume 10%
+        case 'ArrowDown':
+          e.preventDefault();
+          remote.changeVolume(Math.max(0, volume - 0.1));
+          break;
+
+        // Intro skip (fallback 'S')
+        case 'KeyS':
+          if (showIntroSkip) {
+            e.preventDefault();
+            handleSkipIntro();
+          }
+          break;
+
+        // Outro skip (fallback 'E')
+        case 'KeyE':
+          if (showOutroSkip) {
+            e.preventDefault();
+            handleSkipOutro();
+          }
+          break;
+
+        default:
+          break;
       }
     };
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [showIntroSkip, showOutroSkip, handleSkipIntro, handleSkipOutro]);
+  }, [paused, currentTime, duration, muted, fullscreen, volume, remote, showIntroSkip, showOutroSkip, handleSkipIntro, handleSkipOutro]);
 
   const togglePlay = () => {
     if (paused) {
@@ -370,16 +490,37 @@ function CustomControls({
         {/* Action Controls and Settings bar */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-5">
+            {/* Prev Episode Button */}
+            <button 
+              onClick={onPrevEpisode}
+              disabled={!onPrevEpisode}
+              className={`p-2 rounded-[4px] border transition-all outline-none ${onPrevEpisode ? 'bg-white/5 border-white/10 hover:bg-violet-600 hover:border-violet-400 text-white cursor-pointer' : 'bg-transparent border-zinc-900 text-zinc-700 cursor-not-allowed'}`}
+              title="Tập trước"
+            >
+              <SkipBack className="w-4 h-4 fill-current" />
+            </button>
+
             {/* Play Button */}
             <button 
               onClick={togglePlay} 
-              className="p-2 rounded-[4px] bg-white/5 border border-white/10 hover:bg-violet-600 hover:border-violet-400 text-white cursor-pointer transition-all outline-none"
+              className="p-2.5 rounded-[4px] bg-violet-600 border border-violet-500 hover:bg-violet-700 hover:border-violet-600 text-white cursor-pointer transition-all outline-none shadow-md"
+              title={paused ? "Phát" : "Tạm dừng"}
             >
               {paused ? (
                 <Play className="w-4 h-4 fill-white text-white translate-x-0.5" />
               ) : (
                 <Pause className="w-4 h-4 fill-white text-white" />
               )}
+            </button>
+
+            {/* Next Episode Button */}
+            <button 
+              onClick={onNextEpisode}
+              disabled={!onNextEpisode}
+              className={`p-2 rounded-[4px] border transition-all outline-none ${onNextEpisode ? 'bg-white/5 border-white/10 hover:bg-violet-600 hover:border-violet-400 text-white cursor-pointer' : 'bg-transparent border-zinc-900 text-zinc-700 cursor-not-allowed'}`}
+              title="Tập tiếp theo"
+            >
+              <SkipForward className="w-4 h-4 fill-current" />
             </button>
 
             {/* Volume control block */}
