@@ -345,22 +345,22 @@ export default function Home() {
             </h2>
           </div>
 
-          <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4 2xl:grid-cols-5 gap-6">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-8 gap-6">
             {movies
               .filter(m => m.leaderboard?.globalTier === 'S')
               .slice(0, 8)
               .map(movie => (
                 <Link href={`/movies/${movie.id}`} key={movie.id} className="no-underline group flex flex-col gap-2">
                   {/* Poster Container with premium cinematic hover and shadow */}
-                  <div className="relative overflow-hidden rounded-[6px] border border-zinc-900/60 aspect-video cursor-pointer transition-all duration-500 hover:scale-[1.04] hover:border-violet-500/50 hover:shadow-[0_0_25px_rgba(139,92,246,0.25)] bg-zinc-950 shadow-lg">
-                    {/* Poster Image using horizontal bannerUrl */}
+                  <div className="relative overflow-hidden rounded-[6px] border border-zinc-900/60 aspect-[2/3] cursor-pointer transition-all duration-500 hover:scale-[1.04] hover:border-violet-500/50 hover:shadow-[0_0_25px_rgba(139,92,246,0.25)] bg-zinc-950 shadow-lg">
+                    {/* Poster Image using horizontal bannerUrl inside vertical card */}
                     <div className="relative w-full h-full">
                       <Image
                         src={movie.bannerUrl || movie.posterUrl || '/static/uploads/default_poster.jpg'}
                         alt={movie.title}
                         fill
-                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                        className="object-cover transition-transform duration-700 ease-out group-hover:scale-110"
+                        sizes="(max-width: 768px) 50vw, (max-width: 1200px) 25vw, 20vw"
+                        className="object-cover object-top transition-transform duration-700 ease-out group-hover:scale-110"
                       />
                       {/* Gradient overlay for cinematic shadow depth */}
                       <div className="absolute inset-0 bg-gradient-to-t from-[#050508]/90 via-[#050508]/15 to-transparent opacity-60 transition-opacity duration-300 group-hover:opacity-80" />
@@ -491,29 +491,29 @@ export default function Home() {
 
         {/* Loading Spinner */}
         {loading ? (
-          <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-            {[1, 2, 3, 4].map((idx) => (
+          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-6">
+            {[1, 2, 3, 4, 5].map((idx) => (
               <div key={idx} className="flex flex-col gap-3 animate-pulse">
-                <div className="aspect-video rounded-[4px] bg-zinc-900 border border-zinc-800" />
+                <div className="aspect-[2/3] rounded-[4px] bg-zinc-900 border border-zinc-800" />
                 <div className="h-3 bg-zinc-900 rounded-[2px] w-3/4" />
                 <div className="h-2.5 bg-zinc-900 rounded-[2px] w-1/2" />
               </div>
             ))}
           </div>
         ) : filteredMovies.length > 0 ? (
-          <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4 2xl:grid-cols-5 gap-x-6 gap-y-8">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-8 gap-x-6 gap-y-8">
             {filteredMovies.map((movie) => (
               <Link href={`/movies/${movie.id}`} key={movie.id} className="no-underline group flex flex-col gap-2">
                 {/* Poster Frame */}
-                <div className="relative overflow-hidden rounded-[6px] border border-zinc-900/60 aspect-video cursor-pointer transition-all duration-500 hover:scale-[1.04] hover:border-violet-500/50 hover:shadow-[0_0_25px_rgba(139,92,246,0.25)] bg-zinc-950 shadow-lg">
+                <div className="relative overflow-hidden rounded-[6px] border border-zinc-900/60 aspect-[2/3] cursor-pointer transition-all duration-500 hover:scale-[1.04] hover:border-violet-500/50 hover:shadow-[0_0_25px_rgba(139,92,246,0.25)] bg-zinc-950 shadow-lg">
                   {/* Poster Image */}
                   <div className="relative w-full h-full">
                     <Image
                       src={movie.bannerUrl || movie.posterUrl || '/static/uploads/default_poster.jpg'}
                       alt={movie.title}
                       fill
-                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                      className="object-cover transition-transform duration-700 ease-out group-hover:scale-110"
+                      sizes="(max-width: 768px) 50vw, (max-width: 1200px) 25vw, 20vw"
+                      className="object-cover object-top transition-transform duration-700 ease-out group-hover:scale-110"
                     />
                     {/* Gradient overlay for cinematic shadow depth */}
                     <div className="absolute inset-0 bg-gradient-to-t from-[#050508]/90 via-[#050508]/15 to-transparent opacity-60 transition-opacity duration-300 group-hover:opacity-80" />
