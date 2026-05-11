@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import { 
   Users, Film, MessageSquare, AlertTriangle, Star, Shield, 
   Trash2, CheckCircle, Award, Ban, Check, ArrowLeft, Loader2, RefreshCw
@@ -11,7 +10,6 @@ import Header from '../../../components/Header';
 import { adminApi, authApi, Role, AdminStatsPayload, AdminUserPayload, FlaggedCommentPayload } from '../../../lib/api';
 
 export default function AdminDashboard() {
-  const router = useRouter();
   
   // Authentication check states
   const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
@@ -44,7 +42,7 @@ export default function AdminDashboard() {
         } else {
           setIsAdmin(false);
         }
-      } catch (err) {
+      } catch {
         setIsAdmin(false);
       } finally {
         setAuthChecking(false);
@@ -81,7 +79,10 @@ export default function AdminDashboard() {
 
   useEffect(() => {
     if (isAdmin === true) {
-      loadDashboardData();
+      const timer = setTimeout(() => {
+        loadDashboardData();
+      }, 0);
+      return () => clearTimeout(timer);
     }
   }, [isAdmin]);
 
