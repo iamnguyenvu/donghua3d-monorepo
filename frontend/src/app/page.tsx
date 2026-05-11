@@ -82,7 +82,7 @@ export default function Home() {
   // Filtering & Sorting values
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedYear, setSelectedYear] = useState<string>('all');
-  const [sortBy, setSortBy] = useState<string>('rating');
+  const [sortBy, setSortBy] = useState<string>('year');
 
   // Watchlist states
   const [watchlistIds, setWatchlistIds] = useState<Set<string>>(new Set());

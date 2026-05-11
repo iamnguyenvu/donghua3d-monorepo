@@ -232,7 +232,7 @@ export default function MovieDetails() {
           {/* Flat Poster Artwork card */}
           <div className="w-40 aspect-[2/3] rounded-[4px] overflow-hidden border border-zinc-900/60 shadow-2xl flex-shrink-0 hidden md:block relative">
             <Image
-              src={movie.posterUrl || '/static/uploads/default_poster.jpg'}
+              src={movie.bannerUrl || movie.posterUrl || '/static/uploads/default_poster.jpg'}
               alt={movie.title}
               fill
               sizes="160px"
@@ -346,8 +346,8 @@ export default function MovieDetails() {
         <div className="lg:col-span-2 flex flex-col gap-6">
           {/* Related Seasons / Parts Section */}
           {relatedParts.length > 0 && (
-            <div className="mb-4 p-5 bg-[#0a0a0d]/80 backdrop-blur-sm border border-zinc-900/80 rounded-[4px] shadow-lg select-none">
-              <h3 className="text-[10px] font-black text-violet-400 tracking-widest uppercase border-l-2 border-violet-500 pl-3 mb-4">
+            <div className="mb-6 pb-6 border-b border-zinc-900/60 select-none">
+              <h3 className="text-base font-black text-white tracking-wider uppercase border-l-2 border-violet-500 pl-3 mb-4">
                 Các Phần Khác Của Series Này
               </h3>
               <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-zinc-850">
@@ -359,7 +359,7 @@ export default function MovieDetails() {
                   >
                     <div className="w-12 h-16 sm:w-14 sm:h-20 rounded-[2px] overflow-hidden bg-zinc-950 flex-shrink-0 relative border border-zinc-900/60">
                       <Image
-                        src={part.posterUrl || '/static/uploads/default_poster.jpg'}
+                        src={part.bannerUrl || part.posterUrl || '/static/uploads/default_poster.jpg'}
                         alt={part.title}
                         fill
                         sizes="56px"
