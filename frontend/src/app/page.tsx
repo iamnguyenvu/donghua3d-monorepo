@@ -354,7 +354,7 @@ export default function Home() {
       {movies.some(m => m.leaderboard?.globalTier === 'S') && (
         <section className="w-full px-6 md:px-12 lg:px-16 mt-14 select-none animate-fade-in-up">
           <div className="flex items-center gap-2 mb-6 border-b border-zinc-900/60 pb-4">
-            <h2 className="text-sm font-black text-white tracking-widest uppercase border-l-2 border-violet-500 pl-3 flex items-center gap-1.5">
+            <h2 className="text-lg font-black text-white tracking-wider uppercase border-l-2 border-violet-500 pl-3 flex items-center gap-1.5">
               <Sparkles className="w-3.5 h-3.5 text-violet-400" />
               Phim Thịnh Hành (S-Tier)
             </h2>
@@ -423,7 +423,7 @@ export default function Home() {
       <section className="w-full px-6 md:px-12 lg:px-16 mt-12 select-none">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
           <div className="flex items-center gap-2">
-            <h2 className="text-sm font-black text-white tracking-widest uppercase border-l-2 border-violet-500 pl-3">
+            <h2 className="text-lg font-black text-white tracking-wider uppercase border-l-2 border-violet-500 pl-3">
               📅 Lịch Phim Tuần Này
             </h2>
           </div>
