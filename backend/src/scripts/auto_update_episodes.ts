@@ -36,7 +36,6 @@ const CORE_TRACKED_SLUGS = [
   'kiem-lai-phan-2',
   'con-ra-the-thong-gi-nua',
   'con-ra-the-thong-gi-nua-phan-2',
-  'tu-xuyen',
   'tu-xuyen-phan-2-2025',
   'tham-khong-bi-ngan',
   'tram-than-pham-tran-than-vuc',
