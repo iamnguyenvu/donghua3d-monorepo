@@ -73,6 +73,7 @@ export default function PremiumPlayer({
   const [showResumePrompt, setShowResumePrompt] = useState(false);
 
   // Consolidate player refs to support both external forwarding and local control
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const localPlayerRef = useRef<any>(null);
   const activePlayerRef = playerRef || localPlayerRef;
 
@@ -88,6 +89,7 @@ export default function PremiumPlayer({
   // Show Resume Prompt if initialProgress is significant and not in a Watch Party
   useEffect(() => {
     if (initialProgress > 10 && !isWatchParty) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setShowResumePrompt(true);
     }
   }, [initialProgress, isWatchParty]);
@@ -95,7 +97,7 @@ export default function PremiumPlayer({
   const handleResume = () => {
     if (activePlayerRef.current) {
       activePlayerRef.current.currentTime = initialProgress;
-      activePlayerRef.current.play().catch((err: any) => {
+      activePlayerRef.current.play().catch((err: unknown) => {
         console.warn('Auto-play blocked or play failed:', err);
       });
     }
@@ -105,7 +107,7 @@ export default function PremiumPlayer({
   const handleStartOver = () => {
     if (activePlayerRef.current) {
       activePlayerRef.current.currentTime = 0;
-      activePlayerRef.current.play().catch((err: any) => {
+      activePlayerRef.current.play().catch((err: unknown) => {
         console.warn('Auto-play blocked or play failed:', err);
       });
     }
