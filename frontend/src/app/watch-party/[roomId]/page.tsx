@@ -392,6 +392,7 @@ export default function WatchPartyRoom() {
                   introEnd={episodeDetails.introEnd}
                   outroStart={episodeDetails.outroStart}
                   outroEnd={episodeDetails.outroEnd}
+                  isWatchParty={true}
                   onPlay={() => broadcastStateChange(true)}
                   onPause={() => broadcastStateChange(false)}
                   onSeek={handleOutboundSeek}

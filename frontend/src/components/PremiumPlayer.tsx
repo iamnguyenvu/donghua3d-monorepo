@@ -34,6 +34,20 @@ interface PremiumPlayerProps {
   onEnded?: () => void;
   onPrevEpisode?: () => void;
   onNextEpisode?: () => void;
+  isWatchParty?: boolean;
+}
+
+function formatResumeTime(seconds: number): string {
+  const h = Math.floor(seconds / 3600);
+  const m = Math.floor((seconds % 3600) / 60);
+  const s = Math.floor(seconds % 60);
+  if (h > 0) {
+    return `${h} giờ ${m} phút ${s} giây`;
+  }
+  if (m > 0) {
+    return `${m} phút ${s} giây`;
+  }
+  return `${s} giây`;
 }
 
 export default function PremiumPlayer({
@@ -52,9 +66,15 @@ export default function PremiumPlayer({
   playerRef,
   onEnded,
   onPrevEpisode,
-  onNextEpisode
+  onNextEpisode,
+  isWatchParty = false
 }: PremiumPlayerProps) {
   const [selectedQuality, setSelectedQuality] = useState<'1080p' | '4K'>('1080p');
+  const [showResumePrompt, setShowResumePrompt] = useState(false);
+
+  // Consolidate player refs to support both external forwarding and local control
+  const localPlayerRef = useRef<any>(null);
+  const activePlayerRef = playerRef || localPlayerRef;
 
   // Load selected quality from localStorage on mount (hydration-safe)
   useEffect(() => {
@@ -64,6 +84,33 @@ export default function PremiumPlayer({
       setSelectedQuality(saved);
     }
   }, []);
+
+  // Show Resume Prompt if initialProgress is significant and not in a Watch Party
+  useEffect(() => {
+    if (initialProgress > 10 && !isWatchParty) {
+      setShowResumePrompt(true);
+    }
+  }, [initialProgress, isWatchParty]);
+
+  const handleResume = () => {
+    if (activePlayerRef.current) {
+      activePlayerRef.current.currentTime = initialProgress;
+      activePlayerRef.current.play().catch((err: any) => {
+        console.warn('Auto-play blocked or play failed:', err);
+      });
+    }
+    setShowResumePrompt(false);
+  };
+
+  const handleStartOver = () => {
+    if (activePlayerRef.current) {
+      activePlayerRef.current.currentTime = 0;
+      activePlayerRef.current.play().catch((err: any) => {
+        console.warn('Auto-play blocked or play failed:', err);
+      });
+    }
+    setShowResumePrompt(false);
+  };
 
   const handleSetQuality = (q: '1080p' | '4K') => {
     setSelectedQuality(q);
@@ -79,7 +126,7 @@ export default function PremiumPlayer({
   return (
     <div className="relative aspect-video w-full rounded-[4px] overflow-hidden border border-zinc-900/60 bg-black shadow-2xl group select-none">
       <MediaPlayer
-        ref={playerRef}
+        ref={activePlayerRef}
         src={activeSrc}
         title={title}
         aspectRatio={16/9}
@@ -91,8 +138,8 @@ export default function PremiumPlayer({
         onPause={onPause}
         onEnded={onEnded}
         onSeeked={() => {
-          if (onSeek && playerRef?.current) {
-            onSeek(playerRef.current.currentTime);
+          if (onSeek && activePlayerRef?.current) {
+            onSeek(activePlayerRef.current.currentTime);
           }
         }}
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -164,6 +211,40 @@ export default function PremiumPlayer({
             >
               Quay lại 1080p Bản Thường
             </button>
+          </div>
+        </div>
+      )}
+
+      {/* STUNNING RESUME WATCH PROGRESS PROMPT OVERLAY */}
+      {showResumePrompt && !showVipOverlay && (
+        <div className="absolute inset-0 z-40 flex items-center justify-center bg-black/60 backdrop-blur-md animate-fade-in select-none">
+          <div className="p-6 md:p-8 bg-zinc-950/95 border border-violet-500/30 rounded-[4px] text-center max-w-sm w-full mx-4 shadow-[0_0_50px_rgba(139,92,246,0.35)] flex flex-col items-center">
+            <div className="relative mb-5 flex items-center justify-center">
+              <div className="absolute inset-0 bg-violet-500/25 rounded-full blur-xl scale-125 animate-pulse"></div>
+              <div className="relative p-4 rounded-full bg-violet-600/10 border border-violet-500/20">
+                <Sparkles className="w-8 h-8 text-violet-400" />
+              </div>
+            </div>
+
+            <h3 className="text-sm font-black text-white uppercase tracking-wider mb-2">Xem Tiếp Tập Phim</h3>
+            <p className="text-xs text-zinc-300 leading-relaxed mb-6">
+              Bạn đang xem dở tập này tại <span className="text-violet-400 font-extrabold">{formatResumeTime(initialProgress)}</span>. Bạn có muốn xem tiếp từ vị trí này không?
+            </p>
+
+            <div className="flex items-center gap-3 w-full">
+              <button
+                onClick={handleResume}
+                className="flex-grow py-3 bg-violet-600 hover:bg-violet-700 text-white font-extrabold text-[10px] uppercase tracking-wider rounded-[2px] cursor-pointer transition-all border-0 outline-none shadow-md hover:shadow-violet-600/30"
+              >
+                Xem tiếp
+              </button>
+              <button
+                onClick={handleStartOver}
+                className="flex-grow py-3 bg-transparent border border-zinc-850 hover:border-zinc-700 text-zinc-400 hover:text-white font-extrabold text-[10px] uppercase tracking-wider rounded-[2px] cursor-pointer transition-all outline-none"
+              >
+                Xem từ đầu
+              </button>
+            </div>
           </div>
         </div>
       )}
