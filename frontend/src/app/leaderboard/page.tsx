@@ -195,7 +195,7 @@ export default function LeaderboardAndTiers() {
                             title={`${it.movie.title} (${tk}-Tier) ${it.notes ? `- ${it.notes}` : ''}`}
                           >
                             <Image
-                              src={it.movie.posterUrl}
+                              src={it.movie.bannerUrl || it.movie.posterUrl}
                               alt={it.movie.title}
                               fill
                               className="object-cover object-top"
@@ -262,7 +262,7 @@ export default function LeaderboardAndTiers() {
                         title={`${movie.title} ${isAlreadyTiered ? '(Đã có hạng)' : '(Nhấn để chọn nhanh / Kéo để xếp hạng)'}`}
                       >
                         <Image
-                          src={movie.posterUrl || '/static/uploads/default_poster.jpg'}
+                          src={movie.bannerUrl || movie.posterUrl || '/static/uploads/default_poster.jpg'}
                           alt={movie.title}
                           fill
                           className="object-cover object-top select-none pointer-events-none"
