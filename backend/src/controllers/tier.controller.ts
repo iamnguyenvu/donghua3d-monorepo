@@ -127,7 +127,7 @@ router.get('/personal', requireAuth, async (req: AuthenticatedRequest, res: Resp
       where: { userId },
       include: {
         movie: {
-          select: { id: true, title: true, posterUrl: true, rating: true },
+          select: { id: true, title: true, posterUrl: true, bannerUrl: true, rating: true },
         },
       },
     });
@@ -223,7 +223,7 @@ router.get('/leaderboard', async (_req: AuthenticatedRequest, res: Response, nex
     const leaderboard = await prisma.globalTierLeaderboard.findMany({
       include: {
         movie: {
-          select: { id: true, title: true, posterUrl: true, rating: true, studio: true, releaseYear: true },
+          select: { id: true, title: true, posterUrl: true, bannerUrl: true, rating: true, studio: true, releaseYear: true },
         },
       },
       orderBy: { rank: 'asc' },
