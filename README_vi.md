@@ -21,6 +21,20 @@ Nền tảng streaming video chất lượng cao, tối ưu hóa chi phí vận 
 
 ---
 
+## 📸 Trưng Bày Giao Diện Thực Tế
+
+Dưới đây là một số hình ảnh chụp màn hình độ phân giải cao ghi nhận trực tiếp hoạt động thực tế của nền tảng **Donghua3D**:
+
+| 🏠 Trang Chủ Điện Ảnh Toàn Cảnh | 📊 Bảng Xếp Hạng & Tier List Kéo Thả |
+| :---: | :---: |
+| ![Trang Chủ Showcase](screenshots/homepage_showcase.png) | ![Bảng Xếp Hạng Showcase](screenshots/leaderboard_showcase.png) |
+
+| 🎥 Trình Phát Custom Player Cao Cấp & Trải Nghiệm Xem Phim |
+| :---: |
+| ![Trang Xem Phim Showcase](screenshots/watch_page_showcase.png) |
+
+---
+
 ## 💎 Các Tính Năng Đắt Giá Của Nền Tảng
 
 * **🎥 Phát Video HLS Đỉnh Cao ($T_{segment} = 8s$)**: Khởi chạy video tức thì và tua phim mượt mà dưới 1 giây nhờ trình phát Custom Player cao cấp bọc quanh thư viện `hls.js`.
