@@ -144,7 +144,7 @@ export default function LeaderboardAndTiers() {
           {/* LEFT: VISUAL PERSONAL TIER LIST BOARD (2/3 Grid) */}
           <div className="lg:col-span-2 flex flex-col gap-8">
             <div className="flex items-center gap-2">
-              <h2 className="text-sm sm:text-base md:text-lg lg:text-xl font-bold font-space text-zinc-100 tracking-wider uppercase border-l-2 border-violet-500 pl-3 select-none">
+              <h2 className="text-sm sm:text-base md:text-lg font-bold font-space text-zinc-100 tracking-wider uppercase border-l-2 border-violet-500 pl-3 select-none">
                 Bảng Xếp Hạng Cá Nhân Của Bạn
               </h2>
             </div>
@@ -179,19 +179,19 @@ export default function LeaderboardAndTiers() {
                       }
                       setLoading(false);
                     }}
-                    className={`flex items-stretch min-h-[110px] sm:min-h-[120px] lg:min-h-[140px] border-b border-zinc-900/40 last:border-0 transition-colors duration-200 ${
+                    className={`flex items-stretch min-h-[90px] sm:min-h-[100px] lg:min-h-[110px] border-b border-zinc-900/40 last:border-0 transition-colors duration-200 ${
                       draggedMovieId ? 'hover:bg-violet-950/10' : ''
                     }`}
                   >
-                    <div className={`flex items-center justify-center w-20 sm:w-24 md:w-28 lg:w-32 text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black font-space flex-shrink-0 select-none rounded-l-[2px] ${tierColorsMap[tk]}`}>
+                    <div className={`flex items-center justify-center w-20 sm:w-24 md:w-28 text-xl sm:text-2xl md:text-3xl font-black font-space flex-shrink-0 select-none rounded-l-[2px] ${tierColorsMap[tk]}`}>
                       {tk}
                     </div>
-                    <div className="flex flex-wrap gap-4 p-5 bg-zinc-950/20 flex-grow min-h-[60px] items-center">
+                    <div className="flex flex-wrap gap-3.5 p-4 bg-zinc-950/20 flex-grow min-h-[50px] items-center">
                       {items.length > 0 ? (
                         items.map((it) => (
                           <div 
                             key={it.id} 
-                            className="relative group w-14 sm:w-16 md:w-[72px] lg:w-20 aspect-[2/3] rounded-[3px] overflow-hidden border border-zinc-900/80 cursor-pointer transition-all duration-300 hover:scale-110 hover:border-violet-600 hover:shadow-[0_4px_12px_rgba(124,58,237,0.35)]"
+                            className="relative group w-12 sm:w-14 md:w-16 lg:w-[72px] aspect-[2/3] rounded-[3px] overflow-hidden border border-zinc-900/80 cursor-pointer transition-all duration-300 hover:scale-110 hover:border-violet-600 hover:shadow-[0_4px_12px_rgba(124,58,237,0.35)]"
                             title={`${it.movie.title} (${tk}-Tier) ${it.notes ? `- ${it.notes}` : ''}`}
                           >
                             <Image
@@ -227,7 +227,7 @@ export default function LeaderboardAndTiers() {
                 />
               </div>
 
-              <div className="flex flex-wrap gap-4 max-h-[220px] sm:max-h-[260px] md:max-h-[300px] overflow-y-auto p-1.5 custom-scrollbar">
+              <div className="flex flex-wrap gap-4 max-h-[140px] sm:max-h-[160px] md:max-h-[180px] overflow-y-auto p-1.5 custom-scrollbar">
                 {(() => {
                   const filtered = movies.filter(m => {
                     if (!movieSearchQuery) return true;
@@ -254,7 +254,7 @@ export default function LeaderboardAndTiers() {
                         onClick={() => {
                           setSelectedMovieId(movie.id);
                         }}
-                        className={`relative group w-16 sm:w-20 md:w-24 lg:w-28 aspect-[2/3] rounded-[3px] overflow-hidden border cursor-grab active:cursor-grabbing transition-all duration-300 hover:scale-105 ${
+                        className={`relative group w-14 sm:w-16 md:w-20 lg:w-[84px] aspect-[2/3] rounded-[3px] overflow-hidden border cursor-grab active:cursor-grabbing transition-all duration-300 hover:scale-105 ${
                           isAlreadyTiered 
                             ? 'border-zinc-800/50 opacity-40 hover:opacity-100 hover:border-violet-500/50' 
                             : 'border-zinc-850 hover:border-violet-600 hover:shadow-[0_0_12px_rgba(124,58,237,0.35)]'
@@ -349,7 +349,7 @@ export default function LeaderboardAndTiers() {
           {/* RIGHT: AGGREGATED GLOBAL LEADERBOARD (1/3 Grid) */}
           <div className="lg:col-span-1 flex flex-col gap-8">
             <div className="flex items-center gap-2">
-              <h2 className="text-sm sm:text-base md:text-lg lg:text-xl font-bold font-space text-zinc-100 tracking-wider uppercase border-l-2 border-violet-500 pl-3 select-none">
+              <h2 className="text-sm sm:text-base md:text-lg font-bold font-space text-zinc-100 tracking-wider uppercase border-l-2 border-violet-500 pl-3 select-none">
                 Bảng Thứ Hạng Cộng Đồng Donghua3D
               </h2>
             </div>
@@ -364,7 +364,7 @@ export default function LeaderboardAndTiers() {
                     </div>
 
                     <div className="flex items-center gap-4">
-                      <div className="w-14 sm:w-16 md:w-20 aspect-[2/3] rounded-[2px] overflow-hidden border border-zinc-900/60 relative flex-shrink-0 shadow-sm">
+                      <div className="w-12 sm:w-14 lg:w-16 aspect-[2/3] rounded-[2px] overflow-hidden border border-zinc-900/60 relative flex-shrink-0 shadow-sm">
                         <Image
                           src={row.movie.bannerUrl || row.movie.posterUrl}
                           alt={row.movie.title}
