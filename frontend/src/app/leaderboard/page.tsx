@@ -366,7 +366,7 @@ export default function LeaderboardAndTiers() {
                     <div className="flex items-center gap-4">
                       <div className="w-10 aspect-[2/3] rounded-[2px] overflow-hidden border border-zinc-900/60 relative flex-shrink-0 shadow-sm">
                         <Image
-                          src={row.movie.posterUrl}
+                          src={row.movie.bannerUrl || row.movie.posterUrl}
                           alt={row.movie.title}
                           fill
                           className="object-cover object-top"
