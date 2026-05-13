@@ -144,7 +144,7 @@ export default function LeaderboardAndTiers() {
           {/* LEFT: VISUAL PERSONAL TIER LIST BOARD (2/3 Grid) */}
           <div className="lg:col-span-2 flex flex-col gap-8">
             <div className="flex items-center gap-2">
-              <h2 className="text-xs font-black text-zinc-400 tracking-wider uppercase border-l-2 border-zinc-750 pl-2.5 select-none">
+              <h2 className="text-sm sm:text-base md:text-lg lg:text-xl font-bold font-space text-zinc-100 tracking-wider uppercase border-l-2 border-violet-500 pl-3 select-none">
                 Bảng Xếp Hạng Cá Nhân Của Bạn
               </h2>
             </div>
@@ -179,19 +179,19 @@ export default function LeaderboardAndTiers() {
                       }
                       setLoading(false);
                     }}
-                    className={`flex items-stretch min-h-[90px] border-b border-zinc-900/40 last:border-0 transition-colors duration-200 ${
+                    className={`flex items-stretch min-h-[110px] sm:min-h-[120px] lg:min-h-[140px] border-b border-zinc-900/40 last:border-0 transition-colors duration-200 ${
                       draggedMovieId ? 'hover:bg-violet-950/10' : ''
                     }`}
                   >
-                    <div className={`flex items-center justify-center w-20 text-xl font-black tracking-tighter flex-shrink-0 select-none rounded-l-[2px] ${tierColorsMap[tk]}`}>
+                    <div className={`flex items-center justify-center w-20 sm:w-24 md:w-28 lg:w-32 text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black font-space flex-shrink-0 select-none rounded-l-[2px] ${tierColorsMap[tk]}`}>
                       {tk}
                     </div>
-                    <div className="flex flex-wrap gap-3 p-4 bg-zinc-950/20 flex-grow min-h-[50px] items-center">
+                    <div className="flex flex-wrap gap-4 p-5 bg-zinc-950/20 flex-grow min-h-[60px] items-center">
                       {items.length > 0 ? (
                         items.map((it) => (
                           <div 
                             key={it.id} 
-                            className="relative group w-11 aspect-[2/3] rounded-[2px] overflow-hidden border border-zinc-900/80 cursor-pointer transition-all duration-300 hover:scale-110 hover:border-violet-600 hover:shadow-[0_4px_12px_rgba(124,58,237,0.35)]"
+                            className="relative group w-14 sm:w-16 md:w-[72px] lg:w-20 aspect-[2/3] rounded-[3px] overflow-hidden border border-zinc-900/80 cursor-pointer transition-all duration-300 hover:scale-110 hover:border-violet-600 hover:shadow-[0_4px_12px_rgba(124,58,237,0.35)]"
                             title={`${it.movie.title} (${tk}-Tier) ${it.notes ? `- ${it.notes}` : ''}`}
                           >
                             <Image
@@ -203,7 +203,7 @@ export default function LeaderboardAndTiers() {
                           </div>
                         ))
                       ) : (
-                        <span className="text-[11px] md:text-xs text-zinc-600 font-extrabold uppercase tracking-wider select-none">Trống</span>
+                        <span className="text-xs sm:text-sm text-zinc-600 font-extrabold uppercase tracking-wider select-none">Trống</span>
                       )}
                     </div>
                   </div>
@@ -214,7 +214,7 @@ export default function LeaderboardAndTiers() {
             {/* Draggable & Clickable Movie Pool Panel */}
             <div className="p-5 bg-zinc-950/40 border border-zinc-900 rounded-[4px] flex flex-col gap-4 shadow-lg select-none">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-zinc-900/60 pb-3">
-                <span className="text-[11px] md:text-xs font-black text-zinc-400 uppercase tracking-widest flex items-center gap-1.5">
+                <span className="text-xs sm:text-sm md:text-base font-bold font-space text-zinc-100 uppercase tracking-wider flex items-center gap-1.5">
                   <Film className="w-3.5 h-3.5 text-violet-500" />
                   Kho phim chờ xếp hạng (Kéo-Thả hoặc Click)
                 </span>
@@ -227,7 +227,7 @@ export default function LeaderboardAndTiers() {
                 />
               </div>
 
-              <div className="flex flex-wrap gap-3.5 max-h-[160px] overflow-y-auto p-1.5 custom-scrollbar">
+              <div className="flex flex-wrap gap-4 max-h-[220px] sm:max-h-[260px] md:max-h-[300px] overflow-y-auto p-1.5 custom-scrollbar">
                 {(() => {
                   const filtered = movies.filter(m => {
                     if (!movieSearchQuery) return true;
@@ -254,7 +254,7 @@ export default function LeaderboardAndTiers() {
                         onClick={() => {
                           setSelectedMovieId(movie.id);
                         }}
-                        className={`relative group w-[54px] aspect-[2/3] rounded-[3px] overflow-hidden border cursor-grab active:cursor-grabbing transition-all duration-300 hover:scale-105 ${
+                        className={`relative group w-16 sm:w-20 md:w-24 lg:w-28 aspect-[2/3] rounded-[3px] overflow-hidden border cursor-grab active:cursor-grabbing transition-all duration-300 hover:scale-105 ${
                           isAlreadyTiered 
                             ? 'border-zinc-800/50 opacity-40 hover:opacity-100 hover:border-violet-500/50' 
                             : 'border-zinc-850 hover:border-violet-600 hover:shadow-[0_0_12px_rgba(124,58,237,0.35)]'
@@ -277,25 +277,25 @@ export default function LeaderboardAndTiers() {
                   });
                 })()}
               </div>
-              <p className="text-[11px] text-zinc-500 italic leading-tight">
+              <p className="text-xs sm:text-sm text-zinc-400 italic leading-relaxed font-medium">
                 💡 Hướng dẫn: Kéo thẻ phim ở trên và thả trực tiếp vào các dòng S-Tier, A-Tier,... ở bảng xếp hạng phía trên để đặt hạng nhanh, hoặc click để chọn nhanh trong form chỉnh sửa bên dưới.
               </p>
             </div>
 
             {/* Quick Placement Selector Form Panel using pure Tailwind */}
             <form onSubmit={handleSaveTier} className="p-5 bg-zinc-950/40 border border-zinc-900 rounded-[4px] flex flex-col gap-4 shadow-lg select-none">
-              <span className="text-[11px] md:text-xs font-black text-zinc-400 uppercase tracking-widest flex items-center gap-1.5 border-b border-zinc-900/60 pb-3">
+              <span className="text-xs sm:text-sm md:text-base font-bold font-space text-zinc-100 uppercase tracking-wider flex items-center gap-1.5 border-b border-zinc-900/60 pb-3">
                 <PlusCircle className="w-3.5 h-3.5 text-violet-500" />
                 Xếp hạng nhanh phim của bạn
               </span>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-[11px] text-zinc-500 font-bold uppercase tracking-wider">Chọn bộ phim</label>
+                  <label className="text-xs sm:text-sm text-zinc-400 font-bold uppercase tracking-wider">Chọn bộ phim</label>
                   <select
                     value={selectedMovieId}
                     onChange={(e) => setSelectedMovieId(e.target.value)}
-                    className="bg-[#0c0c0f] border border-zinc-800/80 text-zinc-300 rounded-[4px] p-2.5 text-xs cursor-pointer outline-none focus:border-zinc-750 transition-all"
+                    className="bg-[#0c0c0f] border border-zinc-800/80 text-zinc-300 rounded-[4px] p-2.5 text-xs sm:text-sm cursor-pointer outline-none focus:border-zinc-750 transition-all"
                   >
                     {movies.map((m) => (
                       <option key={m.id} value={m.id}>{m.title}</option>
@@ -304,11 +304,11 @@ export default function LeaderboardAndTiers() {
                 </div>
 
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-[11px] text-zinc-500 font-bold uppercase tracking-wider">Xếp vào hạng (Tier)</label>
+                  <label className="text-xs sm:text-sm text-zinc-400 font-bold uppercase tracking-wider">Xếp vào hạng (Tier)</label>
                   <select
                     value={selectedTier}
                     onChange={(e) => setSelectedTier(e.target.value as Tier)}
-                    className="bg-[#0c0c0f] border border-zinc-800/80 text-zinc-300 rounded-[4px] p-2.5 text-xs cursor-pointer outline-none focus:border-zinc-750 transition-all"
+                    className="bg-[#0c0c0f] border border-zinc-800/80 text-zinc-300 rounded-[4px] p-2.5 text-xs sm:text-sm cursor-pointer outline-none focus:border-zinc-750 transition-all"
                   >
                     <option value={Tier.S}>S-Tier (Siêu phẩm đặc sắc)</option>
                     <option value={Tier.A}>A-Tier (Hay xuất sắc)</option>
@@ -321,20 +321,20 @@ export default function LeaderboardAndTiers() {
               </div>
 
               <div className="flex flex-col gap-1.5">
-                <label className="text-[11px] text-zinc-500 font-bold uppercase tracking-wider">Ghi chú cá nhân (Notes)</label>
+                <label className="text-xs sm:text-sm text-zinc-400 font-bold uppercase tracking-wider">Ghi chú cá nhân (Notes)</label>
                 <input
                   type="text"
                   placeholder="Nhập cảm nhận của bạn về vị trí đặt phim này..."
                   value={tierNotes}
                   onChange={(e) => setTierNotes(e.target.value)}
-                  className="bg-[#0c0c0f] border border-zinc-800/80 text-white rounded-[4px] p-3 text-xs outline-none focus:border-zinc-750 transition-all"
+                  className="bg-[#0c0c0f] border border-zinc-800/80 text-white rounded-[4px] p-3 text-xs sm:text-sm outline-none focus:border-zinc-750 transition-all"
                 />
               </div>
 
               <button
                 type="submit"
                 disabled={submitting}
-                className="py-2.5 px-5 rounded-[4px] bg-violet-600 hover:bg-violet-700 text-white font-extrabold flex items-center justify-center gap-1.5 text-[11px] uppercase tracking-wider transition-all duration-200 active:scale-95 shadow-md disabled:opacity-50 cursor-pointer outline-none border-0"
+                className="py-2.5 px-5 rounded-[4px] bg-violet-600 hover:bg-violet-700 text-white font-extrabold flex items-center justify-center gap-1.5 text-xs sm:text-sm uppercase tracking-wider transition-all duration-200 active:scale-95 shadow-md disabled:opacity-50 cursor-pointer outline-none border-0"
               >
                 {submitting ? (
                   <Loader2 className="w-3.5 h-3.5 animate-spin" />
@@ -349,7 +349,7 @@ export default function LeaderboardAndTiers() {
           {/* RIGHT: AGGREGATED GLOBAL LEADERBOARD (1/3 Grid) */}
           <div className="lg:col-span-1 flex flex-col gap-8">
             <div className="flex items-center gap-2">
-              <h2 className="text-xs font-black text-zinc-400 tracking-wider uppercase border-l-2 border-zinc-750 pl-2.5 select-none">
+              <h2 className="text-sm sm:text-base md:text-lg lg:text-xl font-bold font-space text-zinc-100 tracking-wider uppercase border-l-2 border-violet-500 pl-3 select-none">
                 Bảng Thứ Hạng Cộng Đồng Donghua3D
               </h2>
             </div>
@@ -364,7 +364,7 @@ export default function LeaderboardAndTiers() {
                     </div>
 
                     <div className="flex items-center gap-4">
-                      <div className="w-10 aspect-[2/3] rounded-[2px] overflow-hidden border border-zinc-900/60 relative flex-shrink-0 shadow-sm">
+                      <div className="w-14 sm:w-16 md:w-20 aspect-[2/3] rounded-[2px] overflow-hidden border border-zinc-900/60 relative flex-shrink-0 shadow-sm">
                         <Image
                           src={row.movie.bannerUrl || row.movie.posterUrl}
                           alt={row.movie.title}
@@ -373,9 +373,9 @@ export default function LeaderboardAndTiers() {
                         />
                       </div>
 
-                      <div className="flex flex-col gap-0.5 max-w-[160px]">
-                        <h3 className="text-xs font-bold text-white truncate group-hover:text-violet-400 transition-colors">{row.movie.title}</h3>
-                        <span className="text-xs text-zinc-550 font-bold uppercase tracking-wider">{row.movie.studio} • {row.movie.releaseYear}</span>
+                      <div className="flex flex-col gap-1 flex-grow min-w-0">
+                        <h3 className="text-xs sm:text-sm font-bold text-white truncate group-hover:text-violet-400 transition-colors">{row.movie.title}</h3>
+                        <span className="text-xs text-zinc-400 font-medium uppercase tracking-wider">{row.movie.studio} • {row.movie.releaseYear}</span>
                         <div className="flex items-center gap-2 mt-1">
                           {row.movie.rating > 0 ? (
                             <span className="bg-black/80 border border-zinc-800 text-amber-400 font-extrabold text-[11px] px-1.5 py-0.5 rounded-[2px] flex items-center gap-0.5 shadow-sm">
