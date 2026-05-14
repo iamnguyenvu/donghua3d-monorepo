@@ -514,6 +514,18 @@ export interface FlaggedCommentPayload {
   };
 }
 
+export interface ScrapingQueueItem {
+  id: string;
+  sourceUrl: string;
+  targetMovieId?: string;
+  targetEpisodeNumber?: number;
+  audioTrack: string;
+  status: 'PENDING' | 'PROCESSING' | 'COMPLETED' | 'FAILED';
+  attempts: number;
+  errorMessage?: string;
+  createdAt: string;
+}
+
 export const adminApi = {
   async getStats(): Promise<ApiResponse<AdminStatsPayload>> {
     return apiFetch<AdminStatsPayload>('/admin/stats');
@@ -556,8 +568,22 @@ export const adminApi = {
     return apiFetch<unknown>(`/admin/comments/${id}`, {
       method: 'DELETE',
     });
+  },
+
+  async getScrapingQueue(): Promise<ApiResponse<ScrapingQueueItem[]>> {
+    return apiFetch<ScrapingQueueItem[]>('/admin/scraping-queue');
+  },
+
+  async triggerScraperWorker(): Promise<ApiResponse<{ message: string; processedCount: number }>> {
+    return apiFetch<{ message: string; processedCount: number }>('/admin/scraping-queue/trigger', {
+      method: 'POST',
+    });
+  },
+
+  async addScrapingTask(payload: { sourceUrl: string; audioTrack: string; targetMovieId?: string; targetEpisodeNumber?: number }): Promise<ApiResponse<ScrapingQueueItem>> {
+    return apiFetch<ScrapingQueueItem>('/admin/scraping-queue/add', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    });
   }
 };
-
-
-

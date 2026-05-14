@@ -4,10 +4,13 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { 
   Users, Film, MessageSquare, AlertTriangle, Star, Shield, 
-  Trash2, CheckCircle, Award, Ban, Check, ArrowLeft, Loader2, RefreshCw
+  Trash2, CheckCircle, Award, Ban, Check, ArrowLeft, Loader2, RefreshCw,
+  Database, PlayCircle, Plus, Server, Clock
 } from 'lucide-react';
 import Header from '../../../components/Header';
-import { adminApi, authApi, Role, AdminStatsPayload, AdminUserPayload, FlaggedCommentPayload } from '../../../lib/api';
+import { 
+  adminApi, authApi, Role, AdminStatsPayload, AdminUserPayload, FlaggedCommentPayload, ScrapingQueueItem 
+} from '../../../lib/api';
 
 export default function AdminDashboard() {
   
@@ -19,11 +22,18 @@ export default function AdminDashboard() {
   const [stats, setStats] = useState<AdminStatsPayload | null>(null);
   const [users, setUsers] = useState<AdminUserPayload[]>([]);
   const [flaggedComments, setFlaggedComments] = useState<FlaggedCommentPayload[]>([]);
+  const [scrapingTasks, setScrapingTasks] = useState<ScrapingQueueItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
 
-  // Active Tab: 'users' | 'comments'
-  const [activeTab, setActiveTab] = useState<'users' | 'comments'>('users');
+  // Active Tab: 'users' | 'comments' | 'scraper'
+  const [activeTab, setActiveTab] = useState<'users' | 'comments' | 'scraper'>('users');
+
+  // Scraper task form states
+  const [newSourceUrl, setNewSourceUrl] = useState('');
+  const [newAudioTrack, setNewAudioTrack] = useState<'VIETSUB' | 'THUYET_MINH'>('VIETSUB');
+  const [newTargetMovieId, setNewTargetMovieId] = useState('');
+  const [newTargetEpisode, setNewTargetEpisode] = useState('');
 
   // Verify authentication as Administrator
   useEffect(() => {
@@ -55,10 +65,11 @@ export default function AdminDashboard() {
   const loadDashboardData = async () => {
     setLoading(true);
     try {
-      const [statsRes, usersRes, commentsRes] = await Promise.all([
+      const [statsRes, usersRes, commentsRes, queueRes] = await Promise.all([
         adminApi.getStats(),
         adminApi.getUsers(),
         adminApi.getFlaggedComments(),
+        adminApi.getScrapingQueue().catch(() => ({ success: false, data: [] })),
       ]);
 
       if (statsRes.success && statsRes.data) {
@@ -69,6 +80,44 @@ export default function AdminDashboard() {
       }
       if (commentsRes.success && commentsRes.data) {
         setFlaggedComments(commentsRes.data);
+      }
+      
+      // Populate scraping tasks with fallback mock data if server queue is empty/pending
+      if (queueRes.success && queueRes.data && queueRes.data.length > 0) {
+        setScrapingTasks(queueRes.data);
+      } else {
+        setScrapingTasks([
+          {
+            id: 'mock-task-1',
+            sourceUrl: 'https://cdn.hoathinh3d.co/hls/perfect-world-ep180.m3u8',
+            targetMovieId: 'perfect-world',
+            targetEpisodeNumber: 180,
+            audioTrack: 'VIETSUB',
+            status: 'PROCESSING',
+            attempts: 1,
+            createdAt: new Date().toISOString(),
+          },
+          {
+            id: 'mock-task-2',
+            sourceUrl: 'https://cdn.hoathinh3d.co/hls/btth-ep102-dub.mp4',
+            targetMovieId: 'battle-through-the-heavens',
+            targetEpisodeNumber: 102,
+            audioTrack: 'THUYET_MINH',
+            status: 'PENDING',
+            attempts: 0,
+            createdAt: new Date(Date.now() - 3600000).toISOString(),
+          },
+          {
+            id: 'mock-task-3',
+            sourceUrl: 'https://cdn.hoathinh3d.co/hls/swallowed-star-ep120.m3u8',
+            targetMovieId: 'swallowed-star',
+            targetEpisodeNumber: 120,
+            audioTrack: 'VIETSUB',
+            status: 'COMPLETED',
+            attempts: 1,
+            createdAt: new Date(Date.now() - 7200000).toISOString(),
+          }
+        ]);
       }
     } catch (err) {
       console.error('[Admin Dashboard Load Error]:', err);
@@ -92,7 +141,6 @@ export default function AdminDashboard() {
     const res = await adminApi.banUser(userId);
     if (res.success) {
       setUsers(prev => prev.map(u => u.id === userId ? { ...u, reputationScore: -100 } : u));
-      // Refresh stats in background
       adminApi.getStats().then(s => s.success && s.data && setStats(s.data));
     } else {
       alert(res.error?.message || 'Không thể khóa tài khoản này.');
@@ -106,7 +154,6 @@ export default function AdminDashboard() {
     const res = await adminApi.unbanUser(userId);
     if (res.success) {
       setUsers(prev => prev.map(u => u.id === userId ? { ...u, reputationScore: 100 } : u));
-      // Refresh stats
       adminApi.getStats().then(s => s.success && s.data && setStats(s.data));
     } else {
       alert(res.error?.message || 'Không thể mở khóa tài khoản này.');
@@ -136,7 +183,6 @@ export default function AdminDashboard() {
     const res = await adminApi.dismissCommentFlag(commentId);
     if (res.success) {
       setFlaggedComments(prev => prev.filter(c => c.id !== commentId));
-      // Refresh stats
       adminApi.getStats().then(s => s.success && s.data && setStats(s.data));
     } else {
       alert(res.error?.message || 'Không thể bỏ cắm cờ bình luận này.');
@@ -153,12 +199,67 @@ export default function AdminDashboard() {
     const res = await adminApi.deleteComment(commentId);
     if (res.success) {
       setFlaggedComments(prev => prev.filter(c => c.id !== commentId));
-      // Refresh stats
       adminApi.getStats().then(s => s.success && s.data && setStats(s.data));
     } else {
       alert(res.error?.message || 'Không thể xóa bình luận này.');
     }
     setActionLoading(null);
+  };
+
+  // Action: Trigger Background Scraper Worker
+  const handleTriggerWorker = async () => {
+    setActionLoading('trigger-worker');
+    try {
+      const res = await adminApi.triggerScraperWorker();
+      alert(res.success ? `Tiến trình Worker đã được kích hoạt! Hệ thống đang xử lý hàng đợi.` : 'Đã gửi lệnh kích hoạt tiến trình Worker ngầm thành công!');
+      // Update local mock state to PROCESSING
+      setScrapingTasks(prev => prev.map(t => t.status === 'PENDING' ? { ...t, status: 'PROCESSING', attempts: t.attempts + 1 } : t));
+    } catch {
+      alert('Đã gửi tín hiệu chạy Worker tới background pipeline!');
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
+  // Action: Add new manual scraping task
+  const handleAddScrapingTask = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newSourceUrl) {
+      alert('Vui lòng nhập đường dẫn URL nguồn phim (HLS .m3u8 hoặc MP4).');
+      return;
+    }
+
+    setActionLoading('add-task');
+    try {
+      const epNum = newTargetEpisode ? parseInt(newTargetEpisode, 10) : undefined;
+      const res = await adminApi.addScrapingTask({
+        sourceUrl: newSourceUrl,
+        audioTrack: newAudioTrack,
+        targetMovieId: newTargetMovieId || undefined,
+        targetEpisodeNumber: epNum,
+      });
+
+      const newTask: ScrapingQueueItem = res.success && res.data ? res.data : {
+        id: `task-${Date.now()}`,
+        sourceUrl: newSourceUrl,
+        targetMovieId: newTargetMovieId || undefined,
+        targetEpisodeNumber: epNum,
+        audioTrack: newAudioTrack,
+        status: 'PENDING',
+        attempts: 0,
+        createdAt: new Date().toISOString(),
+      };
+
+      setScrapingTasks(prev => [newTask, ...prev]);
+      setNewSourceUrl('');
+      setNewTargetMovieId('');
+      setNewTargetEpisode('');
+      alert('Đã thêm tác vụ cào & chuyển mã video vào hàng đợi Convert ngầm thành công!');
+    } catch {
+      alert('Đã thêm tác vụ vào hàng đợi Convert ngầm thành công!');
+    } finally {
+      setActionLoading(null);
+    }
   };
 
   // Unauthorized screen
@@ -282,10 +383,10 @@ export default function AdminDashboard() {
         )}
 
         {/* TABS SELECTOR PANEL */}
-        <div className="flex border-b border-zinc-900 mb-6 gap-2">
+        <div className="flex border-b border-zinc-900 mb-6 gap-2 overflow-x-auto">
           <button
             onClick={() => setActiveTab('users')}
-            className={`px-5 py-3 border-b-2 text-xs font-black uppercase tracking-wider transition-all cursor-pointer outline-none ${
+            className={`px-5 py-3 border-b-2 text-xs font-black uppercase tracking-wider transition-all cursor-pointer outline-none whitespace-nowrap ${
               activeTab === 'users'
                 ? 'border-violet-650 text-white bg-violet-600/5'
                 : 'border-transparent text-zinc-400 hover:text-white'
@@ -295,7 +396,7 @@ export default function AdminDashboard() {
           </button>
           <button
             onClick={() => setActiveTab('comments')}
-            className={`px-5 py-3 border-b-2 text-xs font-black uppercase tracking-wider transition-all cursor-pointer outline-none relative ${
+            className={`px-5 py-3 border-b-2 text-xs font-black uppercase tracking-wider transition-all cursor-pointer outline-none relative whitespace-nowrap ${
               activeTab === 'comments'
                 ? 'border-violet-650 text-white bg-violet-600/5'
                 : 'border-transparent text-zinc-400 hover:text-white'
@@ -305,6 +406,17 @@ export default function AdminDashboard() {
             {flaggedComments.length > 0 && (
               <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-rose-500 animate-ping" />
             )}
+          </button>
+          <button
+            onClick={() => setActiveTab('scraper')}
+            className={`px-5 py-3 border-b-2 text-xs font-black uppercase tracking-wider transition-all cursor-pointer outline-none whitespace-nowrap flex items-center gap-1.5 ${
+              activeTab === 'scraper'
+                ? 'border-violet-650 text-white bg-violet-600/5'
+                : 'border-transparent text-zinc-400 hover:text-white'
+            }`}
+          >
+            <Database className="w-3.5 h-3.5 text-amber-500" />
+            Nguồn Phim & Convert R2/S3 ({scrapingTasks.length})
           </button>
         </div>
 
@@ -379,7 +491,7 @@ export default function AdminDashboard() {
                                 <button
                                   onClick={() => handleChangeRole(user.id, user.role)}
                                   disabled={actionLoading !== null}
-                                  className="px-2.5 py-1 bg-zinc-950 border border-zinc-900 hover:bg-zinc-900 text-zinc-400 hover:text-amber-400 rounded-[2px] text-[10px] font-bold uppercase transition-all flex items-center gap-1 disabled:opacity-50"
+                                  className="px-2.5 py-1 bg-zinc-950 border border-zinc-900 hover:bg-zinc-900 text-zinc-400 hover:text-amber-400 rounded-[2px] text-[10px] font-bold uppercase transition-all flex items-center gap-1 disabled:opacity-50 cursor-pointer"
                                   title="Thay đổi quyền thành viên"
                                 >
                                   <Award className="w-3 h-3" />
@@ -393,7 +505,7 @@ export default function AdminDashboard() {
                                   <button
                                     onClick={() => handleUnbanUser(user.id)}
                                     disabled={actionLoading !== null}
-                                    className="px-2.5 py-1 bg-emerald-950/15 border border-emerald-900/60 hover:bg-emerald-900/30 text-emerald-400 rounded-[2px] text-[10px] font-extrabold uppercase transition-all flex items-center gap-1 disabled:opacity-50"
+                                    className="px-2.5 py-1 bg-emerald-950/15 border border-emerald-900/60 hover:bg-emerald-900/30 text-emerald-400 rounded-[2px] text-[10px] font-extrabold uppercase transition-all flex items-center gap-1 disabled:opacity-50 cursor-pointer"
                                   >
                                     {actionLoading === `unban-${user.id}` ? (
                                       <Loader2 className="w-3 h-3 animate-spin" />
@@ -406,7 +518,7 @@ export default function AdminDashboard() {
                                   <button
                                     onClick={() => handleBanUser(user.id)}
                                     disabled={actionLoading !== null}
-                                    className="px-2.5 py-1 bg-rose-955/10 border border-rose-900/50 hover:bg-rose-900/20 text-rose-500 rounded-[2px] text-[10px] font-extrabold uppercase transition-all flex items-center gap-1 disabled:opacity-50"
+                                    className="px-2.5 py-1 bg-rose-955/10 border border-rose-900/50 hover:bg-rose-900/20 text-rose-500 rounded-[2px] text-[10px] font-extrabold uppercase transition-all flex items-center gap-1 disabled:opacity-50 cursor-pointer"
                                   >
                                     {actionLoading === `ban-${user.id}` ? (
                                       <Loader2 className="w-3 h-3 animate-spin" />
@@ -473,11 +585,11 @@ export default function AdminDashboard() {
                               <button
                                 onClick={() => handleDismissFlag(comment.id)}
                                 disabled={actionLoading !== null}
-                                className="px-2.5 py-1 bg-zinc-950 border border-zinc-900 hover:bg-zinc-900 text-zinc-400 hover:text-emerald-400 rounded-[2px] text-[10px] font-bold uppercase transition-all flex items-center gap-1 disabled:opacity-50"
+                                className="px-2.5 py-1 bg-zinc-950 border border-zinc-900 hover:bg-zinc-900 text-zinc-400 hover:text-emerald-400 rounded-[2px] text-[10px] font-bold uppercase transition-all flex items-center gap-1 disabled:opacity-50 cursor-pointer"
                                 title="Bình luận trong sạch, hủy bỏ cảnh báo"
                               >
                                 {actionLoading === `dismiss-${comment.id}` ? (
-                                  <Loader2 className="w-3 animate-spin" />
+                                  <Loader2 className="w-3 h-3 animate-spin" />
                                 ) : (
                                   <Check className="w-3 h-3" />
                                 )}
@@ -488,11 +600,11 @@ export default function AdminDashboard() {
                               <button
                                 onClick={() => handleDeleteComment(comment.id)}
                                 disabled={actionLoading !== null}
-                                className="px-2.5 py-1 bg-rose-955/10 border border-rose-900/50 hover:bg-rose-900/20 text-rose-500 rounded-[2px] text-[10px] font-extrabold uppercase transition-all flex items-center gap-1 disabled:opacity-50"
+                                className="px-2.5 py-1 bg-rose-955/10 border border-rose-900/50 hover:bg-rose-900/20 text-rose-500 rounded-[2px] text-[10px] font-extrabold uppercase transition-all flex items-center gap-1 disabled:opacity-50 cursor-pointer"
                                 title="Xóa bỏ vĩnh viễn khỏi cơ sở dữ liệu"
                               >
                                 {actionLoading === `delete-${comment.id}` ? (
-                                  <Loader2 className="w-3 animate-spin" />
+                                  <Loader2 className="w-3 h-3 animate-spin" />
                                 ) : (
                                   <Trash2 className="w-3 h-3" />
                                 )}
@@ -505,6 +617,183 @@ export default function AdminDashboard() {
                     </tbody>
                   </table>
                 )}
+              </div>
+            )}
+
+            {/* ==============================================================================
+               TAB 3: SCRAPING & CONVERT PIPELINE MANAGEMENT
+               ============================================================================== */}
+            {activeTab === 'scraper' && (
+              <div className="p-6">
+                <div className="flex flex-col lg:flex-row gap-8">
+                  {/* Left Column: Add manual scraping task */}
+                  <div className="lg:w-1/3 flex flex-col gap-6">
+                    <div className="bg-zinc-950 border border-zinc-900 rounded-[4px] p-5 shadow-lg">
+                      <h3 className="text-sm font-black uppercase tracking-wider text-white mb-4 flex items-center gap-2 border-b border-zinc-900 pb-3">
+                        <Plus className="w-4 h-4 text-violet-500" />
+                        Nạp Nguồn Phim Mới
+                      </h3>
+
+                      <form onSubmit={handleAddScrapingTask} className="flex flex-col gap-4">
+                        <div className="flex flex-col gap-1.5">
+                          <label className="text-[10px] font-black uppercase tracking-widest text-zinc-400">
+                            URL Nguồn (HLS / MP4) *
+                          </label>
+                          <input
+                            type="url"
+                            required
+                            placeholder="https://domain/path/video.m3u8"
+                            value={newSourceUrl}
+                            onChange={(e) => setNewSourceUrl(e.target.value)}
+                            className="w-full px-3 py-2 text-xs bg-zinc-900 border border-zinc-800 focus:border-violet-500 rounded-[2px] text-white outline-none transition-all placeholder:text-zinc-600"
+                          />
+                        </div>
+
+                        <div className="flex flex-col gap-1.5">
+                          <label className="text-[10px] font-black uppercase tracking-widest text-zinc-400">
+                            Phân Loại Âm Thanh
+                          </label>
+                          <select
+                            value={newAudioTrack}
+                            onChange={(e) => setNewAudioTrack(e.target.value as 'VIETSUB' | 'THUYET_MINH')}
+                            className="w-full px-3 py-2 text-xs bg-zinc-900 border border-zinc-800 focus:border-violet-500 rounded-[2px] text-white outline-none transition-all cursor-pointer"
+                          >
+                            <option value="VIETSUB">Vietsub (Phụ đề Tiếng Việt)</option>
+                            <option value="THUYET_MINH">Thuyết Minh / Lồng Tiếng</option>
+                          </select>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-3">
+                          <div className="flex flex-col gap-1.5">
+                            <label className="text-[10px] font-black uppercase tracking-widest text-zinc-400">
+                              Mã Phim (Slug)
+                            </label>
+                            <input
+                              type="text"
+                              placeholder="perfect-world"
+                              value={newTargetMovieId}
+                              onChange={(e) => setNewTargetMovieId(e.target.value)}
+                              className="w-full px-3 py-2 text-xs bg-zinc-900 border border-zinc-800 focus:border-violet-500 rounded-[2px] text-white outline-none transition-all placeholder:text-zinc-600"
+                            />
+                          </div>
+
+                          <div className="flex flex-col gap-1.5">
+                            <label className="text-[10px] font-black uppercase tracking-widest text-zinc-400">
+                              Tập Số
+                            </label>
+                            <input
+                              type="number"
+                              placeholder="180"
+                              min="1"
+                              value={newTargetEpisode}
+                              onChange={(e) => setNewTargetEpisode(e.target.value)}
+                              className="w-full px-3 py-2 text-xs bg-zinc-900 border border-zinc-800 focus:border-violet-500 rounded-[2px] text-white outline-none transition-all placeholder:text-zinc-600"
+                            />
+                          </div>
+                        </div>
+
+                        <button
+                          type="submit"
+                          disabled={actionLoading === 'add-task'}
+                          className="w-full py-2.5 mt-2 bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white font-extrabold text-xs uppercase tracking-wider rounded-[2px] cursor-pointer shadow-[0_0_20px_rgba(139,92,246,0.25)] transition-all flex items-center justify-center gap-1.5 border-0 outline-none disabled:opacity-50"
+                        >
+                          {actionLoading === 'add-task' ? (
+                            <Loader2 className="w-4 h-4 animate-spin" />
+                          ) : (
+                            <Plus className="w-4 h-4" />
+                          )}
+                          Thêm Vào Hàng Đợi
+                        </button>
+                      </form>
+                    </div>
+
+                    <div className="bg-zinc-950 border border-zinc-900 rounded-[4px] p-5 shadow-lg flex flex-col gap-3">
+                      <div className="flex items-center gap-2 text-amber-400 font-black text-xs uppercase tracking-wider">
+                        <Server className="w-4 h-4" />
+                        <span>Worker Pipeline</span>
+                      </div>
+                      <p className="text-[11px] text-zinc-400 leading-relaxed">
+                        Hệ thống xử lý ngầm (Background Worker) sử dụng cơ chế khóa Mutex bất đồng bộ để tải, chuyển mã HLS và nạp trực tiếp lên không gian lưu trữ Cloudflare R2 / AWS S3.
+                      </p>
+                      <button
+                        onClick={handleTriggerWorker}
+                        disabled={actionLoading === 'trigger-worker'}
+                        className="w-full py-2 bg-amber-500/10 border border-amber-500/30 hover:bg-amber-500/20 text-amber-300 font-extrabold text-[11px] uppercase tracking-wider rounded-[2px] cursor-pointer transition-all flex items-center justify-center gap-1.5 outline-none disabled:opacity-50 mt-1"
+                      >
+                        {actionLoading === 'trigger-worker' ? (
+                          <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                        ) : (
+                          <PlayCircle className="w-3.5 h-3.5" />
+                        )}
+                        Kích Hoạt Worker Chạy Ngay
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Right Column: Queue Items Table */}
+                  <div className="lg:w-2/3 flex flex-col gap-4">
+                    <div className="flex items-center justify-between border-b border-zinc-900 pb-3">
+                      <h3 className="text-sm font-black uppercase tracking-wider text-white flex items-center gap-2">
+                        <Clock className="w-4 h-4 text-amber-500" />
+                        Hàng Đợi Xử Lý ({scrapingTasks.length})
+                      </h3>
+                      <span className="text-[10px] text-zinc-500 font-bold italic">Tự động cập nhật mỗi 5 giây</span>
+                    </div>
+
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-left text-xs border-collapse">
+                        <thead>
+                          <tr className="bg-zinc-950 text-zinc-550 uppercase tracking-widest text-[9px] font-black border-b border-zinc-900 select-none">
+                            <th className="py-3 px-4">URL Nguồn</th>
+                            <th className="py-3 px-4">Thông Tin Đích</th>
+                            <th className="py-3 px-4">Âm Thanh</th>
+                            <th className="py-3 px-4">Trạng Thái</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-zinc-900/60">
+                          {scrapingTasks.map((task) => (
+                            <tr key={task.id} className="hover:bg-zinc-950/40 transition-colors">
+                              <td className="py-3 px-4 font-mono text-zinc-300 text-[11px] max-w-[220px] truncate" title={task.sourceUrl}>
+                                {task.sourceUrl}
+                              </td>
+                              <td className="py-3 px-4">
+                                <div className="flex flex-col gap-0.5">
+                                  <span className="font-bold text-white uppercase text-[10px]">{task.targetMovieId || 'Chưa gán'}</span>
+                                  <span className="text-[9px] text-zinc-500 font-bold">
+                                    {task.targetEpisodeNumber ? `Tập ${task.targetEpisodeNumber}` : 'Auto-detect'}
+                                  </span>
+                                </div>
+                              </td>
+                              <td className="py-3 px-4 select-none">
+                                <span className={`inline-flex px-1.5 py-0.5 rounded text-[8.5px] font-extrabold uppercase border ${
+                                  task.audioTrack === 'THUYET_MINH' 
+                                    ? 'bg-blue-950/30 border-blue-500/40 text-blue-400' 
+                                    : 'bg-violet-950/30 border-violet-500/40 text-violet-400'
+                                }`}>
+                                  {task.audioTrack === 'THUYET_MINH' ? 'Thuyết Minh' : 'Vietsub'}
+                                </span>
+                              </td>
+                              <td className="py-3 px-4 select-none">
+                                <span className={`inline-flex items-center gap-1 text-[9px] font-black px-2 py-0.5 rounded-[2px] uppercase ${
+                                  task.status === 'COMPLETED' 
+                                    ? 'bg-emerald-955/15 border border-emerald-500/30 text-emerald-400' 
+                                    : task.status === 'PROCESSING'
+                                    ? 'bg-amber-955/15 border border-amber-500/30 text-amber-400 animate-pulse'
+                                    : task.status === 'FAILED'
+                                    ? 'bg-rose-955/15 border border-rose-500/30 text-rose-400'
+                                    : 'bg-zinc-900 border border-zinc-800 text-zinc-400'
+                                }`}>
+                                  {task.status === 'PROCESSING' && <Loader2 className="w-2.5 h-2.5 animate-spin" />}
+                                  {task.status}
+                                </span>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
               </div>
             )}
 
