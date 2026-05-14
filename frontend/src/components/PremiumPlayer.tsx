@@ -11,7 +11,8 @@ import Hls from 'hls.js';
 import 'vidstack/styles/base.css';
 import { 
   Play, Pause, Volume2, VolumeX, Maximize2, Minimize2, 
-  SkipForward, SkipBack, Settings, Loader2, Sparkles
+  SkipForward, SkipBack, Settings, Loader2, Sparkles,
+  Bookmark, Star, Lightbulb, ToggleLeft, ToggleRight
 } from 'lucide-react';
 
 interface PremiumPlayerProps {
@@ -35,6 +36,8 @@ interface PremiumPlayerProps {
   onPrevEpisode?: () => void;
   onNextEpisode?: () => void;
   isWatchParty?: boolean;
+  movieId?: string;
+  episodeId?: string;
 }
 
 function formatResumeTime(seconds: number): string {
@@ -67,10 +70,13 @@ export default function PremiumPlayer({
   onEnded,
   onPrevEpisode,
   onNextEpisode,
-  isWatchParty = false
+  isWatchParty = false,
+  movieId,
+  episodeId
 }: PremiumPlayerProps) {
   const [selectedQuality, setSelectedQuality] = useState<'1080p' | '4K'>('1080p');
   const [showResumePrompt, setShowResumePrompt] = useState(false);
+  const [isCinemaMode, setIsCinemaMode] = useState(false);
 
   // Consolidate player refs to support both external forwarding and local control
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -126,130 +132,145 @@ export default function PremiumPlayer({
   const showVipOverlay = selectedQuality === '4K' && !videoUrl4k;
 
   return (
-    <div className="relative aspect-video w-full rounded-[4px] overflow-hidden border border-zinc-900/60 bg-black shadow-2xl group select-none">
-      <MediaPlayer
-        ref={activePlayerRef}
-        src={activeSrc}
-        title={title}
-        aspectRatio={16/9}
-        load="visible"
-        playsInline
-        crossOrigin="anonymous"
-        currentTime={initialProgress}
-        onPlay={onPlay}
-        onPause={onPause}
-        onEnded={onEnded}
-        onSeeked={() => {
-          if (onSeek && activePlayerRef?.current) {
-            onSeek(activePlayerRef.current.currentTime);
-          }
-        }}
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        onProviderSetup={(provider: any) => {
-          if (provider.type === 'hls') {
-            provider.library = Hls;
-            provider.config = {
-              enableWorker: true,
-              lowLatencyMode: true,
-              backBufferLength: 90,
-              maxBufferLength: 30,
-              maxMaxBufferLength: 60,
-              maxBufferSize: 60 * 1000 * 1000,
-            };
-          }
-        }}
-        className="w-full h-full"
-      >
-        <MediaOutlet className="w-full h-full object-contain" />
-        
-        {/* Render custom controls inside the player context */}
-        <CustomControls 
-          introStart={introStart}
-          introEnd={introEnd}
-          outroStart={outroStart}
-          outroEnd={outroEnd}
-          onProgressPulse={onProgressPulse}
-          selectedQuality={selectedQuality}
-          setSelectedQuality={handleSetQuality}
-          videoUrl4k={videoUrl4k}
-          onPrevEpisode={onPrevEpisode}
-          onNextEpisode={onNextEpisode}
+    <div className={`relative w-full transition-all duration-500 ${isCinemaMode ? 'fixed inset-0 z-[9999] bg-black flex items-center justify-center p-4 md:p-12 backdrop-blur-3xl' : ''}`}>
+      {/* Cinema Backdrop Overlay */}
+      {isCinemaMode && (
+        <div 
+          onClick={() => setIsCinemaMode(false)}
+          className="absolute inset-0 bg-black/95 z-[-1] cursor-pointer"
+          title="Nhấn bên ngoài để tắt chế độ rạp chiếu"
         />
-      </MediaPlayer>
-
-      {/* STUNNING GLASSMORPHIC VIP PAYWALL OVERLAY */}
-      {showVipOverlay && (
-        <div className="absolute inset-0 z-50 flex flex-col items-center justify-center p-8 text-center bg-[#050508]/90 backdrop-blur-md transition-all duration-300">
-          {/* Neon Purple Pulsing Shield or Star Icon */}
-          <div className="relative mb-6">
-            <div className="absolute inset-0 bg-violet-500/35 rounded-full blur-xl scale-125 animate-pulse"></div>
-            <div className="relative p-5 rounded-full bg-gradient-to-tr from-amber-500 to-violet-600 border border-amber-300/30 shadow-[0_0_30px_rgba(139,92,246,0.5)]">
-              <Sparkles className="w-10 h-10 text-white animate-pulse" />
-            </div>
-          </div>
-
-          <h2 className="text-xl md:text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-amber-400 via-pink-400 to-violet-500 uppercase tracking-widest mb-3.5">
-            Trải Nghiệm 4K Ultra-HD VIP
-          </h2>
-          
-          <p className="text-zinc-300 text-xs md:text-sm max-w-lg leading-relaxed mb-8">
-            Chất lượng hình ảnh siêu sắc nét 4K chỉ dành riêng cho các thành viên VIP của Donghua3D. 
-            Bạn có thể tích lũy điểm uy tín bằng cách đóng góp đánh giá khách quan để kích hoạt VIP miễn phí!
-          </p>
-
-          <div className="flex flex-col sm:flex-row items-center gap-4">
-            <button
-              onClick={() => {
-                alert('Hệ thống thăng hạng VIP đang đồng bộ với ví & điểm uy tín của bạn!');
-              }}
-              className="px-6 py-3 rounded-[4px] bg-gradient-to-r from-amber-500 to-violet-600 text-xs font-black uppercase tracking-wider text-white border-0 cursor-pointer shadow-[0_0_20px_rgba(139,92,246,0.3)] hover:scale-105 active:scale-95 transition-all outline-none"
-            >
-              Kích hoạt VIP / Nâng cấp ngay
-            </button>
-
-            <button
-              onClick={() => setSelectedQuality('1080p')}
-              className="px-6 py-3 rounded-[4px] bg-transparent border border-zinc-700 hover:border-zinc-500 text-xs font-black uppercase tracking-wider text-zinc-400 hover:text-white cursor-pointer transition-all outline-none"
-            >
-              Quay lại 1080p Bản Thường
-            </button>
-          </div>
-        </div>
       )}
 
-      {/* STUNNING RESUME WATCH PROGRESS PROMPT OVERLAY */}
-      {showResumePrompt && !showVipOverlay && (
-        <div className="absolute inset-0 z-40 flex items-center justify-center bg-black/60 backdrop-blur-md animate-fade-in select-none">
-          <div className="p-6 md:p-8 bg-zinc-950/95 border border-violet-500/30 rounded-[4px] text-center max-w-sm w-full mx-4 shadow-[0_0_50px_rgba(139,92,246,0.35)] flex flex-col items-center">
-            <div className="relative mb-5 flex items-center justify-center">
-              <div className="absolute inset-0 bg-violet-500/25 rounded-full blur-xl scale-125 animate-pulse"></div>
-              <div className="relative p-4 rounded-full bg-violet-600/10 border border-violet-500/20">
-                <Sparkles className="w-8 h-8 text-violet-400" />
+      <div className={`relative aspect-video w-full rounded-[4px] overflow-hidden border border-zinc-900/60 bg-black shadow-2xl group select-none ${isCinemaMode ? 'max-w-7xl max-h-[85vh] border-violet-500/30 shadow-[0_0_80px_rgba(139,92,246,0.25)]' : ''}`}>
+        <MediaPlayer
+          ref={activePlayerRef}
+          src={activeSrc}
+          title={title}
+          aspectRatio={16/9}
+          load="visible"
+          playsInline
+          crossOrigin="anonymous"
+          currentTime={initialProgress}
+          onPlay={onPlay}
+          onPause={onPause}
+          onEnded={onEnded}
+          onSeeked={() => {
+            if (onSeek && activePlayerRef?.current) {
+              onSeek(activePlayerRef.current.currentTime);
+            }
+          }}
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          onProviderSetup={(provider: any) => {
+            if (provider.type === 'hls') {
+              provider.library = Hls;
+              provider.config = {
+                enableWorker: true,
+                lowLatencyMode: true,
+                backBufferLength: 90,
+                maxBufferLength: 30,
+                maxMaxBufferLength: 60,
+                maxBufferSize: 60 * 1000 * 1000,
+              };
+            }
+          }}
+          className="w-full h-full"
+        >
+          <MediaOutlet className="w-full h-full object-contain" />
+          
+          {/* Render custom controls inside the player context */}
+          <CustomControls 
+            introStart={introStart}
+            introEnd={introEnd}
+            outroStart={outroStart}
+            outroEnd={outroEnd}
+            onProgressPulse={onProgressPulse}
+            selectedQuality={selectedQuality}
+            setSelectedQuality={handleSetQuality}
+            videoUrl4k={videoUrl4k}
+            onPrevEpisode={onPrevEpisode}
+            onNextEpisode={onNextEpisode}
+            isCinemaMode={isCinemaMode}
+            setIsCinemaMode={setIsCinemaMode}
+            movieId={movieId}
+            episodeId={episodeId}
+          />
+        </MediaPlayer>
+
+        {/* STUNNING GLASSMORPHIC VIP PAYWALL OVERLAY */}
+        {showVipOverlay && (
+          <div className="absolute inset-0 z-50 flex flex-col items-center justify-center p-8 text-center bg-[#050508]/90 backdrop-blur-md transition-all duration-300">
+            {/* Neon Purple Pulsing Shield or Star Icon */}
+            <div className="relative mb-6">
+              <div className="absolute inset-0 bg-violet-500/35 rounded-full blur-xl scale-125 animate-pulse"></div>
+              <div className="relative p-5 rounded-full bg-gradient-to-tr from-amber-500 to-violet-600 border border-amber-300/30 shadow-[0_0_30px_rgba(139,92,246,0.5)]">
+                <Sparkles className="w-10 h-10 text-white animate-pulse" />
               </div>
             </div>
 
-            <h3 className="text-sm font-black text-white uppercase tracking-wider mb-2">Xem Tiếp Tập Phim</h3>
-            <p className="text-xs text-zinc-300 leading-relaxed mb-6">
-              Bạn đang xem dở tập này tại <span className="text-violet-400 font-extrabold">{formatResumeTime(initialProgress)}</span>. Bạn có muốn xem tiếp từ vị trí này không?
+            <h2 className="text-xl md:text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-amber-400 via-pink-400 to-violet-500 uppercase tracking-widest mb-3.5">
+              Trải Nghiệm 4K Ultra-HD VIP
+            </h2>
+            
+            <p className="text-zinc-300 text-xs md:text-sm max-w-lg leading-relaxed mb-8">
+              Chất lượng hình ảnh siêu sắc nét 4K chỉ dành riêng cho các thành viên VIP của Donghua3D. 
+              Bạn có thể tích lũy điểm uy tín bằng cách đóng góp đánh giá khách quan để kích hoạt VIP miễn phí!
             </p>
 
-            <div className="flex items-center gap-3 w-full">
+            <div className="flex flex-col sm:flex-row items-center gap-4">
               <button
-                onClick={handleResume}
-                className="flex-grow py-3 bg-violet-600 hover:bg-violet-700 text-white font-extrabold text-[10px] uppercase tracking-wider rounded-[2px] cursor-pointer transition-all border-0 outline-none shadow-md hover:shadow-violet-600/30"
+                onClick={() => {
+                  alert('Hệ thống thăng hạng VIP đang đồng bộ với ví & điểm uy tín của bạn!');
+                }}
+                className="px-6 py-3 rounded-[4px] bg-gradient-to-r from-amber-500 to-violet-600 text-xs font-black uppercase tracking-wider text-white border-0 cursor-pointer shadow-[0_0_20px_rgba(139,92,246,0.3)] hover:scale-105 active:scale-95 transition-all outline-none"
               >
-                Xem tiếp
+                Kích hoạt VIP / Nâng cấp ngay
               </button>
+
               <button
-                onClick={handleStartOver}
-                className="flex-grow py-3 bg-transparent border border-zinc-850 hover:border-zinc-700 text-zinc-400 hover:text-white font-extrabold text-[10px] uppercase tracking-wider rounded-[2px] cursor-pointer transition-all outline-none"
+                onClick={() => setSelectedQuality('1080p')}
+                className="px-6 py-3 rounded-[4px] bg-transparent border border-zinc-700 hover:border-zinc-500 text-xs font-black uppercase tracking-wider text-zinc-400 hover:text-white cursor-pointer transition-all outline-none"
               >
-                Xem từ đầu
+                Quay lại 1080p Bản Thường
               </button>
             </div>
           </div>
-        </div>
-      )}
+        )}
+
+        {/* STUNNING RESUME WATCH PROGRESS PROMPT OVERLAY */}
+        {showResumePrompt && !showVipOverlay && (
+          <div className="absolute inset-0 z-40 flex items-center justify-center bg-black/60 backdrop-blur-md animate-fade-in select-none">
+            <div className="p-6 md:p-8 bg-zinc-950/95 border border-violet-500/30 rounded-[4px] text-center max-w-sm w-full mx-4 shadow-[0_0_50px_rgba(139,92,246,0.35)] flex flex-col items-center">
+              <div className="relative mb-5 flex items-center justify-center">
+                <div className="absolute inset-0 bg-violet-500/25 rounded-full blur-xl scale-125 animate-pulse"></div>
+                <div className="relative p-4 rounded-full bg-violet-600/10 border border-violet-500/20">
+                  <Sparkles className="w-8 h-8 text-violet-400" />
+                </div>
+              </div>
+
+              <h3 className="text-sm font-black text-white uppercase tracking-wider mb-2">Xem Tiếp Tập Phim</h3>
+              <p className="text-xs text-zinc-300 leading-relaxed mb-6">
+                Bạn đang xem dở tập này tại <span className="text-violet-400 font-extrabold">{formatResumeTime(initialProgress)}</span>. Bạn có muốn xem tiếp từ vị trí này không?
+              </p>
+
+              <div className="flex items-center gap-3 w-full">
+                <button
+                  onClick={handleResume}
+                  className="flex-grow py-3 bg-violet-600 hover:bg-violet-700 text-white font-extrabold text-[10px] uppercase tracking-wider rounded-[2px] cursor-pointer transition-all border-0 outline-none shadow-md hover:shadow-violet-600/30"
+                >
+                  Xem tiếp
+                </button>
+                <button
+                  onClick={handleStartOver}
+                  className="flex-grow py-3 bg-transparent border border-zinc-850 hover:border-zinc-700 text-zinc-400 hover:text-white font-extrabold text-[10px] uppercase tracking-wider rounded-[2px] cursor-pointer transition-all outline-none"
+                >
+                  Xem từ đầu
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
@@ -265,6 +286,10 @@ interface CustomControlsProps {
   videoUrl4k?: string | null;
   onPrevEpisode?: () => void;
   onNextEpisode?: () => void;
+  isCinemaMode: boolean;
+  setIsCinemaMode: (val: boolean) => void;
+  movieId?: string;
+  episodeId?: string;
 }
 
 function CustomControls({
@@ -277,7 +302,11 @@ function CustomControls({
   setSelectedQuality,
   videoUrl4k,
   onPrevEpisode,
-  onNextEpisode
+  onNextEpisode,
+  isCinemaMode,
+  setIsCinemaMode,
+  movieId,
+  episodeId
 }: CustomControlsProps) {
   const remote = useMediaRemote();
 
@@ -294,6 +323,12 @@ function CustomControls({
 
   // Local State to track mouse inactivity for hiding cursor
   const [isMouseInactive, setIsMouseInactive] = useState(false);
+
+  // Community & Interactive Toolbar Local States
+  const [autoSkipIntro, setAutoSkipIntro] = useState(false);
+  const [isFollowed, setIsFollowed] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
+  const [playbackSpeed, setPlaybackSpeed] = useState(1);
 
   // Monitor mouse activity to auto-hide cursor in fullscreen mode
   useEffect(() => {
@@ -334,22 +369,46 @@ function CustomControls({
     }
   }, [fullscreen, isMouseInactive]);
 
-  // UI Local States (Only settings and speeds, skip states are computed on render!)
-  const [showSettings, setShowSettings] = useState(false);
-  const [playbackSpeed, setPlaybackSpeed] = useState(1);
-
-  // Load saved playback speed from localStorage on mount (hydration-safe)
+  // Load saved configurations from localStorage on mount (hydration-safe)
   useEffect(() => {
-    const saved = localStorage.getItem('donghua3d_playback_speed');
-    if (saved && remote) {
-      const parsed = parseFloat(saved);
+    const savedSpeed = localStorage.getItem('donghua3d_playback_speed');
+    if (savedSpeed && remote) {
+      const parsed = parseFloat(savedSpeed);
       if (!isNaN(parsed)) {
         // eslint-disable-next-line react-hooks/set-state-in-effect
         setPlaybackSpeed(parsed);
         remote.changePlaybackRate(parsed);
       }
     }
-  }, [remote]);
+
+    const savedAutoSkip = localStorage.getItem('donghua3d_auto_skip_intro');
+    if (savedAutoSkip === 'true') {
+      setAutoSkipIntro(true);
+    }
+
+    if (movieId) {
+      const savedFollow = localStorage.getItem(`donghua3d_followed_${movieId}`);
+      if (savedFollow === 'true') {
+        setIsFollowed(true);
+      }
+    }
+  }, [remote, movieId]);
+
+  // Declared skipping functions with useCallback before useEffect keydown
+  const handleSkipIntro = useCallback(() => {
+    remote.seek(introEnd);
+  }, [remote, introEnd]);
+
+  const handleSkipOutro = useCallback(() => {
+    remote.seek(outroEnd);
+  }, [remote, outroEnd]);
+
+  // Auto-skip feature execution when enabled
+  useEffect(() => {
+    if (autoSkipIntro && currentTime >= introStart && currentTime <= introEnd && introEnd > introStart) {
+      handleSkipIntro();
+    }
+  }, [currentTime, autoSkipIntro, introStart, introEnd, handleSkipIntro]);
 
   // Compute Skip buttons visibility dynamically on render - ZERO state overhead, zero re-render loops!
   const showIntroSkip = currentTime >= introStart && currentTime <= introEnd && introEnd > introStart;
@@ -370,15 +429,6 @@ function CustomControls({
       }
     }
   }, [paused, currentTime, duration, onProgressPulse]);
-
-  // Declared skipping functions with useCallback before useEffect keydown
-  const handleSkipIntro = useCallback(() => {
-    remote.seek(introEnd);
-  }, [remote, introEnd]);
-
-  const handleSkipOutro = useCallback(() => {
-    remote.seek(outroEnd);
-  }, [remote, outroEnd]);
 
   // Keyboard Shortcuts for skip buttons & general video controls (PC user enhancement)
   useEffect(() => {
@@ -497,6 +547,33 @@ function CustomControls({
     setShowSettings(false);
   };
 
+  const handleToggleAutoSkip = () => {
+    const newVal = !autoSkipIntro;
+    setAutoSkipIntro(newVal);
+    localStorage.setItem('donghua3d_auto_skip_intro', newVal.toString());
+  };
+
+  const handleToggleFollow = () => {
+    const newVal = !isFollowed;
+    setIsFollowed(newVal);
+    if (movieId) {
+      localStorage.setItem(`donghua3d_followed_${movieId}`, newVal.toString());
+    }
+    alert(newVal ? `Đã thêm phim (ID: ${movieId || 'N/A'}) vào danh sách Theo dõi thành công!` : 'Đã bỏ theo dõi phim.');
+  };
+
+  const handleRatePrompt = () => {
+    const score = prompt(`Nhập điểm số đánh giá tập phim (${episodeId || 'Hiện tại'}) từ 1 đến 10:`, '10');
+    if (score) {
+      const num = parseInt(score, 10);
+      if (!isNaN(num) && num >= 1 && num <= 10) {
+        alert(`Cảm ơn bạn đã đánh giá ${num}/10 điểm! Đánh giá đã được ghi nhận vào hệ thống.`);
+      } else {
+        alert('Điểm số không hợp lệ. Vui lòng nhập từ 1 đến 10.');
+      }
+    }
+  };
+
   const formatTime = (seconds: number) => {
     const m = Math.floor(seconds / 60);
     const s = Math.floor(seconds % 60);
@@ -530,23 +607,23 @@ function CustomControls({
       </div>
 
       {/* 2. Floating skip intro/outro actions */}
-      {showIntroSkip && (
+      {showIntroSkip && !autoSkipIntro && (
         <button
           onClick={handleSkipIntro}
-          className="absolute bottom-24 left-8 z-20 flex items-center gap-2 py-2.5 px-5 rounded-[4px] bg-[#0c0c10]/85 border border-violet-500/40 text-white font-extrabold font-sans text-xs tracking-wider uppercase shadow-[0_0_20px_rgba(139,92,246,0.3)] hover:bg-violet-600 hover:border-violet-400 active:scale-95 transition-all duration-200 animate-pulse cursor-pointer outline-none"
+          className="absolute bottom-28 left-8 z-20 flex items-center gap-2 py-2.5 px-5 rounded-[4px] bg-[#0c0c10]/85 border border-violet-500/40 text-white font-extrabold font-sans text-xs tracking-wider uppercase shadow-[0_0_20px_rgba(139,92,246,0.3)] hover:bg-violet-600 hover:border-violet-400 active:scale-95 transition-all duration-200 animate-pulse cursor-pointer outline-none"
         >
           <SkipForward className="w-3.5 h-3.5" />
-          BỎ QUA GIỚI THIỆU (S)
+          Bỏ Qua Giới Thiệu (S)
         </button>
       )}
 
       {showOutroSkip && (
         <button
           onClick={handleSkipOutro}
-          className="absolute bottom-24 right-8 z-20 flex items-center gap-2 py-2.5 px-5 rounded-[4px] bg-[#0c0c10]/85 border border-violet-500/40 text-white font-extrabold font-sans text-xs tracking-wider uppercase shadow-[0_0_20px_rgba(139,92,246,0.3)] hover:bg-violet-600 hover:border-violet-400 active:scale-95 transition-all duration-200 animate-pulse cursor-pointer outline-none"
+          className="absolute bottom-28 right-8 z-20 flex items-center gap-2 py-2.5 px-5 rounded-[4px] bg-[#0c0c10]/85 border border-violet-500/40 text-white font-extrabold font-sans text-xs tracking-wider uppercase shadow-[0_0_20px_rgba(139,92,246,0.3)] hover:bg-violet-600 hover:border-violet-400 active:scale-95 transition-all duration-200 animate-pulse cursor-pointer outline-none"
         >
           <SkipForward className="w-3.5 h-3.5" />
-          BỎ QUA KẾT THÚC (E)
+          Bỏ Qua Kết Thúc (E)
         </button>
       )}
 
@@ -635,6 +712,59 @@ function CustomControls({
             </span>
           </div>
 
+          {/* Interactive Community Actions Block (Benchmarked vs Hoathinh3D) */}
+          <div className="hidden lg:flex items-center gap-3 bg-white/5 border border-white/10 px-3 py-1.5 rounded-[4px] backdrop-blur-md">
+            {/* Follow / Watchlist Button */}
+            <button
+              onClick={handleToggleFollow}
+              className={`flex items-center gap-1.5 px-2.5 py-1 rounded-[2px] text-xs font-bold transition-all cursor-pointer outline-none border-0 ${isFollowed ? 'bg-violet-600 text-white shadow-[0_0_12px_rgba(139,92,246,0.4)]' : 'bg-transparent text-zinc-300 hover:bg-white/10 hover:text-white'}`}
+              title="Thêm vào danh sách theo dõi"
+            >
+              <Bookmark className={`w-3.5 h-3.5 ${isFollowed ? 'fill-white' : ''}`} />
+              <span>{isFollowed ? 'Đã Theo dõi' : 'Theo dõi'}</span>
+            </button>
+
+            <span className="text-zinc-700">|</span>
+
+            {/* Rate Prompt Button */}
+            <button
+              onClick={handleRatePrompt}
+              className="flex items-center gap-1.5 px-2.5 py-1 bg-transparent hover:bg-white/10 text-zinc-300 hover:text-white rounded-[2px] text-xs font-bold transition-all cursor-pointer outline-none border-0"
+              title="Đánh giá phim"
+            >
+              <Star className="w-3.5 h-3.5 text-amber-400 fill-amber-400" />
+              <span>Đánh giá</span>
+            </button>
+
+            <span className="text-zinc-700">|</span>
+
+            {/* Auto Skip Toggle */}
+            <button
+              onClick={handleToggleAutoSkip}
+              className="flex items-center gap-1.5 px-2.5 py-1 bg-transparent hover:bg-white/10 text-zinc-300 hover:text-white rounded-[2px] text-xs font-bold transition-all cursor-pointer outline-none border-0"
+              title="Tự động tua qua nhạc dạo Intro/Outro"
+            >
+              <span>Auto-Skip</span>
+              {autoSkipIntro ? (
+                <ToggleRight className="w-5 h-5 text-violet-400" />
+              ) : (
+                <ToggleLeft className="w-5 h-5 text-zinc-500" />
+              )}
+            </button>
+
+            <span className="text-zinc-700">|</span>
+
+            {/* Cinema Light Toggle */}
+            <button
+              onClick={() => setIsCinemaMode(!isCinemaMode)}
+              className={`flex items-center gap-1.5 px-2.5 py-1 rounded-[2px] text-xs font-bold transition-all cursor-pointer outline-none border-0 ${isCinemaMode ? 'bg-amber-500 text-black shadow-[0_0_12px_rgba(245,158,11,0.4)]' : 'bg-transparent text-zinc-300 hover:bg-white/10 hover:text-white'}`}
+              title="Bật/tắt chế độ rạp chiếu (Tắt đèn)"
+            >
+              <Lightbulb className="w-3.5 h-3.5" />
+              <span>{isCinemaMode ? 'Bật đèn' : 'Tắt đèn'}</span>
+            </button>
+          </div>
+
           <div className="flex items-center gap-4">
             {/* Settings trigger */}
             <div className="relative">
@@ -647,7 +777,7 @@ function CustomControls({
 
               {/* Glassmorphic Settings menu popup */}
               {showSettings && (
-                <div className="absolute bottom-11 right-0 w-48 bg-[#0c0c10]/95 backdrop-blur-md border border-zinc-900 rounded-[4px] p-2.5 flex flex-col gap-2.5 shadow-2xl z-30 select-none">
+                <div className="absolute bottom-11 right-0 w-52 bg-[#0c0c10]/95 backdrop-blur-md border border-zinc-900 rounded-[4px] p-2.5 flex flex-col gap-2.5 shadow-2xl z-30 select-none">
                   {/* Quality Settings Section */}
                   <div className="flex flex-col gap-1">
                     <span className="text-[9px] font-black text-zinc-550 uppercase tracking-widest pl-1.5 pb-1">Chất lượng</span>
