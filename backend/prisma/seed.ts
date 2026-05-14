@@ -1,4 +1,4 @@
-import { PrismaClient, Role, Tier } from '@prisma/client';
+import { PrismaClient, Role, Tier, AudioTrack } from '@prisma/client';
 import * as bcrypt from 'bcryptjs';
 
 const prisma = new PrismaClient();
@@ -65,6 +65,7 @@ async function main() {
       imdbRating: 8.2,
       posterUrl: '/static/uploads/posters/perfect-world.jpg',
       bannerUrl: '/static/uploads/banners/perfect-world-banner.jpg',
+      audioTrack: AudioTrack.VIETSUB,
       episodes: [
         {
           episodeNumber: 1,
@@ -77,6 +78,7 @@ async function main() {
           outroStart: 1100.0,
           outroEnd: 1200.0,
           thumbnail: '/static/uploads/thumbnails/perfect-world-ep1.jpg',
+          audioTrack: AudioTrack.VIETSUB,
         },
         {
           episodeNumber: 2,
@@ -89,6 +91,7 @@ async function main() {
           outroStart: 1080.0,
           outroEnd: 1180.0,
           thumbnail: '/static/uploads/thumbnails/perfect-world-ep2.jpg',
+          audioTrack: AudioTrack.VIETSUB,
         }
       ]
     },
@@ -101,6 +104,7 @@ async function main() {
       imdbRating: 8.6,
       posterUrl: '/static/uploads/posters/soul-land.jpg',
       bannerUrl: '/static/uploads/banners/soul-land-banner.jpg',
+      audioTrack: AudioTrack.THUYET_MINH,
       episodes: [
         {
           episodeNumber: 1,
@@ -113,6 +117,7 @@ async function main() {
           outroStart: 1200.0,
           outroEnd: 1300.0,
           thumbnail: '/static/uploads/thumbnails/soul-land-ep1.jpg',
+          audioTrack: AudioTrack.THUYET_MINH,
         }
       ]
     },
@@ -125,6 +130,7 @@ async function main() {
       imdbRating: 9.0,
       posterUrl: '/static/uploads/posters/mortals-journey.jpg',
       bannerUrl: '/static/uploads/banners/mortals-journey-banner.jpg',
+      audioTrack: AudioTrack.VIETSUB,
       episodes: [
         {
           episodeNumber: 1,
@@ -137,6 +143,7 @@ async function main() {
           outroStart: 1150.0,
           outroEnd: 1250.0,
           thumbnail: '/static/uploads/thumbnails/mortals-journey-ep1.jpg',
+          audioTrack: AudioTrack.VIETSUB,
         }
       ]
     }
@@ -159,6 +166,7 @@ async function main() {
           posterUrl: item.posterUrl,
           bannerUrl: item.bannerUrl,
           imdbRating: item.imdbRating,
+          audioTrack: item.audioTrack,
         },
       });
       console.log(`✅ Movie created: ${item.title}`);
@@ -167,9 +175,10 @@ async function main() {
         where: { id: existingMovie.id },
         data: {
           imdbRating: item.imdbRating,
+          audioTrack: item.audioTrack,
         },
       });
-      console.log(`ℹ️ Movie updated with IMDb: ${item.title}`);
+      console.log(`ℹ️ Movie updated with audioTrack: ${item.title}`);
     }
 
     // Seed Episodes
@@ -197,15 +206,19 @@ async function main() {
             outroStart: ep.outroStart,
             outroEnd: ep.outroEnd,
             thumbnail: ep.thumbnail,
+            audioTrack: ep.audioTrack,
           },
         });
         console.log(`  └─ ✅ Episode ${ep.episodeNumber} created`);
       } else {
         await prisma.episode.update({
           where: { id: existingEp.id },
-          data: { videoUrl: ep.videoUrl }
+          data: { 
+            videoUrl: ep.videoUrl,
+            audioTrack: ep.audioTrack 
+          }
         });
-        console.log(`  └─ 🔄 Episode ${ep.episodeNumber} updated with real stream link`);
+        console.log(`  └─ 🔄 Episode ${ep.episodeNumber} updated with real stream link & audioTrack`);
       }
     }
 

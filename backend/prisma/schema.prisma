@@ -7,7 +7,7 @@ generator client {
   provider = "prisma-client-js"
 }
 
-// Custom Enums (matching 02_data_spec.md)
+// Custom Enums (matching 02_data_spec.md & Phase 2 Upgrades)
 enum Role {
   USER
   EXPERT
@@ -26,6 +26,19 @@ enum Tier {
 enum RatingType {
   USER
   EXPERT
+}
+
+enum AudioTrack {
+  VIETSUB
+  THUYET_MINH
+  DUAL_AUDIO
+}
+
+enum ScrapingStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
 }
 
 // 1. User Entity Model
@@ -62,6 +75,7 @@ model Movie {
   expertRating   Float                  @default(0.0)
   audienceRating Float                  @default(0.0)
   imdbRating     Float?
+  audioTrack     AudioTrack             @default(VIETSUB)
   createdAt      DateTime               @default(now()) @db.Timestamptz
   updatedAt      DateTime               @updatedAt @db.Timestamptz
   
@@ -76,6 +90,7 @@ model Movie {
 
   @@index([releaseYear(sort: Desc), rating(sort: Desc)], name: "idx_movie_release_rating")
   @@index([viewsCount(sort: Desc)], name: "idx_movie_popularity")
+  @@index([audioTrack], name: "idx_movie_audio_track")
 }
 
 // 2b. MovieSeries Entity Model
@@ -101,6 +116,7 @@ model Episode {
   outroStart     Float          @default(0.0) // Video second offset where ED song starts
   outroEnd       Float          @default(0.0) // Video second offset where ED song ends
   thumbnail      String?        @db.VarChar(512) // Video thumbnail screen grab
+  audioTrack     AudioTrack     @default(VIETSUB)
   rating         Float          @default(0.0)
   expertRating   Float          @default(0.0)
   audienceRating Float          @default(0.0)
@@ -113,6 +129,7 @@ model Episode {
 
   @@unique([movieId, episodeNumber], name: "unique_movie_episode")
   @@index([movieId, episodeNumber(sort: Asc)], name: "idx_episode_movie_number")
+  @@index([audioTrack], name: "idx_episode_audio_track")
 }
 
 // 4. Rating Entity Model
@@ -223,4 +240,20 @@ model ScrapingLog {
   syncedCount Int       @default(0)
   results     Json      @default("[]") // JSON list of detailed messages
   error       String?   @db.Text
+}
+
+// 11. ScrapingQueue Staging Model (Hybrid Pipeline Phase 2)
+model ScrapingQueue {
+  id          String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  sourceUrl   String         @db.VarChar(1024)
+  title       String         @db.VarChar(255)
+  episodeNum  Int
+  audioTrack  AudioTrack     @default(VIETSUB)
+  status      ScrapingStatus @default(PENDING)
+  attempts    Int            @default(0)
+  errorLog    String?        @db.Text
+  createdAt   DateTime       @default(now()) @db.Timestamptz
+  updatedAt   DateTime       @updatedAt @db.Timestamptz
+
+  @@index([status, createdAt], name: "idx_scraping_queue_status")
 }
