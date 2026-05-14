@@ -11,7 +11,8 @@
     "prisma:migrate": "prisma migrate dev",
     "prisma:studio": "prisma studio",
     "seed": "ts-node prisma/seed.ts",
-    "update-studios": "ts-node src/scripts/update_studios.ts"
+    "update-studios": "ts-node src/scripts/update_studios.ts",
+    "auto-update": "ts-node src/scripts/auto_update_episodes.ts"
   },
   "prisma": {
     "seed": "ts-node prisma/seed.ts"
