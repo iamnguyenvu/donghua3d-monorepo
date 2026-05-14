@@ -57,8 +57,8 @@ async function main() {
   // 3. Seed Sample Movies & Global Leaderboard States
   const sampleMovies = [
     {
-      title: 'Perfect World',
-      altTitles: ['Thế Giới Hoàn Mỹ', '完美世界'],
+      title: 'Thế Giới Hoàn Mỹ',
+      altTitles: ['Perfect World', '完美世界'],
       description: 'In the desolate wilderness, a small child raised by an orphan village rises to conquer the heavens.',
       studio: 'Foch Film',
       releaseYear: 2021,
@@ -96,8 +96,8 @@ async function main() {
       ]
     },
     {
-      title: 'Soul Land',
-      altTitles: ['Đấu La Đại Lục', '斗罗大陆'],
+      title: 'Đấu La Đại Lục',
+      altTitles: ['Soul Land', '斗罗大陆'],
       description: 'Tang San, having committed a forbidden crime in his martial sect, reincarnates in Soul Land with twin high-tier spirits.',
       studio: 'Sparkly Key Animation Studio',
       releaseYear: 2018,
@@ -122,8 +122,8 @@ async function main() {
       ]
     },
     {
-      title: 'A Record of a Mortals Journey to Immortality',
-      altTitles: ['Phàm Nhân Tu Tiên', '凡人修仙传'],
+      title: 'Phàm Nhân Tu Tiên',
+      altTitles: ['A Record of a Mortals Journey to Immortality', '凡人修仙传'],
       description: 'An ordinary village boy accidentally gains entry into an esoteric sect and begins his journey of cautious cultivation.',
       studio: 'Original Force',
       releaseYear: 2020,
@@ -148,8 +148,8 @@ async function main() {
       ]
     },
     {
-      title: 'The Avenue of Heaven',
-      altTitles: ['Đại Đạo Triều Thiên', '大道朝天', 'Da Dao Chao Tian'],
+      title: 'Đại Đạo Triều Thiên',
+      altTitles: ['The Avenue of Heaven', '大道朝天', 'Da Dao Chao Tian'],
       description: 'Cốt truyện xoay quanh hành trình tu đạo đỉnh cao của Tỉnh Cửu tại Thanh Sơn Tông. Bề ngoài biếng nhác nhưng mang trong mình tâm niệm kiên định với kiếm đạo trường sinh.',
       studio: 'Bilibili Pictures',
       releaseYear: 2024,

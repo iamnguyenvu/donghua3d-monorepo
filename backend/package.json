@@ -12,7 +12,8 @@
     "prisma:studio": "prisma studio",
     "seed": "ts-node prisma/seed.ts",
     "update-studios": "ts-node src/scripts/update_studios.ts",
-    "auto-update": "ts-node src/scripts/auto_update_episodes.ts"
+    "auto-update": "ts-node src/scripts/auto_update_episodes.ts",
+    "purge-unwanted": "ts-node src/scripts/purge_live_action_and_fix_slugs.ts"
   },
   "prisma": {
     "seed": "ts-node prisma/seed.ts"

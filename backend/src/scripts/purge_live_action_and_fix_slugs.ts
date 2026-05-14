@@ -88,17 +88,18 @@ async function run() {
       reason = 'Bản truyền hình người đóng (Eternal Brotherhood - 40 tập)';
     }
 
-    // 4.5. Kiểm tra các mục cụ thể theo yêu cầu người dùng: "Đấu Phá Thương Khung Ngoại Truyện", "Đấu Phá Thương Khung OVA 4: Duyên Khởi" & "Nhất Niệm Vĩnh Hằng" live-action
+    // 4.5. Kiểm tra các mục cụ thể theo yêu cầu người dùng: "Đấu Phá Thương Khung Ngoại Truyện", "Đấu Phá Thương Khung OVA 4: Duyên Khởi", "Nhất Niệm Vĩnh Hằng" 2D/Live-action và các bản placeholder tiếng Anh cũ
     else if (
-      m.id === '83b70af2-3640-47f8-a1a6-abbb6efb62ac' ||
-      m.id === 'be76a355-b898-4f42-b207-99c43391f0de' ||
-      m.id === '9b07d166-b240-4b8f-adcf-462691f51e4f' ||
       titleLower === 'đấu phá thương khung ngoại truyện' ||
       titleLower === 'đấu phá thương khung ova 4: duyên khởi' ||
-      (titleLower === 'nhất niệm vĩnh hằng' && descriptionLower.includes('phim truyền hình'))
+      (titleLower === 'nhất niệm vĩnh hằng' && (descriptionLower.includes('phim truyền hình') || altTitlesLower.includes('an eternal thought'))) ||
+      titleLower === 'perfect world' ||
+      titleLower === 'a record of a mortals journey to immortality' ||
+      titleLower === 'the avenue of heaven' ||
+      titleLower === 'soul land'
     ) {
       isLiveAction = true;
-      reason = 'Xóa theo yêu cầu người dùng (Bản truyền hình người đóng Nhất Niệm Vĩnh Hằng)';
+      reason = `Xóa theo yêu cầu chuẩn hóa danh mục (Bản trùng lặp/2D/Tiếng Anh cũ: "${m.title}")`;
     }
 
     // 5. Kiểm tra các phim thuộc danh sách từ khóa Live-Action chung
