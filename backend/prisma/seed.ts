@@ -146,6 +146,32 @@ async function main() {
           audioTrack: AudioTrack.VIETSUB,
         }
       ]
+    },
+    {
+      title: 'The Avenue of Heaven',
+      altTitles: ['Đại Đạo Triều Thiên', '大道朝天', 'Da Dao Chao Tian'],
+      description: 'Cốt truyện xoay quanh hành trình tu đạo đỉnh cao của Tỉnh Cửu tại Thanh Sơn Tông. Bề ngoài biếng nhác nhưng mang trong mình tâm niệm kiên định với kiếm đạo trường sinh.',
+      studio: 'Bilibili Pictures',
+      releaseYear: 2024,
+      imdbRating: 8.8,
+      posterUrl: 'https://cdn.hoathinh3d.co/uploads/posters/dai-dao-trieu-thien.jpg',
+      bannerUrl: 'https://cdn.hoathinh3d.co/uploads/banners/dai-dao-trieu-thien-banner.jpg',
+      audioTrack: AudioTrack.VIETSUB,
+      episodes: [
+        {
+          episodeNumber: 1,
+          title: 'Tập 1: Thanh Sơn Tông Tỉnh Cửu',
+          description: 'Tỉnh Cửu gia nhập Thanh Sơn Tông, phô diễn ngộ tính trác tuyệt vượt xa các đệ tử đồng trang lứa.',
+          videoUrl: 'https://s5.phim1280.tv/20250303/xZEA0QQm/index.m3u8',
+          duration: 1250.0,
+          introStart: 12.0,
+          introEnd: 98.0,
+          outroStart: 1150.0,
+          outroEnd: 1250.0,
+          thumbnail: 'https://cdn.hoathinh3d.co/uploads/thumbnails/dai-dao-trieu-thien-ep1.jpg',
+          audioTrack: AudioTrack.VIETSUB,
+        }
+      ]
     }
   ];
 

@@ -398,6 +398,7 @@ export function getPosterPosition(title: string): string {
   if (t.includes('to be hero')) return 'object-center';
   if (t.includes('chúa tể huyền bí')) return 'object-[50%_25%]';
   if (t.includes('mục thần ký')) return 'object-[50%_25%]';
+  if (t.includes('đại đạo triều thiên') || t.includes('avenue of heaven')) return 'object-center';
   if (t.includes('đấu phá thương khung')) return 'object-center';
   return 'object-top'; // default fallback for standard upright portraits
 }
@@ -460,6 +461,8 @@ export function cleanEpisodeTitle(title: string, episodeNumber?: number): string
       lowerClean === 'kiếm lai' || 
       lowerClean === 'chúa tể huyền bí' ||
       lowerClean === 'mục thần ký' ||
+      lowerClean === 'đại đạo triều thiên' ||
+      lowerClean === 'avenue of heaven' ||
       lowerClean === 'tập' || 
       lowerClean === 'episode' ||
       (/^[a-z0-9\s_\-\.]+$/i.test(lowerClean) && (lowerClean.includes('episode') || lowerClean.includes('ep') || lowerClean.includes('tap')))) {
