@@ -61,7 +61,8 @@ const CORE_TRACKED_SLUGS = [
   'nhat-niem-vinh-hang-2020',
   'nhat-niem-vinh-hang',
   'hoa-phung-lieu-nguyen',
-  'tien-nghich'
+  'tien-nghich',
+  'dai-dao-trieu-thien'
 ];
 
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
