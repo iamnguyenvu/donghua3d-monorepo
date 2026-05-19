@@ -18,6 +18,7 @@ export default function Header({ onSearchChange }: HeaderProps) {
   const [user, setUser] = useState<UserPayload | null>(null);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
+  const [profileMenuOpen, setProfileMenuOpen] = useState(false);
 
   // Watch History popover state
   interface LocalWatchHistoryItem {
@@ -86,11 +87,26 @@ export default function Header({ onSearchChange }: HeaderProps) {
       if (e.key === 'Escape') {
         setMobileMenuOpen(false);
         setShowModal(false);
+        setProfileMenuOpen(false);
       }
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
+
+  // Close dropdown on click outside
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+      if (!target.closest('#profile-dropdown-container')) {
+        setProfileMenuOpen(false);
+      }
+    };
+    if (profileMenuOpen) {
+      window.addEventListener('click', handleClickOutside);
+    }
+    return () => window.removeEventListener('click', handleClickOutside);
+  }, [profileMenuOpen]);
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value;
@@ -287,26 +303,69 @@ export default function Header({ onSearchChange }: HeaderProps) {
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-2 sm:gap-3.5">
-                    <div className="flex flex-col text-right hidden xs:flex">
-                      <span className="text-[11px] sm:text-xs font-black text-white max-w-[80px] sm:max-w-[120px] truncate tracking-tight">{user.email.split('@')[0]}</span>
-                      <span className="text-[8px] sm:text-[9px] text-violet-400 font-black uppercase tracking-widest mt-0.5">Rep: {user.reputationScore}</span>
-                    </div>
-                    <div className="flex items-center gap-1 group cursor-pointer" title="Hồ sơ">
-                      <div className="w-8 sm:w-9 h-8 sm:h-9 rounded-[4px] bg-violet-600 text-white font-black flex items-center justify-center text-xs sm:text-sm shadow-md transition-all duration-300 group-hover:scale-105 group-hover:bg-violet-500 ring-1 ring-violet-500/30">
-                        {user.email[0].toUpperCase()}
+                  <div id="profile-dropdown-container" className="relative select-none">
+                    <div 
+                      onClick={() => setProfileMenuOpen(!profileMenuOpen)}
+                      className="flex items-center gap-2 sm:gap-3.5 cursor-pointer group" 
+                      title="Hồ sơ"
+                    >
+                      <div className="flex flex-col text-right hidden xs:flex">
+                        <span className="text-[11px] sm:text-xs font-black text-white max-w-[80px] sm:max-w-[120px] truncate tracking-tight">{user.email.split('@')[0]}</span>
+                        <span className="text-[8px] sm:text-[9px] text-violet-400 font-black uppercase tracking-widest mt-0.5">Rep: {user.reputationScore}</span>
                       </div>
-                      <ChevronDown className="w-3.5 sm:w-4 h-3.5 sm:h-4 text-zinc-500 group-hover:text-zinc-300 transition-colors" />
+                      <div className="flex items-center gap-1">
+                        <div className="w-8 sm:w-9 h-8 sm:h-9 rounded-[4px] bg-violet-600 text-white font-black flex items-center justify-center text-xs sm:text-sm shadow-md transition-all duration-300 group-hover:scale-105 group-hover:bg-violet-500 ring-1 ring-violet-500/30">
+                          {user.email[0].toUpperCase()}
+                        </div>
+                        <ChevronDown className={`w-3.5 sm:w-4 h-3.5 sm:h-4 text-zinc-500 group-hover:text-zinc-300 transition-transform duration-200 ${profileMenuOpen ? 'rotate-180 text-violet-400' : ''}`} />
+                      </div>
                     </div>
-                  </div>
 
-                  <button
-                    onClick={handleLogout}
-                    className="p-2 rounded-[4px] bg-zinc-950 border border-zinc-800 hover:border-violet-500/30 text-zinc-400 hover:text-violet-400 hover:bg-zinc-900 transition-all duration-300 cursor-pointer outline-none ml-1 sm:ml-2 flex items-center justify-center"
-                    title="Đăng xuất"
-                  >
-                    <LogOut className="w-4 h-4" />
-                  </button>
+                    {/* Premium Profile Dropdown Menu */}
+                    {profileMenuOpen && (
+                      <div className="absolute right-0 top-full pt-2 w-56 animate-fade-in-up z-50">
+                        <div className="bg-[#0c0c10]/95 backdrop-blur-xl border border-zinc-900 rounded-[4px] p-2.5 shadow-[0_10px_40px_rgba(0,0,0,0.8)] flex flex-col gap-1">
+                          {/* User info section inside dropdown for mobile/tablet where text is hidden */}
+                          <div className="px-3 py-2 border-b border-zinc-900/60 flex flex-col gap-0.5 xs:hidden">
+                            <span className="text-xs font-black text-white truncate">{user.email}</span>
+                            <span className="text-[9px] text-violet-400 font-black uppercase tracking-widest">Rep: {user.reputationScore}</span>
+                          </div>
+                          
+                          {/* Admin Dashboard Option if role is ADMIN */}
+                          {user.role === 'ADMIN' && (
+                            <Link
+                              href="/admin/dashboard"
+                              onClick={() => setProfileMenuOpen(false)}
+                              className="flex items-center gap-2.5 px-3 py-2.5 rounded-[2px] text-xs font-bold text-violet-400 hover:text-violet-300 hover:bg-violet-500/10 transition-all no-underline"
+                            >
+                              <User className="w-4 h-4" />
+                              <span>Quản Trị Admin</span>
+                            </Link>
+                          )}
+
+                          <Link
+                            href="/watchlist"
+                            onClick={() => setProfileMenuOpen(false)}
+                            className="flex items-center gap-2.5 px-3 py-2.5 rounded-[2px] text-xs font-bold text-zinc-300 hover:text-white hover:bg-zinc-900 transition-all no-underline"
+                          >
+                            <Clock className="w-4 h-4 text-zinc-550" />
+                            <span>Danh Sách Của Tôi</span>
+                          </Link>
+
+                          <button
+                            onClick={() => {
+                              setProfileMenuOpen(false);
+                              handleLogout();
+                            }}
+                            className="flex items-center gap-2.5 w-full text-left px-3 py-2.5 rounded-[2px] text-xs font-bold text-rose-400 hover:text-rose-300 hover:bg-rose-500/10 border-0 bg-transparent cursor-pointer transition-all outline-none"
+                          >
+                            <LogOut className="w-4 h-4" />
+                            <span>Đăng Xuất</span>
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
                 </div>
               ) : (
                 <button
