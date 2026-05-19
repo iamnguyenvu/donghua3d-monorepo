@@ -196,4 +196,21 @@ router.delete('/comments/:id', async (req: AuthenticatedRequest, res: Response, 
   }
 });
 
+// 9. GET /api/admin/scraping-logs - Retrieve background scraping execution logs
+router.get('/scraping-logs', async (_req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    const logs = await prisma.scrapingLog.findMany({
+      orderBy: { startedAt: 'desc' },
+      take: 50,
+    });
+
+    res.status(200).json({
+      success: true,
+      data: logs,
+    });
+  } catch (err) {
+    next(err);
+  }
+});
+
 export default router;
