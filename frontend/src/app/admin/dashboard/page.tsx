@@ -5,11 +5,11 @@ import Link from 'next/link';
 import { 
   Users, Film, MessageSquare, AlertTriangle, Star, Shield, 
   Trash2, CheckCircle, Award, Ban, Check, ArrowLeft, Loader2, RefreshCw,
-  Database, PlayCircle, Plus, Server, Clock
+  Database, PlayCircle, Plus, Server, Clock, Activity, Edit
 } from 'lucide-react';
 import Header from '../../../components/Header';
 import { 
-  adminApi, authApi, Role, AdminStatsPayload, AdminUserPayload, FlaggedCommentPayload, ScrapingQueueItem 
+  adminApi, authApi, catalogApi, Role, AdminStatsPayload, AdminUserPayload, FlaggedCommentPayload, ScrapingQueueItem, MoviePayload, ScrapingLogPayload
 } from '../../../lib/api';
 
 export default function AdminDashboard() {
@@ -23,11 +23,13 @@ export default function AdminDashboard() {
   const [users, setUsers] = useState<AdminUserPayload[]>([]);
   const [flaggedComments, setFlaggedComments] = useState<FlaggedCommentPayload[]>([]);
   const [scrapingTasks, setScrapingTasks] = useState<ScrapingQueueItem[]>([]);
+  const [movies, setMovies] = useState<MoviePayload[]>([]);
+  const [scrapingLogs, setScrapingLogs] = useState<ScrapingLogPayload[]>([]);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
 
-  // Active Tab: 'users' | 'comments' | 'scraper'
-  const [activeTab, setActiveTab] = useState<'users' | 'comments' | 'scraper'>('users');
+  // Active Tab: 'users' | 'comments' | 'scraper' | 'movies' | 'logs'
+  const [activeTab, setActiveTab] = useState<'users' | 'comments' | 'scraper' | 'movies' | 'logs'>('users');
 
   // Scraper task form states
   const [newSourceUrl, setNewSourceUrl] = useState('');
@@ -61,26 +63,23 @@ export default function AdminDashboard() {
     checkAdminAuth();
   }, []);
 
-  // Load Admin Data once verified
   const loadDashboardData = async () => {
     setLoading(true);
     try {
-      const [statsRes, usersRes, commentsRes, queueRes] = await Promise.all([
+      const [statsRes, usersRes, commentsRes, queueRes, moviesRes, logsRes] = await Promise.all([
         adminApi.getStats(),
         adminApi.getUsers(),
         adminApi.getFlaggedComments(),
         adminApi.getScrapingQueue().catch(() => ({ success: false, data: [] })),
+        catalogApi.getMovies().catch(() => ({ success: false, data: [] })),
+        adminApi.getScrapingLogs().catch(() => ({ success: false, data: [] })),
       ]);
 
-      if (statsRes.success && statsRes.data) {
-        setStats(statsRes.data);
-      }
-      if (usersRes.success && usersRes.data) {
-        setUsers(usersRes.data);
-      }
-      if (commentsRes.success && commentsRes.data) {
-        setFlaggedComments(commentsRes.data);
-      }
+      if (statsRes.success && statsRes.data) setStats(statsRes.data);
+      if (usersRes.success && usersRes.data) setUsers(usersRes.data);
+      if (commentsRes.success && commentsRes.data) setFlaggedComments(commentsRes.data);
+      if (moviesRes.success && moviesRes.data) setMovies(moviesRes.data);
+      if (logsRes.success && logsRes.data) setScrapingLogs(logsRes.data);
       
       // Populate scraping tasks with fallback mock data if server queue is empty/pending
       if (queueRes.success && queueRes.data && queueRes.data.length > 0) {
@@ -383,30 +382,31 @@ export default function AdminDashboard() {
         )}
 
         {/* TABS SELECTOR PANEL */}
-        <div className="flex border-b border-zinc-900 mb-6 gap-2 overflow-x-auto">
+        <div className="flex border-b border-zinc-900 mb-6 gap-2 overflow-x-auto hide-scrollbar">
           <button
             onClick={() => setActiveTab('users')}
-            className={`px-5 py-3 border-b-2 text-xs font-black uppercase tracking-wider transition-all cursor-pointer outline-none whitespace-nowrap ${
+            className={`px-5 py-3 border-b-2 text-xs font-black uppercase tracking-wider transition-all cursor-pointer outline-none whitespace-nowrap flex items-center gap-1.5 ${
               activeTab === 'users'
                 ? 'border-violet-650 text-white bg-violet-600/5'
                 : 'border-transparent text-zinc-400 hover:text-white'
             }`}
           >
-            Quản Lý Thành Viên ({users.length})
+            <Users className="w-3.5 h-3.5" />
+            Thành Viên ({users.length})
           </button>
+          
           <button
-            onClick={() => setActiveTab('comments')}
-            className={`px-5 py-3 border-b-2 text-xs font-black uppercase tracking-wider transition-all cursor-pointer outline-none relative whitespace-nowrap ${
-              activeTab === 'comments'
+            onClick={() => setActiveTab('movies')}
+            className={`px-5 py-3 border-b-2 text-xs font-black uppercase tracking-wider transition-all cursor-pointer outline-none whitespace-nowrap flex items-center gap-1.5 ${
+              activeTab === 'movies'
                 ? 'border-violet-650 text-white bg-violet-600/5'
                 : 'border-transparent text-zinc-400 hover:text-white'
             }`}
           >
-            Báo Cáo Vi Phạm ({flaggedComments.length})
-            {flaggedComments.length > 0 && (
-              <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-rose-500 animate-ping" />
-            )}
+            <Film className="w-3.5 h-3.5 text-violet-400" />
+            Phim ({stats?.totalMovies || 0})
           </button>
+
           <button
             onClick={() => setActiveTab('scraper')}
             className={`px-5 py-3 border-b-2 text-xs font-black uppercase tracking-wider transition-all cursor-pointer outline-none whitespace-nowrap flex items-center gap-1.5 ${
@@ -416,7 +416,34 @@ export default function AdminDashboard() {
             }`}
           >
             <Database className="w-3.5 h-3.5 text-amber-500" />
-            Nguồn Phim & Convert R2/S3 ({scrapingTasks.length})
+            Nguồn & Convert ({scrapingTasks.length})
+          </button>
+
+          <button
+            onClick={() => setActiveTab('logs')}
+            className={`px-5 py-3 border-b-2 text-xs font-black uppercase tracking-wider transition-all cursor-pointer outline-none whitespace-nowrap flex items-center gap-1.5 ${
+              activeTab === 'logs'
+                ? 'border-violet-650 text-white bg-violet-600/5'
+                : 'border-transparent text-zinc-400 hover:text-white'
+            }`}
+          >
+            <Activity className="w-3.5 h-3.5 text-emerald-500" />
+            Nhật Ký Scraper
+          </button>
+
+          <button
+            onClick={() => setActiveTab('comments')}
+            className={`px-5 py-3 border-b-2 text-xs font-black uppercase tracking-wider transition-all cursor-pointer outline-none relative whitespace-nowrap flex items-center gap-1.5 ${
+              activeTab === 'comments'
+                ? 'border-violet-650 text-white bg-violet-600/5'
+                : 'border-transparent text-zinc-400 hover:text-white'
+            }`}
+          >
+            <MessageSquare className="w-3.5 h-3.5" />
+            Vi Phạm ({flaggedComments.length})
+            {flaggedComments.length > 0 && (
+              <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-rose-500 animate-ping" />
+            )}
           </button>
         </div>
 
@@ -794,6 +821,128 @@ export default function AdminDashboard() {
                     </div>
                   </div>
                 </div>
+              </div>
+            )}
+
+            {/* ==============================================================================
+               TAB 4: MOVIE MANAGER (CRUD)
+               ============================================================================== */}
+            {activeTab === 'movies' && (
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-xs border-collapse">
+                  <thead>
+                    <tr className="bg-zinc-950 text-zinc-550 uppercase tracking-widest text-[9px] font-black border-b border-zinc-900 select-none">
+                      <th className="py-4 px-5">Tên Phim</th>
+                      <th className="py-4 px-5">Năm</th>
+                      <th className="py-4 px-5">Lượt Xem</th>
+                      <th className="py-4 px-5">Đánh Giá</th>
+                      <th className="py-4 px-5 text-right">Hành Động</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-zinc-900/60">
+                    {movies.length === 0 ? (
+                      <tr>
+                        <td colSpan={5} className="py-12 text-center text-zinc-500 font-bold italic text-xs">Chưa có dữ liệu phim</td>
+                      </tr>
+                    ) : movies.map((movie) => (
+                      <tr key={movie.id} className="hover:bg-zinc-950/40 transition-colors group">
+                        <td className="py-4 px-5">
+                          <div className="flex items-center gap-3">
+                            <div className="w-8 h-10 bg-zinc-900 rounded overflow-hidden relative shrink-0">
+                              {movie.posterUrl ? (
+                                // eslint-disable-next-line @next/next/no-img-element
+                                <img src={movie.posterUrl} alt={movie.title} className="w-full h-full object-cover" />
+                              ) : (
+                                <Film className="w-4 h-4 text-zinc-600 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />
+                              )}
+                            </div>
+                            <div className="flex flex-col">
+                              <span className="font-bold text-white text-[13px]">{movie.title}</span>
+                              <span className="text-[10px] text-zinc-500">{movie.studio || 'Unknown Studio'}</span>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="py-4 px-5 font-mono text-zinc-300">{movie.releaseYear}</td>
+                        <td className="py-4 px-5">
+                          <span className="text-amber-400 font-bold bg-amber-500/10 px-2 py-0.5 rounded text-[10px] uppercase">
+                            {movie.viewsCount?.toLocaleString() || 0} Views
+                          </span>
+                        </td>
+                        <td className="py-4 px-5">
+                          <div className="flex items-center gap-1 text-violet-400">
+                            <Star className="w-3 h-3 fill-current" />
+                            <span className="font-black text-[11px]">{movie.rating?.toFixed(1) || '0.0'}</span>
+                          </div>
+                        </td>
+                        <td className="py-4 px-5 text-right">
+                          <button className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-zinc-900 hover:bg-zinc-800 text-zinc-300 hover:text-white rounded text-[10px] font-bold uppercase transition-colors">
+                            <Edit className="w-3 h-3" />
+                            Sửa
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+
+            {/* ==============================================================================
+               TAB 5: SCRAPING LOGS
+               ============================================================================== */}
+            {activeTab === 'logs' && (
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-xs border-collapse">
+                  <thead>
+                    <tr className="bg-zinc-950 text-zinc-550 uppercase tracking-widest text-[9px] font-black border-b border-zinc-900 select-none">
+                      <th className="py-4 px-5 w-40">Thời Gian</th>
+                      <th className="py-4 px-5 w-24">Trạng Thái</th>
+                      <th className="py-4 px-5 w-32">Đồng Bộ</th>
+                      <th className="py-4 px-5">Chi Tiết Log</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-zinc-900/60">
+                    {scrapingLogs.length === 0 ? (
+                      <tr>
+                        <td colSpan={4} className="py-12 text-center text-zinc-500 font-bold italic text-xs">Chưa có nhật ký vận hành</td>
+                      </tr>
+                    ) : scrapingLogs.map((log) => (
+                      <tr key={log.id} className="hover:bg-zinc-950/40 transition-colors">
+                        <td className="py-4 px-5">
+                          <div className="flex flex-col gap-0.5">
+                            <span className="text-zinc-300 font-mono text-[11px]">
+                              {new Date(log.startedAt).toLocaleDateString('vi-VN')}
+                            </span>
+                            <span className="text-zinc-500 font-mono text-[10px]">
+                              {new Date(log.startedAt).toLocaleTimeString('vi-VN')}
+                            </span>
+                          </div>
+                        </td>
+                        <td className="py-4 px-5">
+                          <span className={`inline-flex px-2 py-0.5 rounded-[2px] text-[9px] font-black uppercase border ${
+                            log.status === 'SUCCESS' || log.status === 'COMPLETED'
+                              ? 'bg-emerald-955/20 border-emerald-500/30 text-emerald-400'
+                              : log.status === 'FAILED'
+                              ? 'bg-rose-955/20 border-rose-500/30 text-rose-400'
+                              : 'bg-amber-955/20 border-amber-500/30 text-amber-400'
+                          }`}>
+                            {log.status}
+                          </span>
+                        </td>
+                        <td className="py-4 px-5">
+                          <span className="text-violet-400 font-bold bg-violet-500/10 px-2 py-0.5 rounded text-[10px]">
+                            {log.syncedCount} Tập
+                          </span>
+                        </td>
+                        <td className="py-4 px-5">
+                          <div className="text-[10px] text-zinc-400 font-mono max-w-lg truncate" title={log.error || (typeof log.results === 'string' ? log.results : JSON.stringify(log.results))}>
+                            {log.error || (Array.isArray(log.results) ? log.results[0] : JSON.stringify(log.results)) || 'Tiến trình hoàn tất không có lỗi.'}
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
             )}
 

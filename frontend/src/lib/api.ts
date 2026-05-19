@@ -529,6 +529,18 @@ export interface ScrapingQueueItem {
   createdAt: string;
 }
 
+export interface ScrapingLogPayload {
+  id: string;
+  startedAt: string;
+  completedAt?: string | null;
+  status: string;
+  syncedCount: number;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  results: any; // Mảng JSON chứa chi tiết log
+  error?: string | null;
+}
+
+
 export const adminApi = {
   async getStats(): Promise<ApiResponse<AdminStatsPayload>> {
     return apiFetch<AdminStatsPayload>('/admin/stats');
@@ -588,5 +600,42 @@ export const adminApi = {
       method: 'POST',
       body: JSON.stringify(payload),
     });
+  },
+
+  // -------------------------------------------------------------
+  // MOVIE & EPISODE CRUD (Admin Only)
+  // -------------------------------------------------------------
+  async createMovie(payload: { title: string; altTitles?: string[]; description?: string; studio?: string; releaseYear: number; posterUrl?: string; bannerUrl?: string; imdbRating?: number }): Promise<ApiResponse<MoviePayload>> {
+    return apiFetch<MoviePayload>('/movies', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    });
+  },
+
+  async updateMovie(id: string, payload: { title?: string; altTitles?: string[]; description?: string; studio?: string; releaseYear?: number; posterUrl?: string; bannerUrl?: string; imdbRating?: number }): Promise<ApiResponse<MoviePayload>> {
+    return apiFetch<MoviePayload>(`/movies/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(payload),
+    });
+  },
+
+  async deleteMovie(id: string): Promise<ApiResponse<unknown>> {
+    return apiFetch<unknown>(`/movies/${id}`, {
+      method: 'DELETE',
+    });
+  },
+
+  async createEpisode(movieId: string, payload: { episodeNumber: number; title: string; description?: string; videoUrl: string; introStart?: number; introEnd?: number; outroStart?: number; outroEnd?: number; thumbnail?: string }): Promise<ApiResponse<EpisodePayload>> {
+    return apiFetch<EpisodePayload>(`/movies/${movieId}/episodes`, {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    });
+  },
+
+  // -------------------------------------------------------------
+  // SYSTEM AUDIT & LOGS
+  // -------------------------------------------------------------
+  async getScrapingLogs(): Promise<ApiResponse<ScrapingLogPayload[]>> {
+    return apiFetch<ScrapingLogPayload[]>('/admin/scraping-logs');
   }
 };

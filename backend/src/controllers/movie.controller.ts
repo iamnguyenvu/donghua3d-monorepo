@@ -446,4 +446,51 @@ router.get('/transcode/sse/:jobId', (req: AuthenticatedRequest, res: Response): 
   });
 });
 
+// 10. PUT /api/movies/:id - Update Movie Catalog (Admin Only)
+router.put('/movies/:id', requireRole([Role.ADMIN]), async (req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    const { id } = req.params;
+    const { title, altTitles, description, studio, releaseYear, posterUrl, bannerUrl, imdbRating } = req.body;
+
+    const movie = await prisma.movie.update({
+      where: { id },
+      data: {
+        title,
+        altTitles: altTitles ?? [],
+        description,
+        studio,
+        releaseYear: releaseYear ? parseInt(releaseYear as string, 10) : undefined,
+        posterUrl,
+        bannerUrl,
+        imdbRating: imdbRating ? parseFloat(imdbRating as string) : null,
+      },
+    });
+
+    res.status(200).json({
+      success: true,
+      data: movie,
+    });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// 11. DELETE /api/movies/:id - Delete Movie Catalog (Admin Only)
+router.delete('/movies/:id', requireRole([Role.ADMIN]), async (req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    const { id } = req.params;
+
+    await prisma.movie.delete({
+      where: { id },
+    });
+
+    res.status(200).json({
+      success: true,
+      message: 'Đã xóa phim thành công khỏi hệ thống.',
+    });
+  } catch (err) {
+    next(err);
+  }
+});
+
 export default router;
