@@ -614,13 +614,23 @@ export default function AdminDashboard() {
                   </div>
                   
                   <div className="flex flex-wrap items-center gap-3">
-                    <input
-                      type="text"
-                      placeholder="Tìm theo email..."
-                      value={searchUser}
-                      onChange={(e) => setSearchUser(e.target.value)}
-                      className="px-3 py-1.5 bg-zinc-900 border border-zinc-850 focus:border-violet-500/50 rounded text-xs text-white placeholder-zinc-650 focus:outline-none w-48 transition-all"
-                    />
+                    <div className="relative">
+                      <input
+                        type="text"
+                        placeholder="Tìm theo email..."
+                        value={searchUser}
+                        onChange={(e) => setSearchUser(e.target.value)}
+                        className="pl-3 pr-7 py-1.5 bg-zinc-900 border border-zinc-850 focus:border-violet-500/50 rounded text-xs text-white placeholder-zinc-650 focus:outline-none w-48 transition-all"
+                      />
+                      {searchUser && (
+                        <button
+                          onClick={() => setSearchUser('')}
+                          className="absolute right-2 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-white transition-colors p-0.5 rounded-full cursor-pointer hover:bg-zinc-800"
+                        >
+                          <X className="w-3 h-3" />
+                        </button>
+                      )}
+                    </div>
 
                     {/* Role Filter */}
                     <select
@@ -1079,13 +1089,23 @@ export default function AdminDashboard() {
                   </div>
                   
                   <div className="flex flex-wrap items-center gap-3">
-                    <input
-                      type="text"
-                      placeholder="Tìm kiếm phim..."
-                      value={searchMovie}
-                      onChange={(e) => setSearchMovie(e.target.value)}
-                      className="px-3 py-1.5 bg-zinc-900 border border-zinc-850 focus:border-violet-500/50 rounded text-xs text-white placeholder-zinc-650 focus:outline-none w-48 transition-all"
-                    />
+                    <div className="relative">
+                      <input
+                        type="text"
+                        placeholder="Tìm kiếm phim..."
+                        value={searchMovie}
+                        onChange={(e) => setSearchMovie(e.target.value)}
+                        className="pl-3 pr-7 py-1.5 bg-zinc-900 border border-zinc-850 focus:border-violet-500/50 rounded text-xs text-white placeholder-zinc-650 focus:outline-none w-48 transition-all"
+                      />
+                      {searchMovie && (
+                        <button
+                          onClick={() => setSearchMovie('')}
+                          className="absolute right-2 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-white transition-colors p-0.5 rounded-full cursor-pointer hover:bg-zinc-800"
+                        >
+                          <X className="w-3 h-3" />
+                        </button>
+                      )}
+                    </div>
 
                     {/* Movie Year Filter */}
                     <select
