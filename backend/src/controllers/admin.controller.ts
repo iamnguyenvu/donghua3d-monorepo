@@ -213,4 +213,43 @@ router.get('/scraping-logs', async (_req: AuthenticatedRequest, res: Response, n
   }
 });
 
+// 10. GET /api/admin/scraping-queue - Get all items in queue
+router.get('/scraping-queue', async (_req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    const queue = await prisma.scrapingQueue.findMany({
+      orderBy: { createdAt: 'desc' },
+      take: 100,
+    });
+    res.status(200).json({ success: true, data: queue });
+  } catch (err) { next(err); }
+});
+
+// 11. POST /api/admin/scraping-queue/add - Add task to queue
+router.post('/scraping-queue/add', async (req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    const { sourceUrl, audioTrack, targetMovieId, targetEpisodeNumber } = req.body;
+    if (!sourceUrl) {
+      res.status(400).json({ success: false, error: { code: 'BAD_REQUEST', message: 'URL nguồn không được để trống.' } });
+      return;
+    }
+    const task = await prisma.scrapingQueue.create({
+      data: {
+        sourceUrl,
+        title: targetMovieId || 'N/A',
+        episodeNum: targetEpisodeNumber || 0,
+        audioTrack: audioTrack || 'VIETSUB',
+        status: 'PENDING',
+      },
+    });
+    res.status(201).json({ success: true, data: task });
+  } catch (err) { next(err); }
+});
+
+// 12. POST /api/admin/scraping-queue/trigger - Trigger queue
+router.post('/scraping-queue/trigger', async (_req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    res.status(200).json({ success: true, data: { message: 'Đã kích hoạt worker (Mock)!', processedCount: 0 } });
+  } catch (err) { next(err); }
+});
+
 export default router;
