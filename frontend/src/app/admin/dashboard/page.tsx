@@ -41,6 +41,20 @@ export default function AdminDashboard() {
   const [searchUser, setSearchUser] = useState('');
   const [searchMovie, setSearchMovie] = useState('');
 
+  // Filter and Sort states
+  const [filterUserRole, setFilterUserRole] = useState<'ALL' | 'ADMIN' | 'EXPERT' | 'USER'>('ALL');
+  const [filterUserStatus, setFilterUserStatus] = useState<'ALL' | 'ACTIVE' | 'BANNED'>('ALL');
+  
+  const [filterMovieYear, setFilterMovieYear] = useState<string>('ALL');
+  const [sortMovieBy, setSortMovieBy] = useState<'VIEWS_DESC' | 'VIEWS_ASC' | 'RATING_DESC' | 'RATING_ASC' | 'YEAR_DESC' | 'TITLE_ASC'>('VIEWS_DESC');
+  
+  const [filterQueueStatus, setFilterQueueStatus] = useState<'ALL' | 'PENDING' | 'PROCESSING' | 'COMPLETED' | 'FAILED'>('ALL');
+  const [filterQueueAudio, setFilterQueueAudio] = useState<'ALL' | 'VIETSUB' | 'THUYET_MINH'>('ALL');
+
+  const [filterLogStatus, setFilterLogStatus] = useState<'ALL' | 'SUCCESS' | 'FAILED'>('ALL');
+  
+  const [isRefreshing, setIsRefreshing] = useState<string | null>(null);
+
   // Movie edit drawer state
   const [editingMovie, setEditingMovie] = useState<MoviePayload | null>(null);
   const [editForm, setEditForm] = useState({
@@ -155,6 +169,42 @@ export default function AdminDashboard() {
       console.error('[Admin Dashboard Load Error]:', err);
     } finally {
       setLoading(false);
+    }
+  };
+
+  // Section-specific targeted reloading
+  const handleReloadSection = async (section: 'users' | 'movies' | 'scraper' | 'logs' | 'comments' | 'all') => {
+    setIsRefreshing(section);
+    try {
+      if (section === 'all' || section === 'users') {
+        const res = await adminApi.getUsers();
+        if (res.success && res.data) setUsers(res.data);
+      }
+      if (section === 'all' || section === 'movies') {
+        const res = await catalogApi.getMovies().catch(() => ({ success: false, data: [] }));
+        if (res.success && res.data) setMovies(res.data);
+      }
+      if (section === 'all' || section === 'scraper') {
+        const res = await adminApi.getScrapingQueue().catch(() => ({ success: false, data: [] }));
+        if (res.success && res.data && res.data.length > 0) {
+          setScrapingTasks(res.data);
+        }
+      }
+      if (section === 'all' || section === 'logs') {
+        const res = await adminApi.getScrapingLogs().catch(() => ({ success: false, data: [] }));
+        if (res.success && res.data) setScrapingLogs(res.data);
+      }
+      if (section === 'all' || section === 'comments') {
+        const res = await adminApi.getFlaggedComments();
+        if (res.success && res.data) setFlaggedComments(res.data);
+      }
+      
+      const statsRes = await adminApi.getStats();
+      if (statsRes.success && statsRes.data) setStats(statsRes.data);
+    } catch (err) {
+      console.error('Failed to reload section:', err);
+    } finally {
+      setIsRefreshing(null);
     }
   };
 
@@ -550,15 +600,51 @@ export default function AdminDashboard() {
                ============================================================================== */}
             {activeTab === 'users' && (
               <div className="overflow-x-auto">
-                <div className="p-4 border-b border-zinc-900 bg-zinc-950/40 flex items-center justify-between gap-4">
-                  <div className="text-zinc-400 text-xs font-bold uppercase tracking-wider">Danh Sách Thành Viên</div>
-                  <input
-                    type="text"
-                    placeholder="Tìm kiếm theo email..."
-                    value={searchUser}
-                    onChange={(e) => setSearchUser(e.target.value)}
-                    className="px-3 py-1.5 bg-zinc-900 border border-zinc-850 focus:border-violet-500/50 rounded text-xs text-white placeholder-zinc-650 focus:outline-none w-64 transition-all"
-                  />
+                <div className="p-4 border-b border-zinc-900 bg-zinc-950/40 flex flex-col md:flex-row md:items-center justify-between gap-4 select-none">
+                  <div className="flex items-center gap-2">
+                    <div className="text-zinc-400 text-xs font-black uppercase tracking-wider">Danh Sách Thành Viên</div>
+                    <button
+                      onClick={() => handleReloadSection('users')}
+                      disabled={isRefreshing === 'users'}
+                      className="p-1 hover:bg-zinc-900 rounded text-zinc-450 hover:text-white transition-colors cursor-pointer border border-zinc-900 disabled:opacity-50"
+                      title="Làm mới bảng"
+                    >
+                      <RefreshCw className={`w-3.5 h-3.5 ${isRefreshing === 'users' ? 'animate-spin text-violet-400' : ''}`} />
+                    </button>
+                  </div>
+                  
+                  <div className="flex flex-wrap items-center gap-3">
+                    <input
+                      type="text"
+                      placeholder="Tìm theo email..."
+                      value={searchUser}
+                      onChange={(e) => setSearchUser(e.target.value)}
+                      className="px-3 py-1.5 bg-zinc-900 border border-zinc-850 focus:border-violet-500/50 rounded text-xs text-white placeholder-zinc-650 focus:outline-none w-48 transition-all"
+                    />
+
+                    {/* Role Filter */}
+                    <select
+                      value={filterUserRole}
+                      onChange={(e) => setFilterUserRole(e.target.value as 'ALL' | 'ADMIN' | 'EXPERT' | 'USER')}
+                      className="px-2.5 py-1.5 bg-zinc-900 border border-zinc-850 focus:border-violet-500/50 rounded text-xs text-zinc-350 focus:outline-none cursor-pointer"
+                    >
+                      <option value="ALL">Tất cả Quyền</option>
+                      <option value="ADMIN">Quản Trị Viên (ADMIN)</option>
+                      <option value="EXPERT">Chuyên Gia (EXPERT)</option>
+                      <option value="USER">Khán Giả (USER)</option>
+                    </select>
+
+                    {/* Status Filter */}
+                    <select
+                      value={filterUserStatus}
+                      onChange={(e) => setFilterUserStatus(e.target.value as 'ALL' | 'ACTIVE' | 'BANNED')}
+                      className="px-2.5 py-1.5 bg-zinc-900 border border-zinc-850 focus:border-violet-500/50 rounded text-xs text-zinc-350 focus:outline-none cursor-pointer"
+                    >
+                      <option value="ALL">Tất cả Trạng Thái</option>
+                      <option value="ACTIVE">Đang Hoạt Động</option>
+                      <option value="BANNED">Đã Bị Khóa</option>
+                    </select>
+                  </div>
                 </div>
                 <table className="w-full text-left text-xs border-collapse">
                   <thead>
@@ -573,7 +659,15 @@ export default function AdminDashboard() {
                   </thead>
                   <tbody className="divide-y divide-zinc-900/60">
                     {users
-                      .filter(user => user.email.toLowerCase().includes(searchUser.toLowerCase()))
+                      .filter(user => {
+                        const matchesSearch = user.email.toLowerCase().includes(searchUser.toLowerCase());
+                        const matchesRole = filterUserRole === 'ALL' || user.role === filterUserRole;
+                        const isBanned = user.reputationScore <= 0;
+                        const matchesStatus = filterUserStatus === 'ALL' || 
+                          (filterUserStatus === 'BANNED' && isBanned) || 
+                          (filterUserStatus === 'ACTIVE' && !isBanned);
+                        return matchesSearch && matchesRole && matchesStatus;
+                      })
                       .map((user) => {
                         const isBanned = user.reputationScore <= 0;
                       return (
@@ -860,12 +954,47 @@ export default function AdminDashboard() {
 
                   {/* Right Column: Queue Items Table */}
                   <div className="lg:w-2/3 flex flex-col gap-4">
-                    <div className="flex items-center justify-between border-b border-zinc-900 pb-3">
-                      <h3 className="text-sm font-black uppercase tracking-wider text-white flex items-center gap-2">
-                        <Clock className="w-4 h-4 text-amber-500" />
-                        Hàng Đợi Xử Lý ({scrapingTasks.length})
-                      </h3>
-                      <span className="text-[10px] text-zinc-500 font-bold italic">Tự động cập nhật mỗi 5 giây</span>
+                    <div className="flex flex-col md:flex-row md:items-center justify-between border-b border-zinc-900 pb-3 gap-3 select-none">
+                      <div className="flex items-center gap-2">
+                        <h3 className="text-sm font-black uppercase tracking-wider text-white flex items-center gap-2">
+                          <Clock className="w-4 h-4 text-amber-500" />
+                          Hàng Đợi Xử Lý ({scrapingTasks.length})
+                        </h3>
+                        <button
+                          onClick={() => handleReloadSection('scraper')}
+                          disabled={isRefreshing === 'scraper'}
+                          className="p-1 hover:bg-zinc-900 rounded text-zinc-450 hover:text-white transition-colors cursor-pointer border border-zinc-900 disabled:opacity-50"
+                          title="Làm mới hàng đợi"
+                        >
+                          <RefreshCw className={`w-3.5 h-3.5 ${isRefreshing === 'scraper' ? 'animate-spin text-violet-400' : ''}`} />
+                        </button>
+                      </div>
+
+                      <div className="flex items-center gap-2.5">
+                        {/* Audio filter */}
+                        <select
+                          value={filterQueueAudio}
+                          onChange={(e) => setFilterQueueAudio(e.target.value as 'ALL' | 'VIETSUB' | 'THUYET_MINH')}
+                          className="px-2.5 py-1.5 bg-zinc-900 border border-zinc-850 focus:border-violet-500/50 rounded text-[11px] text-zinc-350 focus:outline-none cursor-pointer"
+                        >
+                          <option value="ALL">Tất cả Âm thanh</option>
+                          <option value="VIETSUB">Vietsub</option>
+                          <option value="THUYET_MINH">Thuyết Minh</option>
+                        </select>
+
+                        {/* Status filter */}
+                        <select
+                          value={filterQueueStatus}
+                          onChange={(e) => setFilterQueueStatus(e.target.value as 'ALL' | 'PENDING' | 'PROCESSING' | 'COMPLETED' | 'FAILED')}
+                          className="px-2.5 py-1.5 bg-zinc-900 border border-zinc-850 focus:border-violet-500/50 rounded text-[11px] text-zinc-350 focus:outline-none cursor-pointer"
+                        >
+                          <option value="ALL">Tất cả Trạng thái</option>
+                          <option value="PENDING">PENDING</option>
+                          <option value="PROCESSING">PROCESSING</option>
+                          <option value="COMPLETED">COMPLETED</option>
+                          <option value="FAILED">FAILED</option>
+                        </select>
+                      </div>
                     </div>
 
                     <div className="overflow-x-auto">
@@ -879,7 +1008,13 @@ export default function AdminDashboard() {
                           </tr>
                         </thead>
                         <tbody className="divide-y divide-zinc-900/60">
-                          {scrapingTasks.map((task) => (
+                          {scrapingTasks
+                            .filter(task => {
+                              const matchesAudio = filterQueueAudio === 'ALL' || task.audioTrack === filterQueueAudio;
+                              const matchesStatus = filterQueueStatus === 'ALL' || task.status === filterQueueStatus;
+                              return matchesAudio && matchesStatus;
+                            })
+                            .map((task) => (
                             <tr key={task.id} className="hover:bg-zinc-950/40 transition-colors">
                               <td className="py-3 px-4 font-mono text-zinc-300 text-[11px] max-w-[220px] truncate" title={task.sourceUrl}>
                                 {task.sourceUrl}
@@ -930,15 +1065,56 @@ export default function AdminDashboard() {
                ============================================================================== */}
             {activeTab === 'movies' && (
               <div className="overflow-x-auto">
-                <div className="p-4 border-b border-zinc-900 bg-zinc-950/40 flex items-center justify-between gap-4">
-                  <div className="text-zinc-400 text-xs font-bold uppercase tracking-wider">Thư Viện Phim</div>
-                  <input
-                    type="text"
-                    placeholder="Tìm kiếm phim..."
-                    value={searchMovie}
-                    onChange={(e) => setSearchMovie(e.target.value)}
-                    className="px-3 py-1.5 bg-zinc-900 border border-zinc-850 focus:border-violet-500/50 rounded text-xs text-white placeholder-zinc-650 focus:outline-none w-64 transition-all"
-                  />
+                <div className="p-4 border-b border-zinc-900 bg-zinc-950/40 flex flex-col md:flex-row md:items-center justify-between gap-4 select-none">
+                  <div className="flex items-center gap-2">
+                    <div className="text-zinc-400 text-xs font-black uppercase tracking-wider">Thư Viện Phim</div>
+                    <button
+                      onClick={() => handleReloadSection('movies')}
+                      disabled={isRefreshing === 'movies'}
+                      className="p-1 hover:bg-zinc-900 rounded text-zinc-450 hover:text-white transition-colors cursor-pointer border border-zinc-900 disabled:opacity-50"
+                      title="Làm mới bảng"
+                    >
+                      <RefreshCw className={`w-3.5 h-3.5 ${isRefreshing === 'movies' ? 'animate-spin text-violet-400' : ''}`} />
+                    </button>
+                  </div>
+                  
+                  <div className="flex flex-wrap items-center gap-3">
+                    <input
+                      type="text"
+                      placeholder="Tìm kiếm phim..."
+                      value={searchMovie}
+                      onChange={(e) => setSearchMovie(e.target.value)}
+                      className="px-3 py-1.5 bg-zinc-900 border border-zinc-850 focus:border-violet-500/50 rounded text-xs text-white placeholder-zinc-650 focus:outline-none w-48 transition-all"
+                    />
+
+                    {/* Movie Year Filter */}
+                    <select
+                      value={filterMovieYear}
+                      onChange={(e) => setFilterMovieYear(e.target.value)}
+                      className="px-2.5 py-1.5 bg-zinc-900 border border-zinc-850 focus:border-violet-500/50 rounded text-xs text-zinc-355 focus:outline-none cursor-pointer"
+                    >
+                      <option value="ALL">Tất cả Năm</option>
+                      <option value="2026">Năm 2026</option>
+                      <option value="2025">Năm 2025</option>
+                      <option value="2024">Năm 2024</option>
+                      <option value="2023">Năm 2023</option>
+                      <option value="BEFORE_2023">Trước 2023</option>
+                    </select>
+
+                    {/* Movie Sort Order */}
+                    <select
+                      value={sortMovieBy}
+                      onChange={(e) => setSortMovieBy(e.target.value as 'VIEWS_DESC' | 'VIEWS_ASC' | 'RATING_DESC' | 'RATING_ASC' | 'YEAR_DESC' | 'TITLE_ASC')}
+                      className="px-2.5 py-1.5 bg-zinc-900 border border-zinc-850 focus:border-violet-500/50 rounded text-xs text-zinc-355 focus:outline-none cursor-pointer"
+                    >
+                      <option value="VIEWS_DESC">Lượt Xem giảm dần</option>
+                      <option value="VIEWS_ASC">Lượt Xem tăng dần</option>
+                      <option value="RATING_DESC">Đánh Giá giảm dần</option>
+                      <option value="RATING_ASC">Đánh Giá tăng dần</option>
+                      <option value="YEAR_DESC">Năm ra mắt giảm dần</option>
+                      <option value="TITLE_ASC">Tên Phim (A-Z)</option>
+                    </select>
+                  </div>
                 </div>
                 <table className="w-full text-left text-xs border-collapse">
                   <thead>
@@ -951,12 +1127,39 @@ export default function AdminDashboard() {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-zinc-900/60">
-                    {movies.filter(m => m.title.toLowerCase().includes(searchMovie.toLowerCase())).length === 0 ? (
+                    {movies.filter(m => {
+                      const matchesSearch = m.title.toLowerCase().includes(searchMovie.toLowerCase());
+                      let matchesYear = true;
+                      if (filterMovieYear === 'BEFORE_2023') {
+                        matchesYear = m.releaseYear < 2023;
+                      } else if (filterMovieYear !== 'ALL') {
+                        matchesYear = m.releaseYear === parseInt(filterMovieYear, 10);
+                      }
+                      return matchesSearch && matchesYear;
+                    }).length === 0 ? (
                       <tr>
                         <td colSpan={5} className="py-12 text-center text-zinc-500 font-bold italic text-xs">Chưa có dữ liệu phim trùng khớp</td>
                       </tr>
                     ) : movies
-                        .filter(m => m.title.toLowerCase().includes(searchMovie.toLowerCase()))
+                        .filter(m => {
+                          const matchesSearch = m.title.toLowerCase().includes(searchMovie.toLowerCase());
+                          let matchesYear = true;
+                          if (filterMovieYear === 'BEFORE_2023') {
+                            matchesYear = m.releaseYear < 2023;
+                          } else if (filterMovieYear !== 'ALL') {
+                            matchesYear = m.releaseYear === parseInt(filterMovieYear, 10);
+                          }
+                          return matchesSearch && matchesYear;
+                        })
+                        .sort((a, b) => {
+                          if (sortMovieBy === 'VIEWS_DESC') return (b.viewsCount || 0) - (a.viewsCount || 0);
+                          if (sortMovieBy === 'VIEWS_ASC') return (a.viewsCount || 0) - (b.viewsCount || 0);
+                          if (sortMovieBy === 'RATING_DESC') return (b.rating || 0) - (a.rating || 0);
+                          if (sortMovieBy === 'RATING_ASC') return (a.rating || 0) - (b.rating || 0);
+                          if (sortMovieBy === 'YEAR_DESC') return b.releaseYear - a.releaseYear;
+                          if (sortMovieBy === 'TITLE_ASC') return a.title.localeCompare(b.title);
+                          return 0;
+                        })
                         .map((movie) => (
                           <tr key={movie.id} className="hover:bg-zinc-950/40 transition-colors group">
                             <td className="py-4 px-5">
@@ -1028,6 +1231,32 @@ export default function AdminDashboard() {
                ============================================================================== */}
             {activeTab === 'logs' && (
               <div className="overflow-x-auto">
+                <div className="p-4 border-b border-zinc-900 bg-zinc-950/40 flex flex-col md:flex-row md:items-center justify-between gap-4 select-none">
+                  <div className="flex items-center gap-2">
+                    <div className="text-zinc-400 text-xs font-black uppercase tracking-wider">Nhật Ký Vận Hành Scraper</div>
+                    <button
+                      onClick={() => handleReloadSection('logs')}
+                      disabled={isRefreshing === 'logs'}
+                      className="p-1 hover:bg-zinc-900 rounded text-zinc-450 hover:text-white transition-colors cursor-pointer border border-zinc-900 disabled:opacity-50"
+                      title="Làm mới log"
+                    >
+                      <RefreshCw className={`w-3.5 h-3.5 ${isRefreshing === 'logs' ? 'animate-spin text-violet-400' : ''}`} />
+                    </button>
+                  </div>
+                  
+                  <div className="flex items-center gap-2.5">
+                    {/* Status filter */}
+                    <select
+                      value={filterLogStatus}
+                      onChange={(e) => setFilterLogStatus(e.target.value as 'ALL' | 'SUCCESS' | 'FAILED')}
+                      className="px-2.5 py-1.5 bg-zinc-900 border border-zinc-850 focus:border-violet-500/50 rounded text-xs text-zinc-350 focus:outline-none cursor-pointer"
+                    >
+                      <option value="ALL">Tất cả Kết quả</option>
+                      <option value="SUCCESS">Thành Công (SUCCESS)</option>
+                      <option value="FAILED">Thất Bại (FAILED)</option>
+                    </select>
+                  </div>
+                </div>
                 <table className="w-full text-left text-xs border-collapse">
                   <thead>
                     <tr className="bg-zinc-950 text-zinc-550 uppercase tracking-widest text-[9px] font-black border-b border-zinc-900 select-none">
@@ -1038,11 +1267,21 @@ export default function AdminDashboard() {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-zinc-900/60">
-                    {scrapingLogs.length === 0 ? (
+                    {scrapingLogs.filter(log => {
+                      if (filterLogStatus === 'SUCCESS') return log.status === 'SUCCESS' || log.status === 'COMPLETED';
+                      if (filterLogStatus === 'FAILED') return log.status === 'FAILED';
+                      return true;
+                    }).length === 0 ? (
                       <tr>
-                        <td colSpan={4} className="py-12 text-center text-zinc-500 font-bold italic text-xs">Chưa có nhật ký vận hành</td>
+                        <td colSpan={4} className="py-12 text-center text-zinc-500 font-bold italic text-xs">Chưa có nhật ký vận hành trùng khớp</td>
                       </tr>
-                    ) : scrapingLogs.map((log) => (
+                    ) : scrapingLogs
+                        .filter(log => {
+                          if (filterLogStatus === 'SUCCESS') return log.status === 'SUCCESS' || log.status === 'COMPLETED';
+                          if (filterLogStatus === 'FAILED') return log.status === 'FAILED';
+                          return true;
+                        })
+                        .map((log) => (
                       <tr key={log.id} className="hover:bg-zinc-950/40 transition-colors">
                         <td className="py-4 px-5">
                           <div className="flex flex-col gap-0.5">
