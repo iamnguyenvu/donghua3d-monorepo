@@ -1,3 +1,5 @@
+<div align="center">
+
 ```text
 ██████╗  ██████╗ ███╗   ██╗ ██████╗ ██╗  ██╗██╗   ██╗ █████╗ ██████╗ ██████╗ 
 ██╔══██╗██╔═══██╗████╗  ██║██╔════╝ ██║  ██║██║   ██║██╔══██╗╚════██╗██╔══██╗
@@ -7,140 +9,261 @@
 ╚═════╝  ╚═════╝ ╚═╝  ╚═══╝ ╚═════╝ ╚═╝  ╚═╝ ╚═════╝ ╚═╝  ╚═╝╚═════╝ ╚═════╝ 
 ```
 
-# 🎬 Donghua3D Monorepo
+# 🎬 Donghua3D — Nền Tảng Phát Trực Tuyến Phim Hoạt Hình 3D Trung Quốc Cao Cấp
 
-[![Status](https://img.shields.io/badge/trạng_thái-lên_kế_hoạch-45f3ff?style=for-the-badge&logo=codeforces)](https://github.com/iamnguyenvu/donghua3d-monorepo.git)
-[![Docker](https://img.shields.io/badge/Docker-khả_dụng-e50914?style=for-the-badge&logo=docker)](https://github.com/iamnguyenvu/donghua3d-monorepo.git)
-[![Prisma](https://img.shields.io/badge/ORM-Prisma-00e5ff?style=for-the-badge&logo=prisma)](https://github.com/iamnguyenvu/donghua3d-monorepo.git)
-[![PostgreSQL](https://img.shields.io/badge/Cơ_sở_dữ_liệu-PostgreSQL-336791?style=for-the-badge&logo=postgresql)](https://github.com/iamnguyenvu/donghua3d-monorepo.git)
+[![Trạng thái](https://img.shields.io/badge/Trạng_Thái-Đang_Phát_Triển-7c3aed?style=for-the-badge&logo=statuspage&logoColor=white)](https://github.com/iamnguyenvu/donghua3d-monorepo)
+[![Next.js](https://img.shields.io/badge/Next.js-16.x-000000?style=for-the-badge&logo=nextdotjs&logoColor=white)](https://nextjs.org)
+[![Express](https://img.shields.io/badge/Express-4.x-404040?style=for-the-badge&logo=express&logoColor=white)](https://expressjs.com)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-15-336791?style=for-the-badge&logo=postgresql&logoColor=white)](https://postgresql.org)
+[![Prisma](https://img.shields.io/badge/Prisma-ORM-2D3748?style=for-the-badge&logo=prisma&logoColor=white)](https://prisma.io)
+[![Docker](https://img.shields.io/badge/Docker-Compose-2496ED?style=for-the-badge&logo=docker&logoColor=white)](https://docker.com)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178C6?style=for-the-badge&logo=typescript&logoColor=white)](https://typescriptlang.org)
 
-Nền tảng streaming video chất lượng cao, tối ưu hóa chi phí vận hành và đạt tiêu chuẩn doanh nghiệp thiết kế riêng cho các bộ phim hoạt hình 3D Trung Quốc (Donghua). Hệ thống được kỹ thuật hóa từ **Nguyên lý gốc (First-Principles)** nhằm mang lại trải nghiệm phát video HLS không độ trễ, bảng xếp hạng Tier List tương tác kéo-thả, hệ thống đánh giá chống spam và các luồng bình luận đa cấp.
+**Nền tảng phát trực tuyến web đẳng cấp doanh nghiệp, phong cách điện ảnh — được xây dựng riêng cho Phim Hoạt Hình 3D Trung Quốc (Donghua).** Thiết kế từ Nguyên Lý Gốc (First-Principles) để mang đến trải nghiệm phát video HLS không giật lag, bảng xếp hạng Tier List kéo-thả, đánh giá chống spam dựa trên trọng số uy tín, và cây bình luận che mờ spoil — tất cả trong một TypeScript Monorepo được Docker hóa hoàn toàn.
 
-> 🌐 **Địa chỉ Repo GitHub**: [https://github.com/iamnguyenvu/donghua3d-monorepo.git](https://github.com/iamnguyenvu/donghua3d-monorepo.git)  
-> 🌍 **Bản Tiếng Anh**: Xem tại file [README.md](file:///d:/Download/Project/donghua3d/README.md) để đọc tài liệu gốc bằng tiếng Anh.
+> 🌐 **Repository**: [github.com/iamnguyenvu/donghua3d-monorepo](https://github.com/iamnguyenvu/donghua3d-monorepo)  
+> 🇬🇧 **English**: Read the documentation at [README.md](./README.md)
+
+</div>
 
 ---
 
 ## 📸 Trưng Bày Giao Diện Thực Tế
 
-Dưới đây là một số hình ảnh chụp màn hình độ phân giải cao ghi nhận trực tiếp hoạt động thực tế của nền tảng **Donghua3D**:
+Hình ảnh chụp màn hình trực tiếp từ nền tảng **Donghua3D** đang hoạt động:
 
-| 🏠 Trang Chủ Điện Ảnh Toàn Cảnh | 📊 Bảng Xếp Hạng & Tier List Kéo Thả |
+| 🏠 Trang Chủ Phong Cách Điện Ảnh | 📊 Bảng Xếp Hạng & Tier List |
 | :---: | :---: |
-| ![Trang Chủ Showcase](screenshots/homepage_showcase.png) | ![Bảng Xếp Hạng Showcase](screenshots/leaderboard_showcase.png) |
+| ![Trang Chủ](screenshots/homepage_showcase.png) | ![Bảng Xếp Hạng](screenshots/leaderboard_showcase.png) |
 
-| 🎥 Trình Phát Custom Player Cao Cấp & Trải Nghiệm Xem Phim |
+| 🎥 Trình Phát HLS Tùy Chỉnh & Trải Nghiệm Xem Phim |
 | :---: |
-| ![Trang Xem Phim Showcase](screenshots/watch_page_showcase.png) |
+| ![Trang Xem Phim](screenshots/watch_page_showcase.png) |
 
 ---
 
-## 💎 Các Tính Năng Đắt Giá Của Nền Tảng
+## 💎 Các Tính Năng Cốt Lõi
 
-* **🎥 Phát Video HLS Đỉnh Cao ($T_{segment} = 8s$)**: Khởi chạy video tức thì và tua phim mượt mà dưới 1 giây nhờ trình phát Custom Player cao cấp bọc quanh thư viện `hls.js`.
-* **⚙️ Tiến Trình Mã Hóa Khóa Mutex**: Hàng đợi xử lý bất đồng bộ tự động cắt nhỏ file MP4 gốc thành các thư mục phân đoạn HLS đạt chuẩn keyframe-aligned, giới hạn chạy duy nhất 1 tiến trình tại một thời điểm để bảo vệ tài nguyên máy chủ.
-* **🛡️ Bộ Lọc Đánh Giá Chống Spam Kép**: Thuật toán tính điểm trung bình dựa trên trọng số điểm uy tín (reputation score) của tài khoản, cô lập các tài khoản clone dưới 7 ngày tuổi để chặn review-bombing.
-* **📊 Bảng Xếp Hạng Tier List Kéo-Thả**: Giao diện mờ kính (glassmorphic) vô cùng mượt mà cho phép người xem tự tay sắp xếp các bộ phim yêu thích vào các hàng (S, A, B, C, D, F) kèm ghi chú cá nhân.
-* **💬 Bình Luận Che Mờ Nội Dung Spoil**: Luồng bình luận đa cấp tương tác cao, tự động áp bộ lọc CSS làm mờ (Blur) các nội dung spoil cốt truyện cho đến khi người xem chủ động nhấp chuột vào để hiển thị.
-* **💾 Xem Tiếp Tự Động & Bỏ Qua Intro**: Tự động lưu lịch sử giây đang xem dở về DB cứ mỗi 10 giây và hiển thị nút bấm nổi cho phép bỏ qua nhanh nhạc dạo đầu phim (OP/ED).
+| Tính Năng | Mô Tả |
+| :--- | :--- |
+| 🎥 **Phát Video HLS Đỉnh Cao** | Khởi chạy và tua phim dưới 1 giây qua Custom Player bọc `hls.js`, sử dụng CDN đối tác (`phim1280.tv`, `zyxcdn.com`, `kkphimplayer7.com`) |
+| 🤖 **Dịch Vụ Cào Phim Tự Động** | Engine đồng bộ do Admin kiểm soát — tự động lấy, làm sạch và nạp danh mục phim đầy đủ từ OPhim API, kèm chuẩn hóa tên Hán-Việt |
+| 🛡️ **Bộ Lọc Đánh Giá Chống Spam Kép** | Tính điểm theo trọng số uy tín (thang 0–100), quy tắc sandbox 7 ngày với tài khoản mới, khóa tự động khi phát hiện review bombing |
+| 📊 **Bảng Tier List Kéo-Thả** | Giao diện mờ kính (glassmorphic) cho phép xếp hạng phim (S/A/B/C/D/F) kèm ghi chú cá nhân, được tổng hợp thành Bảng Xếp Hạng Toàn Cầu |
+| 💬 **Cây Bình Luận Che Mờ Spoil** | Luồng bình luận lồng nhau với CSS Blur ẩn nội dung cốt truyện nhạy cảm — hiện ra khi người xem chủ động nhấp vào |
+| 💾 **Xem Tiếp Tự Động & Bỏ Qua Intro** | Đồng bộ tiến độ xem lên database mỗi 10 giây, kèm nút nổi bỏ qua nhạc dạo đầu/cuối (OP/ED) |
+| ⚡ **Microcaching Nginx** | Cache in-memory 1 giây trên toàn bộ API public — chặn đứng DDoS burst và duy trì thời gian phản hồi danh mục dưới **5ms** |
+| 🔒 **Mã Hóa Video Khóa Mutex** | Worker FFmpeg thực thi đơn luồng để tránh bão hòa CPU trên máy chủ EC2 |
 
 ---
 
-## 🛠️ Cấu Trúc Monorepo Thống Nhất
+## 🏗️ Tổng Quan Kiến Trúc Hệ Thống
 
-Dự án này được tổ chức dưới dạng một **TypeScript Monorepo**, đảm bảo dùng chung kiểu dữ liệu và vận hành Docker đồng bộ.
+```mermaid
+flowchart TD
+    Client[Trình Duyệt / Người Dùng] -->|Cổng 80/443| Nginx{Nginx Reverse Proxy}
 
-```text
-donghua3d-monorepo/
-├── docs/                             # Tài liệu Đặc tả Chuẩn Claude SDD
-│   ├── 01_system_spec.md             # Phạm vi hệ thống, bounded contexts, threat model
-│   ├── 02_data_spec.md               # Schema DDL PostgreSQL, compound indices, thuật toán điểm
-│   ├── 03_api_spec.md                # Danh sách API routes, JSON payloads, định dạng SSE stream
-│   ├── 04_ui_ux_spec.md              # Cinematic design tokens, custom player, bảng tier list
-│   ├── 05_ops_spec.md                # Dockerfiles, Nginx cache, cấu hình S3 OAC, 4 phase scaling
-│   ├── 06_implementation_plan.md     # Kế hoạch code từng bước kèm điều kiện verify kiểm thử
-│   ├── 07_conventions_spec.md        # Quy chuẩn viết code, commit git, chuẩn đặt tên API & CSS
-│   ├── 08_audit_report.md            # Báo cáo rà soát và đánh giá mã nguồn ban đầu
-│   ├── 09_current_system_report.md   # Báo cáo hiện trạng hệ thống & kiểm toán giao diện thực tế
-│   ├── 10_phase2_implementation.md   # Kế hoạch chi tiết triển khai Giai đoạn 2 (Vidstack, R2, Sockets)
-│   ├── 11_video_sources_audit.md     # Phân tích chuyên sâu nguồn video (hoathinh3d & hh3d, Proxy CDN)
-│   └── 12_premium_4k_architecture.md # Thiết kế kiến trúc chuyển tiếp video lai chất lượng cao 4K
-├── nginx/                            # Cấu hình Reverse Proxy Nginx
-│   └── nginx.conf                    # CORS headers, chính sách microcaching, tối ưu hóa phát file
-├── backend/                          # Mã nguồn API Server (Express.js & TypeScript)
-│   ├── src/                          # Controllers, middleware, services, router
-│   ├── prisma/                       # Cấu hình Prisma schema, migrations, seed script
-│   └── Dockerfile                    # Container hóa multi-stage tích hợp sẵn FFmpeg
-├── frontend/                         # Mã nguồn Web Client (Next.js & App Router)
-│   ├── src/                          # Các trang, component tương tác cao cấp, CSS
-│   └── Dockerfile                    # Container hóa Next.js standalone tối ưu dung lượng
-├── docker-compose.yml                # Điều phối container db, api, ui và reverse proxy
-├── .env.example                      # File khuôn mẫu cấu hình môi trường
-└── README.md                         # Tổng quan dự án bằng tiếng Anh
+    subgraph Frontend ["Next.js 16 — Cổng 3000"]
+        Router[App Router + SSR]
+        HlsPlayer[Custom HLS Video Player]
+        TierBoard[Bảng Tier List Kéo-Thả]
+    end
+
+    subgraph Backend ["Express.js API — Cổng 5000"]
+        AuthController[Auth & JWT Controller]
+        MovieController[Catalog & Episode Controller]
+        ScraperService[Dịch Vụ Cào Phim Tự Động]
+        Prisma[Prisma ORM Client]
+    end
+
+    subgraph Storage ["Tầng Lưu Trữ"]
+        Postgres[(PostgreSQL 15)]
+        OphimCDN[CDN Ngoài: phim1280 / zyxcdn / kkphim]
+    end
+
+    Nginx -->|/* routes| Frontend
+    Nginx -->|/api/* routes| Backend
+    Nginx -->|/static/uploads| Storage
+
+    Prisma --> Postgres
+    HlsPlayer -->|Stream HLS trực tiếp| OphimCDN
+    ScraperService -->|OPhim REST API| OphimCDN
 ```
 
 ---
 
-## ⚙️ Yêu Cầu & Cài Đặt Khởi Chạy Nhanh
+## 🛠️ Cấu Trúc Monorepo
 
-Trước khi bắt đầu, hãy đảm bảo máy phát triển cục bộ của bạn đáp ứng các điều kiện tiên quyết sau:
-- **Node.js**: `v20.x` hoặc `v22.x` (Bản LTS)
-- **Docker & Docker Desktop**: Đã cài đặt và đang chạy ổn định
-- **FFmpeg**: Đã cài đặt cục bộ và thêm vào biến Path hệ thống (không bắt buộc, để phục vụ chạy test nhanh ngoài container)
+```text
+donghua3d-monorepo/
+├── docs/                              # Tài liệu Đặc Tả SDD (Spec-Driven Development)
+│   ├── 01_system_spec.md              # Phạm vi hệ thống, bounded contexts, threat model
+│   ├── 02_data_spec.md                # PostgreSQL DDL, composite indices, thuật toán điểm
+│   ├── 03_api_spec.md                 # REST routes, JSON payloads, định dạng SSE
+│   ├── 04_ui_ux_spec.md               # Design tokens, custom player, tương tác tier board
+│   ├── 05_ops_spec.md                 # Docker multi-stage, Nginx microcache, CloudFront S3
+│   ├── 06_implementation_plan.md      # Kế hoạch code tuần tự kèm điều kiện verify
+│   ├── 07_conventions_spec.md         # Đặt tên, BEM CSS, cú pháp Angular commit
+│   ├── 08_audit_report.md             # Báo cáo kiểm toán mã nguồn ban đầu
+│   ├── 09_current_system_report.md    # Báo cáo Giai đoạn 1: tích hợp HLS thật, sửa UI
+│   ├── 10_phase2_implementation.md    # Lộ trình Giai đoạn 2: Vidstack, R2, Sockets, CI/CD
+│   ├── 11_video_sources_audit.md      # Phân tích chuyên sâu CDN proxy HLS (hoathinh3d, hh3d)
+│   ├── 12_premium_4k_architecture.md  # Kiến trúc 4K lai: nguồn ngoài + R2 tự lưu chống leech
+│   └── 13_renovation_master_blueprint.md # Bản thiết kế nâng cấp tổng thể: DB, Scraper, UI
+├── nginx/
+│   └── nginx.conf                     # CORS, microcaching, phát file HLS & static
+├── backend/                           # API Server Express.js + TypeScript
+│   ├── src/
+│   │   ├── controllers/               # Route handlers: auth, movies, episodes, scraper
+│   │   ├── services/                  # Logic nghiệp vụ: scraper, mã hóa FFmpeg
+│   │   ├── middleware/                # JWT auth, xử lý lỗi, giới hạn tốc độ
+│   │   ├── gateways/                  # Socket.IO real-time gateway
+│   │   └── scripts/                   # CLI Admin: cập nhật studio, tự động cào tập mới
+│   ├── prisma/
+│   │   ├── schema.prisma              # Schema quan hệ đầy đủ (Movie, Episode, Rating…)
+│   │   ├── migrations/                # Lịch sử migration Prisma
+│   │   └── seed.ts                    # Seeder DB với nguồn HLS thật
+│   └── Dockerfile                     # Multi-stage build tích hợp sẵn FFmpeg
+├── frontend/                          # Web Client Next.js 16 + App Router
+│   ├── src/
+│   │   ├── app/                       # Page routes: home, movies, leaderboard, profile
+│   │   └── components/                # Header, Player, TierBoard, CommentTree, v.v.
+│   └── Dockerfile                     # Container Next.js standalone tối ưu dung lượng
+├── docker-compose.yml                 # Điều phối: db, backend, frontend, nginx
+├── .env.example                       # Template biến môi trường
+└── README_vi.md                       # Tài liệu này
+```
 
-### 1. Nhân bản dự án từ GitHub
+---
+
+## ⚙️ Yêu Cầu Hệ Thống
+
+| Công Cụ | Phiên Bản |
+| :--- | :--- |
+| **Docker & Docker Desktop** | Bản ổn định mới nhất (bắt buộc) |
+| **Node.js** | `v20.x` hoặc `v22.x` LTS |
+| **FFmpeg** | Đã thêm vào PATH hệ thống (tùy chọn — chỉ cần khi test CLI ngoài Docker) |
+
+---
+
+## 🚀 Khởi Chạy Nhanh
+
+### 1. Nhân bản repository
 ```bash
 git clone https://github.com/iamnguyenvu/donghua3d-monorepo.git
 cd donghua3d-monorepo
 ```
 
-### 2. Thiết lập file cấu hình môi trường
-Sao chép file khuôn mẫu và điều chỉnh các mật khẩu/khóa:
+### 2. Cấu hình biến môi trường
 ```bash
 cp .env.example .env
+# Chỉnh sửa .env với các secrets: DATABASE_URL, JWT_SECRET, v.v.
 ```
 
-### 3. Build và khởi động toàn bộ hệ thống
-Để khởi tạo các microservices và đồng loạt khởi chạy Postgres, Express, Next.js standalone, và Nginx proxy:
+### 3. Build và khởi động toàn bộ container
 ```bash
 docker compose up -d --build
 ```
-*Sau khi các container chạy thành công, bạn có thể truy cập website ngay tại [http://localhost](http://localhost) (đã được định tuyến qua cổng 80 của Nginx Reverse Proxy).*
+> Sau khi chạy, truy cập tại **[http://localhost](http://localhost)** — được định tuyến qua Nginx proxy cổng 80.
 
-### 4. Đồng bộ Cơ sở Dữ liệu (Bên trong Container API)
-Khởi chạy tạo bảng tự động và nạp bộ dữ liệu mẫu (Seeding):
+### 4. Khởi tạo cơ sở dữ liệu (lần đầu chạy)
 ```bash
+# Chạy Prisma migrations & seed danh mục phim
 docker compose exec backend npx prisma migrate dev --name init
 docker compose exec backend npx prisma db seed
 ```
 
+### 5. Các lệnh phát triển hữu ích
+```bash
+# Xem log container trực tiếp
+docker compose logs -f
+
+# Mở Prisma Studio (giao diện quản lý DB)
+docker compose exec backend npx prisma studio
+
+# Đồng bộ phim mới từ OPhim API (script Admin)
+docker compose exec backend npm run auto-update
+
+# Build lại một service riêng lẻ
+docker compose up -d --build backend
+```
+
 ---
 
-## 📑 Các File Tài Liệu Đặc Tả Chi Tiết (Claude SDD)
+## 📡 Tham Chiếu API Nhanh
 
-Hệ thống được thiết kế hoàn thiện trước khi tiến hành code. Để rà soát chi tiết, hãy đọc bộ tài liệu đặc tả cốt lõi tại đây:
+| Phương Thức | Endpoint | Xác Thực | Mô Tả |
+| :---: | :--- | :---: | :--- |
+| `GET` | `/api/movies` | — | Danh sách phim với phân trang |
+| `GET` | `/api/movies/:id` | — | Chi tiết phim kèm danh sách tập |
+| `GET` | `/api/episodes/:id` | — | Thông tin tập + URL stream (tăng viewsCount) |
+| `POST` | `/api/auth/register` | — | Đăng ký tài khoản người dùng mới |
+| `POST` | `/api/auth/login` | — | Đăng nhập và nhận JWT token |
+| `POST` | `/api/ratings` | 🔐 JWT | Gửi đánh giá (kiểm tra sandbox + uy tín) |
+| `GET` | `/api/leaderboard` | — | Bảng Xếp Hạng Tier Toàn Cầu |
+| `POST` | `/api/scraper/sync-movie` | 🔐 Admin | Đồng bộ phim đơn lẻ bằng OPhim slug |
+| `POST` | `/api/scraper/sync-latest` | 🔐 Admin | Đồng bộ hàng loạt phim mới nhất từ OPhim |
+| `GET` | `/api/upload/status/:id` | 🔐 Admin | SSE stream: tiến độ FFmpeg thời gian thực |
 
-* 📄 **[01_Đặc tả Hệ thống](file:///d:/Download/Project/donghua3d/docs/01_system_spec.md)**: Tổng quan hệ thống, stack công nghệ, bounded contexts, sơ đồ kiến trúc và use case.
-* 📄 **[02_Đặc tả Cơ sở Dữ liệu](file:///d:/Download/Project/donghua3d/docs/02_data_spec.md)**: Hệ thống bảng PostgreSQL DDL, composite indexes và công thức toán học tính điểm.
-* 📄 **[03_Đặc tả Giao diện API](file:///d:/Download/Project/donghua3d/docs/03_api_spec.md)**: Danh sách chi tiết API routes, JSON payloads và cấu trúc SSE stream telemetry.
-* 📄 **[04_Đặc tả Giao diện UI/UX](file:///d:/Download/Project/donghua3d/docs/04_ui_ux_spec.md)**: Giao diện trình phát Custom Player, kéo thả Tier List, mờ spoil và loader.
-* 📄 **[05_Đặc tả Ops & Caching](file:///d:/Download/Project/donghua3d/docs/05_ops_spec.md)**: Đóng gói Docker multi-stage, chính sách cache Nginx và hạ tầng AWS CloudFront S3.
-* 📄 **[06_Kế hoạch Triển khai](file:///d:/Download/Project/donghua3d/docs/06_implementation_plan.md)**: Danh sách tác vụ lập trình tuần tự kèm điều kiện xác nhận thành công.
-* 📄 **[07_Quy chuẩn Dự án](file:///d:/Download/Project/donghua3d/docs/07_conventions_spec.md)**: Quy tắc gõ code TypeScript, đặt tên biến, BEM CSS, và cú pháp commit Git.
-* 📄 **[08_Báo cáo Kiểm toán Mã nguồn](file:///d:/Download/Project/donghua3d/docs/08_audit_report.md)**: Kết quả đánh giá chất lượng mã nguồn ban đầu của monorepo.
-* 📄 **[09_Báo cáo Hiện trạng Hệ thống](file:///d:/Download/Project/donghua3d/docs/09_current_system_report.md)**: Tổng hợp hệ thống sau Giai đoạn 1 và khắc phục lỗi giao diện.
-* 📄 **[10_Kế hoạch Giai đoạn 2](file:///d:/Download/Project/donghua3d/docs/10_phase2_implementation_plan.md)**: Lộ trình triển khai nâng cấp Vidstack Player, Cloudflare R2, WebSockets.
-* 📄 **[11_Phân tích Nguồn Video](file:///d:/Download/Project/donghua3d/docs/11_video_sources_audit.md)**: Nghiên cứu chuyên sâu giao thức HLS, CDN Proxy của hoathinh3d & hh3d.
-* 📄 **[12_Kiến trúc 4K Premium](file:///d:/Download/Project/donghua3d/docs/12_premium_4k_architecture.md)**: Thiết kế giải pháp chuyển tiếp video lai chất lượng cao và chống leech 4K.
+> Toàn bộ hợp đồng route, request/response payload và định dạng SSE event được tài liệu hóa đầy đủ tại [`03_api_spec.md`](./docs/03_api_spec.md).
+
+---
+
+## 📑 Tài Liệu Đặc Tả (Claude SDD)
+
+Hệ thống được thiết kế đặc tả hoàn chỉnh trước khi viết bất kỳ dòng code nào, theo phương pháp Claude Spec-Driven Development (SDD):
+
+| # | Tài Liệu | Nội Dung |
+| :---: | :--- | :--- |
+| 01 | [Đặc Tả Hệ Thống](./docs/01_system_spec.md) | Phạm vi, lựa chọn công nghệ, bounded contexts, threat model |
+| 02 | [Đặc Tả Dữ Liệu](./docs/02_data_spec.md) | Schema PostgreSQL, composite indices, công thức tính điểm |
+| 03 | [Đặc Tả API](./docs/03_api_spec.md) | REST routes, JSON payloads, định dạng SSE telemetry |
+| 04 | [Đặc Tả UI/UX](./docs/04_ui_ux_spec.md) | Design tokens điện ảnh, điều khiển player, tương tác tier board |
+| 05 | [Đặc Tả Ops](./docs/05_ops_spec.md) | Docker multi-stage, Nginx microcaching, CloudFront / S3 |
+| 06 | [Kế Hoạch Triển Khai](./docs/06_implementation_plan.md) | Danh sách tác vụ tuần tự kèm điều kiện xác nhận rõ ràng |
+| 07 | [Quy Chuẩn Dự Án](./docs/07_conventions_spec.md) | TypeScript style, BEM CSS, Angular semantic git commits |
+| 08 | [Báo Cáo Kiểm Toán](./docs/08_audit_report.md) | Kiểm toán bảo mật & chất lượng mã nguồn ban đầu |
+| 09 | [Báo Cáo Hiện Trạng](./docs/09_current_system_report.md) | Giai đoạn 1 hoàn thành: HLS thật, sửa lỗi UI layout |
+| 10 | [Kế Hoạch Giai Đoạn 2](./docs/10_phase2_implementation.md) | Vidstack Player, Cloudflare R2, WebSocket, CI/CD |
+| 11 | [Phân Tích Nguồn Video](./docs/11_video_sources_audit.md) | Nghiên cứu chuyên sâu CDN proxy HLS (hoathinh3d, hh3d, phim1280) |
+| 12 | [Kiến Trúc 4K Premium](./docs/12_premium_4k_architecture.md) | Kiến trúc lai: nguồn ngoài + R2 tự lưu 4K chống leech |
+| 13 | [Bản Thiết Kế Nâng Cấp](./docs/13_renovation_master_blueprint.md) | Master plan: Schema DB, chuẩn hóa Scraper, nâng cấp UI toàn diện |
 
 ---
 
 ## 🤝 Quy Chuẩn Viết Code & Đóng Góp
 
-Tất cả các đóng góp mã nguồn bắt buộc phải tuân thủ nghiêm ngặt các quy tắc quy định tại **[07_Quy chuẩn Dự án](file:///d:/Download/Project/donghua3d/docs/07_conventions_spec.md)**.
+Tất cả đóng góp phải tuân thủ nghiêm ngặt **[07_Quy Chuẩn Dự Án](./docs/07_conventions_spec.md)**.
 
-### Quy tắc đặt thông điệp Commit Git
-Thông điệp commit bắt buộc tuân theo định dạng Angular Semantic Standard:
-`feat(scope): mô tả ngắn bằng chữ thường`
+### Cú Pháp Commit Git (Angular Semantic Standard)
 
-Các từ khóa được chấp nhận: `feat`, `fix`, `docs`, `style`, `refactor`, `perf`, `chore`.
+```
+<type>(<scope>): <mô tả ngắn bằng chữ thường>
+```
+
+| Từ Khóa | Khi nào dùng |
+| :--- | :--- |
+| `feat` | Tính năng hoặc chức năng mới |
+| `fix` | Sửa lỗi |
+| `docs` | Thay đổi tài liệu thuần túy |
+| `style` | Định dạng, khoảng trắng — không thay đổi logic |
+| `refactor` | Tái cấu trúc code không thay đổi hành vi |
+| `perf` | Cải thiện hiệu năng |
+| `chore` | Quy trình build, cập nhật dependency, cấu hình CI |
+
+**Ví dụ thực tế:**
+```bash
+feat(scraper): thêm bản đồ chuẩn hóa tên hán-việt
+fix(player): sửa lỗi hls.js đứng hình trên safari 17
+docs(readme): cập nhật bảng api và lộ trình giai đoạn 2
+perf(nginx): bật microcaching cho các endpoint danh mục phim
+```
+
+---
+
+<div align="center">
+
+**Được xây dựng với ❤️ cho cộng đồng mê Donghua**  
+*Vận hành bởi Next.js · Express.js · PostgreSQL · Prisma · Nginx · Docker*
+
+</div>
