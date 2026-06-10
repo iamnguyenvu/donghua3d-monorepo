@@ -26,7 +26,7 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
 export interface ApiResponse<T> {
   success: boolean;
   data?: T;
-  meta?: any;
+  meta?: Record<string, unknown>;
   error?: {
     code: string;
     message: string;
@@ -160,7 +160,7 @@ export interface MoviePayload {
   airingDay?: string;
   seriesId?: string;
   seriesLabel?: string;
-  loreMetadata?: any;
+  loreMetadata?: { title?: string; levels?: { name: string; desc?: string }[] } | null;
 }
 
 export interface EpisodePayload {

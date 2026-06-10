@@ -563,7 +563,7 @@ export default function MovieDetails() {
               </h3>
               {movie.loreMetadata?.levels && Array.isArray(movie.loreMetadata.levels) ? (
                 <ul className="space-y-4">
-                  {movie.loreMetadata.levels.map((lvl: any, i: number) => (
+                  {movie.loreMetadata.levels.map((lvl: { name: string; desc?: string }, i: number) => (
                     <li key={i} className="flex flex-col border-l-2 border-zinc-800 pl-4 py-1 hover:border-amber-500/50 transition-colors">
                       <span className="font-bold text-white text-sm uppercase tracking-wide">{lvl.name}</span>
                       {lvl.desc && <span className="text-xs text-zinc-400 mt-1.5 leading-relaxed">{lvl.desc}</span>}

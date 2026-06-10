@@ -16,7 +16,7 @@ export default function Header({ onSearchChange }: HeaderProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [searchVal, setSearchVal] = useState('');
   const [moviesCache, setMoviesCache] = useState<MoviePayload[]>([]);
-  const [genresCache, setGenresCache] = useState<any[]>([]);
+  const [genresCache, setGenresCache] = useState<{ id: string; name: string; slug: string }[]>([]);
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const [searchLoading, setSearchLoading] = useState(false);
   const [user, setUser] = useState<UserPayload | null>(null);
@@ -28,6 +28,7 @@ export default function Header({ onSearchChange }: HeaderProps) {
   useEffect(() => {
     const dismissed = localStorage.getItem('donghua3d_dismissed_backup_banner');
     if (!dismissed) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setShowBackupBanner(true);
     }
   }, []);
@@ -104,7 +105,9 @@ export default function Header({ onSearchChange }: HeaderProps) {
         if (res.success && res.data) {
           setGenresCache(res.data);
         }
-      } catch (err) {}
+      } catch (err) {
+        console.error('Failed to load genres:', err);
+      }
     }
     fetchGenres();
   }, []);
