@@ -154,6 +154,7 @@ router.get('/episodes/:id', async (req: AuthenticatedRequest, res: Response, nex
 
     const episode = await prisma.episode.findUnique({
       where: { id },
+      include: { sources: { orderBy: { priority: 'desc' } } }
     });
 
     if (!episode) {

@@ -6,7 +6,7 @@ import Image from 'next/image';
 import { useParams } from 'next/navigation';
 import { 
   Star, Play, Film, ArrowLeft, Loader2, Award, 
-  Info, Plus, Check, Search 
+  Info, Plus, Check, Search, Book
 } from 'lucide-react';
 import Header from '@/components/Header';
 import { catalogApi, ratingApi, MovieWithEpisodes, ReviewPayload, watchlistApi, Tier, MoviePayload, cleanEpisodeTitle } from '@/lib/api';
@@ -32,6 +32,7 @@ export default function MovieDetails() {
   const [watchlistIds, setWatchlistIds] = useState<Set<string>>(new Set());
   const [watchlistActionLoading, setWatchlistActionLoading] = useState(false);
   const [episodeLayout, setEpisodeLayout] = useState<'grid' | 'compact'>('grid');
+  const [activeTab, setActiveTab] = useState<'episodes' | 'lore'>('episodes');
   const [sortAsc, setSortAsc] = useState(true);
   const [episodeSearchQuery, setEpisodeSearchQuery] = useState('');
 
@@ -192,7 +193,18 @@ export default function MovieDetails() {
           imdbRating: 8.2,
           createdAt: new Date().toISOString(),
           leaderboard: { globalTier: Tier.S, tierScore: 94.5, rank: 1 },
-          episodes: mockEpisodes
+          episodes: mockEpisodes,
+          loreMetadata: {
+            title: 'Hệ Thống Cảnh Giới Tu Luyện (Thế Giới Hoàn Mỹ)',
+            levels: [
+              { name: 'Chuyển Huyết Cảnh', desc: 'Rèn luyện khí huyết, đả thông kinh mạch toàn thân, sinh ra thần lực mấy vạn cân.' },
+              { name: 'Động Thiên Cảnh', desc: 'Hấp thu tinh hoa thiên địa, khai mở động thiên trong cơ thể, giao tiếp với thiên địa đại đạo.' },
+              { name: 'Hóa Linh Cảnh', desc: 'Thân thể thuế biến, thần hồn được cường hóa, bắt đầu ngưng tụ linh thân.' },
+              { name: 'Minh Văn Cảnh', desc: 'Khắc họa phù văn đại đạo lên xương cốt, lĩnh ngộ thần thông nguyên thủy.' },
+              { name: 'Liệt Trận Cảnh', desc: 'Khắc họa sát trận trong cơ thể, mỗi cử động đều có uy lực hủy thiên diệt địa.' },
+              { name: 'Tôn Giả Cảnh', desc: 'Siêu phàm nhập thánh, đứng trên đỉnh cao của phàm giới, có thể khai tông lập phái.' }
+            ]
+          }
         });
         document.title = "Perfect World (Thế Giới Hoàn Mỹ) - Xem Donghua 3D Vietsub Thuyết Minh | Donghua3D";
       }
@@ -400,126 +412,168 @@ export default function MovieDetails() {
             </div>
           )}
 
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-zinc-900/60 pb-4 gap-4">
-            <div className="flex flex-col xs:flex-row xs:items-center gap-3">
-              <h2 className="text-base font-black text-white tracking-wider uppercase border-l-2 border-violet-500 pl-3">
-                Danh Sách Tập Phim
-              </h2>
-              {movie?.episodes && movie.episodes.length > 0 && (
-                <span className="text-[10px] font-bold text-zinc-500 bg-zinc-900/40 border border-zinc-900/60 px-1.5 py-0.5 rounded-[2px] w-fit">
-                  {movie.episodes.length} Tập
-                </span>
-              )}
-            </div>
-
-            <div className="flex items-center gap-3 select-none flex-wrap sm:flex-nowrap">
-              {/* Sleek Episode Search Input */}
-              <div className="flex items-center gap-2 px-3 py-1.5 rounded-[4px] bg-zinc-950/85 border border-zinc-900 focus-within:border-violet-500/50 focus-within:bg-zinc-950 transition-all duration-300 w-full sm:w-44 h-9">
-                <Search className="w-3.5 h-3.5 text-zinc-550 flex-shrink-0" />
-                <input
-                  type="text"
-                  placeholder="Tìm số tập, tên..."
-                  value={episodeSearchQuery}
-                  onChange={(e) => setEpisodeSearchQuery(e.target.value)}
-                  className="bg-transparent text-zinc-200 placeholder-zinc-650 text-[11px] font-black outline-none border-0 p-0 focus:ring-0 focus:outline-none w-full"
-                />
-              </div>
-
+          {movie.loreMetadata && (
+            <div className="flex items-center gap-6 border-b border-zinc-900/60 pb-0 mb-2">
               <button
-                onClick={() => setSortAsc(!sortAsc)}
-                className="px-3 py-1.5 bg-zinc-950/85 hover:bg-zinc-900 border border-zinc-900 text-[10px] font-black uppercase tracking-wider text-zinc-400 hover:text-white transition-all cursor-pointer rounded-[4px] h-9"
+                onClick={() => setActiveTab('episodes')}
+                className={`pb-4 px-2 font-black text-[13px] uppercase tracking-wider transition-all border-b-2 ${activeTab === 'episodes' ? 'border-violet-500 text-white' : 'border-transparent text-zinc-500 hover:text-zinc-300'}`}
               >
-                Xếp: {sortAsc ? 'Cũ nhất' : 'Mới nhất'}
+                Danh Sách Tập
               </button>
-
-              <div className="flex items-center bg-zinc-950/80 p-1 rounded-[4px] border border-zinc-900 h-9">
-                <button
-                  onClick={() => setEpisodeLayout('grid')}
-                  className={`px-3 py-1.5 rounded-[3px] text-[10px] font-black uppercase tracking-wider transition-all cursor-pointer border-0 outline-none ${
-                    episodeLayout === 'grid'
-                      ? 'bg-violet-600 text-white shadow-sm'
-                      : 'text-zinc-500 hover:text-zinc-300 bg-transparent'
-                  }`}
-                >
-                  Chi Tiết
-                </button>
-                <button
-                  onClick={() => setEpisodeLayout('compact')}
-                  className={`px-3 py-1.5 rounded-[3px] text-[10px] font-black uppercase tracking-wider transition-all cursor-pointer border-0 outline-none ${
-                    episodeLayout === 'compact'
-                      ? 'bg-violet-600 text-white shadow-sm'
-                      : 'text-zinc-500 hover:text-zinc-300 bg-transparent'
-                  }`}
-                >
-                  Rút Gọn
-                </button>
-              </div>
+              <button
+                onClick={() => setActiveTab('lore')}
+                className={`pb-4 px-2 font-black text-[13px] uppercase tracking-wider transition-all flex items-center gap-2 border-b-2 ${activeTab === 'lore' ? 'border-amber-500 text-amber-400' : 'border-transparent text-zinc-500 hover:text-zinc-300'}`}
+              >
+                <Book className="w-4 h-4" /> Cẩm Nang Tu Tiên
+              </button>
             </div>
-          </div>
+          )}
 
-          {episodeLayout === 'grid' ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {filteredAndSortedEpisodes && filteredAndSortedEpisodes.length > 0 ? (
-                filteredAndSortedEpisodes.map((ep) => (
-                  <Link
-                    href={`/movies/${movie.id}/episodes/${ep.id}`}
-                    key={ep.id}
-                    className="bg-[#0c0c0f]/40 border border-zinc-900/60 hover:border-zinc-800 rounded-[4px] overflow-hidden flex flex-col group transition-all duration-300 shadow-md no-underline animate-fade-in"
+          {activeTab === 'episodes' ? (
+            <div className="flex flex-col gap-6">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-zinc-900/60 pb-4 gap-4">
+                <div className="flex flex-col xs:flex-row xs:items-center gap-3">
+                  {!movie.loreMetadata && (
+                    <h2 className="text-base font-black text-white tracking-wider uppercase border-l-2 border-violet-500 pl-3">
+                      Danh Sách Tập Phim
+                    </h2>
+                  )}
+                  {movie?.episodes && movie.episodes.length > 0 && (
+                    <span className="text-[10px] font-bold text-zinc-500 bg-zinc-900/40 border border-zinc-900/60 px-1.5 py-0.5 rounded-[2px] w-fit">
+                      {movie.episodes.length} Tập
+                    </span>
+                  )}
+                </div>
+
+                <div className="flex items-center gap-3 select-none flex-wrap sm:flex-nowrap">
+                  <div className="flex items-center gap-2 px-3 py-1.5 rounded-[4px] bg-zinc-950/85 border border-zinc-900 focus-within:border-violet-500/50 focus-within:bg-zinc-950 transition-all duration-300 w-full sm:w-44 h-9">
+                    <Search className="w-3.5 h-3.5 text-zinc-550 flex-shrink-0" />
+                    <input
+                      type="text"
+                      placeholder="Tìm số tập, tên..."
+                      value={episodeSearchQuery}
+                      onChange={(e) => setEpisodeSearchQuery(e.target.value)}
+                      className="bg-transparent text-zinc-200 placeholder-zinc-650 text-[11px] font-black outline-none border-0 p-0 focus:ring-0 focus:outline-none w-full"
+                    />
+                  </div>
+
+                  <button
+                    onClick={() => setSortAsc(!sortAsc)}
+                    className="px-3 py-1.5 bg-zinc-950/85 hover:bg-zinc-900 border border-zinc-900 text-[10px] font-black uppercase tracking-wider text-zinc-400 hover:text-white transition-all cursor-pointer rounded-[4px] h-9"
                   >
-                    <div className="relative aspect-video w-full bg-zinc-950">
-                      <Image
-                        src={ep.thumbnail || movie.posterUrl || '/static/uploads/default_thumb.jpg'}
-                        alt={cleanEpisodeTitle(ep.title, ep.episodeNumber)}
-                        fill
-                        className="object-cover transition-transform duration-550 group-hover:scale-103"
-                      />
-                      <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                        <div className="p-2.5 rounded-[4px] bg-violet-600 text-white shadow-2xl scale-95 group-hover:scale-100 transition-all duration-200">
-                          <Play className="w-3.5 h-3.5 fill-white text-white" />
-                        </div>
-                      </div>
-                    </div>
+                    Xếp: {sortAsc ? 'Cũ nhất' : 'Mới nhất'}
+                  </button>
 
-                    <div className="p-4 flex flex-col gap-1 select-none">
-                      <span className="text-[9px] text-violet-500 font-black uppercase tracking-widest">Tập {ep.episodeNumber}</span>
-                      <h3 className="text-xs font-bold text-white group-hover:text-violet-400 transition-colors truncate mt-0.5">
-                        {cleanEpisodeTitle(ep.title, ep.episodeNumber)}
-                      </h3>
-                      <p className="text-[11px] text-zinc-500 line-clamp-2 leading-relaxed mt-0.5">
-                        {ep.description}
+                  <div className="flex items-center bg-zinc-950/80 p-1 rounded-[4px] border border-zinc-900 h-9">
+                    <button
+                      onClick={() => setEpisodeLayout('grid')}
+                      className={`px-3 py-1.5 rounded-[3px] text-[10px] font-black uppercase tracking-wider transition-all cursor-pointer border-0 outline-none ${
+                        episodeLayout === 'grid'
+                          ? 'bg-violet-600 text-white shadow-sm'
+                          : 'text-zinc-500 hover:text-zinc-300 bg-transparent'
+                      }`}
+                    >
+                      Chi Tiết
+                    </button>
+                    <button
+                      onClick={() => setEpisodeLayout('compact')}
+                      className={`px-3 py-1.5 rounded-[3px] text-[10px] font-black uppercase tracking-wider transition-all cursor-pointer border-0 outline-none ${
+                        episodeLayout === 'compact'
+                          ? 'bg-violet-600 text-white shadow-sm'
+                          : 'text-zinc-500 hover:text-zinc-300 bg-transparent'
+                      }`}
+                    >
+                      Rút Gọn
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              {episodeLayout === 'grid' ? (
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                  {filteredAndSortedEpisodes && filteredAndSortedEpisodes.length > 0 ? (
+                    filteredAndSortedEpisodes.map((ep) => (
+                      <Link
+                        href={`/movies/${movie.id}/episodes/${ep.id}`}
+                        key={ep.id}
+                        className="bg-[#0c0c0f]/40 border border-zinc-900/60 hover:border-zinc-800 rounded-[4px] overflow-hidden flex flex-col group transition-all duration-300 shadow-md no-underline animate-fade-in"
+                      >
+                        <div className="relative aspect-video w-full bg-zinc-950">
+                          <Image
+                            src={ep.thumbnail || movie.posterUrl || '/static/uploads/default_thumb.jpg'}
+                            alt={cleanEpisodeTitle(ep.title, ep.episodeNumber)}
+                            fill
+                            className="object-cover transition-transform duration-550 group-hover:scale-103"
+                          />
+                          <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                            <div className="p-2.5 rounded-[4px] bg-violet-600 text-white shadow-2xl scale-95 group-hover:scale-100 transition-all duration-200">
+                              <Play className="w-3.5 h-3.5 fill-white text-white" />
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="p-4 flex flex-col gap-1 select-none">
+                          <span className="text-[9px] text-violet-500 font-black uppercase tracking-widest">Tập {ep.episodeNumber}</span>
+                          <h3 className="text-xs font-bold text-white group-hover:text-violet-400 transition-colors truncate mt-0.5">
+                            {cleanEpisodeTitle(ep.title, ep.episodeNumber)}
+                          </h3>
+                          <p className="text-[11px] text-zinc-500 line-clamp-2 leading-relaxed mt-0.5">
+                            {ep.description}
+                          </p>
+                        </div>
+                      </Link>
+                    ))
+                  ) : (
+                    <div className="col-span-full text-center py-12 bg-zinc-950/40 border border-zinc-900 rounded-[4px] p-6 select-none">
+                      <Info className="w-6 h-6 text-zinc-650 mx-auto mb-2" />
+                      <p className="text-xs text-zinc-550 italic">
+                        {episodeSearchQuery ? 'Không tìm thấy tập phim nào khớp với từ khóa tìm kiếm.' : 'Chưa có tập phim nào được phát hành.'}
                       </p>
                     </div>
-                  </Link>
-                ))
+                  )}
+                </div>
               ) : (
-                <div className="col-span-full text-center py-12 bg-zinc-950/40 border border-zinc-900 rounded-[4px] p-6 select-none">
-                  <Info className="w-6 h-6 text-zinc-650 mx-auto mb-2" />
-                  <p className="text-xs text-zinc-550 italic">
-                    {episodeSearchQuery ? 'Không tìm thấy tập phim nào khớp với từ khóa tìm kiếm.' : 'Chưa có tập phim nào được phát hành.'}
-                  </p>
+                <div className="grid grid-cols-3 xxs:grid-cols-4 xs:grid-cols-5 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-10 xl:grid-cols-12 2xl:grid-cols-14 gap-3">
+                  {filteredAndSortedEpisodes && filteredAndSortedEpisodes.length > 0 ? (
+                    filteredAndSortedEpisodes.map((ep) => (
+                      <Link
+                        href={`/movies/${movie.id}/episodes/${ep.id}`}
+                        key={ep.id}
+                        className="p-3 bg-[#0c0c0f]/80 border border-zinc-900/85 hover:border-violet-500/50 hover:bg-violet-500/10 rounded-[4px] text-center flex flex-col justify-center items-center group transition-all duration-300 no-underline shadow-md cursor-pointer animate-fade-in"
+                      >
+                        <span className="text-[9px] text-zinc-500 group-hover:text-violet-400 font-extrabold uppercase tracking-widest transition-colors">TẬP</span>
+                        <span className="text-sm font-black text-white group-hover:text-violet-300 mt-0.5 transition-colors">{ep.episodeNumber}</span>
+                      </Link>
+                    ))
+                  ) : (
+                    <div className="col-span-full text-center py-12 bg-zinc-950/40 border border-zinc-900 rounded-[4px] p-6 select-none">
+                      <Info className="w-6 h-6 text-zinc-650 mx-auto mb-2" />
+                      <p className="text-xs text-zinc-550 italic">
+                        {episodeSearchQuery ? 'Không tìm thấy tập phim nào khớp với từ khóa tìm kiếm.' : 'Chưa có tập phim nào được phát hành.'}
+                      </p>
+                    </div>
+                  )}
                 </div>
               )}
             </div>
           ) : (
-            <div className="grid grid-cols-3 xxs:grid-cols-4 xs:grid-cols-5 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-10 xl:grid-cols-12 2xl:grid-cols-14 gap-3">
-              {filteredAndSortedEpisodes && filteredAndSortedEpisodes.length > 0 ? (
-                filteredAndSortedEpisodes.map((ep) => (
-                  <Link
-                    href={`/movies/${movie.id}/episodes/${ep.id}`}
-                    key={ep.id}
-                    className="p-3 bg-[#0c0c0f]/80 border border-zinc-900/85 hover:border-violet-500/50 hover:bg-violet-500/10 rounded-[4px] text-center flex flex-col justify-center items-center group transition-all duration-300 no-underline shadow-md cursor-pointer animate-fade-in"
-                  >
-                    <span className="text-[9px] text-zinc-500 group-hover:text-violet-400 font-extrabold uppercase tracking-widest transition-colors">TẬP</span>
-                    <span className="text-sm font-black text-white group-hover:text-violet-300 mt-0.5 transition-colors">{ep.episodeNumber}</span>
-                  </Link>
-                ))
+            <div className="bg-zinc-950/40 border border-zinc-900 rounded-[4px] p-6 text-zinc-300 max-w-none shadow-md animate-fade-in">
+              <h3 className="text-amber-400 uppercase tracking-widest text-sm font-black mb-6 flex items-center gap-2">
+                <Book className="w-5 h-5"/> {movie.loreMetadata?.title || 'Hệ Thống Cảnh Giới Tu Luyện'}
+              </h3>
+              {movie.loreMetadata?.levels && Array.isArray(movie.loreMetadata.levels) ? (
+                <ul className="space-y-4">
+                  {movie.loreMetadata.levels.map((lvl: any, i: number) => (
+                    <li key={i} className="flex flex-col border-l-2 border-zinc-800 pl-4 py-1 hover:border-amber-500/50 transition-colors">
+                      <span className="font-bold text-white text-sm uppercase tracking-wide">{lvl.name}</span>
+                      {lvl.desc && <span className="text-xs text-zinc-400 mt-1.5 leading-relaxed">{lvl.desc}</span>}
+                    </li>
+                  ))}
+                </ul>
               ) : (
-                <div className="col-span-full text-center py-12 bg-zinc-950/40 border border-zinc-900 rounded-[4px] p-6 select-none">
-                  <Info className="w-6 h-6 text-zinc-650 mx-auto mb-2" />
-                  <p className="text-xs text-zinc-550 italic">
-                    {episodeSearchQuery ? 'Không tìm thấy tập phim nào khớp với từ khóa tìm kiếm.' : 'Chưa có tập phim nào được phát hành.'}
-                  </p>
-                </div>
+                <pre className="text-[10px] bg-black p-4 rounded border border-zinc-800 overflow-auto text-zinc-500">
+                  {JSON.stringify(movie.loreMetadata, null, 2)}
+                </pre>
               )}
             </div>
           )}

@@ -160,6 +160,7 @@ export interface MoviePayload {
   airingDay?: string;
   seriesId?: string;
   seriesLabel?: string;
+  loreMetadata?: any;
 }
 
 export interface EpisodePayload {
@@ -181,6 +182,11 @@ export interface EpisodePayload {
     progress: number;
     completed: boolean;
   };
+  sources?: {
+    id: string;
+    serverName: string;
+    videoUrl: string;
+  }[];
 }
 
 export interface MovieWithEpisodes extends MoviePayload {

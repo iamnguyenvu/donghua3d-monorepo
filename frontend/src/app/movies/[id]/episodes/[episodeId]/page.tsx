@@ -26,7 +26,7 @@ export default function WatchEpisode() {
   // Selector Utility States
   const [episodeSearch, setEpisodeSearch] = useState('');
   const [sortAsc, setSortAsc] = useState(true);
-  const [selectedServer, setSelectedServer] = useState<'VIP 1' | 'VIP 2'>('VIP 1');
+  const [selectedServer, setSelectedServer] = useState<string>('');
 
   // Autoplay State
   const [autoplayCountdown, setAutoplayCountdown] = useState<number | null>(null);
@@ -53,6 +53,12 @@ export default function WatchEpisode() {
         setEpisode(epRes.data);
         setMovie(mvRes.data);
         
+        if (epRes.data.sources && epRes.data.sources.length > 0) {
+          setSelectedServer(epRes.data.sources[0].serverName);
+        } else {
+          setSelectedServer('VIP 1');
+        }
+
         // Set initial watch progress if present
         if (epRes.data.watchHistory && epRes.data.watchHistory.progress > 0) {
           setInitialProgress(epRes.data.watchHistory.progress);
@@ -82,6 +88,10 @@ export default function WatchEpisode() {
           introEnd: 90.0,
           outroStart: 1100.0,
           outroEnd: 1200.0,
+          sources: [
+            { id: '1', serverName: 'VIP 1 (Mux)', videoUrl: 'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8' },
+            { id: '2', serverName: 'VIP 2 (Cloudflare)', videoUrl: 'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8' }
+          ]
         });
         setMovie({
           id: params.id,
@@ -139,6 +149,15 @@ export default function WatchEpisode() {
       }
     }
   };
+
+  const currentVideoUrl = React.useMemo(() => {
+    if (!episode) return '';
+    if (episode.sources && episode.sources.length > 0) {
+      const src = episode.sources.find(s => s.serverName === selectedServer);
+      if (src) return src.videoUrl;
+    }
+    return episode.videoUrl;
+  }, [episode, selectedServer]);
 
   // Find next episode
   const nextEpisode = movie?.episodes && episode
@@ -294,7 +313,7 @@ export default function WatchEpisode() {
 
         {/* Custom Vidstack Premium Video Player Component */}
         <PremiumPlayer
-          src={episode.videoUrl}
+          src={currentVideoUrl}
           videoUrl4k={episode.videoUrl4k}
           isVipOnly={episode.isVipOnly}
           title={cleanEpisodeTitle(episode.title, episode.episodeNumber)}
@@ -344,7 +363,9 @@ export default function WatchEpisode() {
               <div className="flex items-center gap-2 bg-zinc-950/80 border border-zinc-900 px-3 py-2 rounded-[2px]">
                 <span className="text-[9px] font-black text-zinc-500 uppercase tracking-widest">Nguồn:</span>
                 <div className="flex items-center gap-1.5 ml-1">
-                  {(['VIP 1', 'VIP 2'] as const).map((srv) => (
+                  {(episode.sources && episode.sources.length > 0
+                    ? episode.sources.map(s => s.serverName)
+                    : ['VIP 1', 'VIP 2']).map((srv) => (
                     <button
                       key={srv}
                       onClick={() => setSelectedServer(srv)}

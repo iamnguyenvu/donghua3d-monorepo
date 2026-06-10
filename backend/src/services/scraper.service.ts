@@ -200,28 +200,33 @@ export class ScraperService {
       // Sync/Upsert Episodes
       let syncedEpisodesCount = 0;
       if (data.episodes && data.episodes.length > 0) {
-        // We use the first available server stream server (usually Vietsub #1 or similar)
-        const server = data.episodes[0];
-        console.log(`🤖 [Scraper] Syncing ${server.server_data.length} episodes from server: "${server.server_name}"`);
+        console.log(`🤖 [Scraper] Syncing episodes across ${data.episodes.length} servers...`);
+        const allEpsMap = new Map<number, any>();
 
-        for (const ep of server.server_data) {
-          const episodeNumber = parseInt(ep.name, 10);
-          if (isNaN(episodeNumber)) continue;
+        for (const server of data.episodes) {
+          const serverName = server.server_name;
+          for (const ep of server.server_data) {
+            const episodeNumber = parseInt(ep.name, 10);
+            if (isNaN(episodeNumber)) continue;
 
-          const videoUrl = ep.link_m3u8 || ep.link_embed;
-          if (!videoUrl) continue;
+            const videoUrl = ep.link_m3u8 || ep.link_embed;
+            if (!videoUrl) continue;
 
-          const existingEp = await prisma.episode.findUnique({
-            where: {
-              unique_movie_episode: {
-                movieId: movie.id,
-                episodeNumber
-              }
+            if (!allEpsMap.has(episodeNumber)) {
+              allEpsMap.set(episodeNumber, {
+                episodeNumber,
+                filename: ep.filename,
+                sources: []
+              });
             }
-          });
+            allEpsMap.get(episodeNumber).sources.push({ serverName, videoUrl });
+          }
+        }
 
-          // Clean episode title
-          let cleanEpTitle = ep.filename || `Tập ${episodeNumber}`;
+        for (const epData of allEpsMap.values()) {
+          const { episodeNumber, filename, sources } = epData;
+
+          let cleanEpTitle = filename || `Tập ${episodeNumber}`;
           cleanEpTitle = cleanEpTitle.replace(/\.(mp4|m3u8|mkv|avi|flv|ts)$/i, '');
           const lowerEp = cleanEpTitle.toLowerCase();
           const isUglyFile = (cleanEpTitle.split('.').length > 3 || cleanEpTitle.split('_').length > 3 || cleanEpTitle.split('-').length > 3) && (
@@ -245,29 +250,63 @@ export class ScraperService {
             cleanEpTitle = `Tập ${episodeNumber}`;
           }
 
+          let existingEp = await prisma.episode.findUnique({
+            where: {
+              unique_movie_episode: {
+                movieId: movie.id,
+                episodeNumber
+              }
+            }
+          });
+
+          const primaryVideoUrl = sources[0].videoUrl;
+
           if (!existingEp) {
-            // Create Episode
-            await prisma.episode.create({
+            existingEp = await prisma.episode.create({
               data: {
                 movieId: movie.id,
                 episodeNumber,
                 title: cleanEpTitle,
                 description: `Tập phim thứ ${episodeNumber} của bộ phim ${movie.title}`,
-                videoUrl,
-                duration: 1200.0, // default 20 mins
+                videoUrl: primaryVideoUrl,
+                duration: 1200.0,
                 thumbnail: movie.bannerUrl
               }
             });
           } else {
-            // Update stream URL for freshness
-            await prisma.episode.update({
+            existingEp = await prisma.episode.update({
               where: { id: existingEp.id },
               data: {
-                videoUrl,
+                videoUrl: primaryVideoUrl,
                 title: cleanEpTitle
               }
             });
           }
+
+          for (let i = 0; i < sources.length; i++) {
+            const source = sources[i];
+            const priority = sources.length - i;
+            const existingSource = await prisma.episodeSource.findFirst({
+              where: { episodeId: existingEp.id, serverName: source.serverName }
+            });
+
+            if (!existingSource) {
+              await prisma.episodeSource.create({
+                data: {
+                  episodeId: existingEp.id,
+                  serverName: source.serverName,
+                  videoUrl: source.videoUrl,
+                  priority
+                }
+              });
+            } else {
+              await prisma.episodeSource.update({
+                where: { id: existingSource.id },
+                data: { videoUrl: source.videoUrl, priority }
+              });
+            }
+          }
+
           syncedEpisodesCount++;
         }
       }
