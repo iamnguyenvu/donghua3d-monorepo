@@ -16,7 +16,7 @@ export default function Header({ onSearchChange }: HeaderProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [searchVal, setSearchVal] = useState('');
   const [moviesCache, setMoviesCache] = useState<MoviePayload[]>([]);
-  const [genresCache, setGenresCache] = useState<{ id: string; name: string; slug: string }[]>([]);
+  const [genresCache, setGenresCache] = useState<{ id: string; name: string; slug: string; _count?: { movies: number } }[]>([]);
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const [searchLoading, setSearchLoading] = useState(false);
   const [user, setUser] = useState<UserPayload | null>(null);

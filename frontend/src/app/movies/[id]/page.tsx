@@ -126,7 +126,7 @@ export default function MovieDetails() {
         const reviewRes = await ratingApi.getReviews(params.id);
         if (reviewRes.success && reviewRes.data) {
           setReviews(reviewRes.data);
-          setRatingCount(reviewRes.meta?.totalRatings || 0);
+          setRatingCount((reviewRes.meta?.totalRatings as number) || 0);
         }
 
         // Fetch related parts of the series using a semantic root title match
