@@ -198,9 +198,14 @@ router.get('/movie/:movieId', async (req: AuthenticatedRequest, res: Response, n
       orderBy: { createdAt: 'desc' },
     });
 
+    const ratingCount = await prisma.rating.count({
+      where: { movieId, isCredible: true, isApproved: true }
+    });
+
     res.status(200).json({
       success: true,
       data: reviews,
+      meta: { totalRatings: ratingCount }
     });
   } catch (err) {
     next(err);

@@ -14,6 +14,7 @@ import tierRouter from './controllers/tier.controller';
 import watchlistRouter from './controllers/watchlist.controller';
 import scraperRouter from './controllers/scraper.controller';
 import adminRouter from './controllers/admin.controller';
+import genreRouter from './controllers/genre.controller';
 
 // Import Services & Gateways
 import { cronService } from './services/cron.service';
@@ -51,6 +52,7 @@ app.use('/tiers', tierRouter);
 app.use('/watchlist', watchlistRouter);
 app.use('/scraper', scraperRouter);
 app.use('/admin', adminRouter);
+app.use('/genres', genreRouter);
 
 // 3. Health check route
 app.get('/health', (_req, res) => {

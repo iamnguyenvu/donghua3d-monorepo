@@ -168,6 +168,35 @@ export class ScraperService {
         });
       }
 
+      // Sync Genres (Extract from ophimMovie.category if available)
+      if (ophimMovie.category && Array.isArray(ophimMovie.category)) {
+        for (const cat of ophimMovie.category) {
+          if (cat.name && cat.slug) {
+            // Upsert Genre
+            const genre = await prisma.genre.upsert({
+              where: { slug: cat.slug },
+              update: { name: cat.name },
+              create: { name: cat.name, slug: cat.slug }
+            });
+
+            // Link to Movie (Upserting MovieGenre)
+            await prisma.movieGenre.upsert({
+              where: {
+                movieId_genreId: {
+                  movieId: movie.id,
+                  genreId: genre.id
+                }
+              },
+              update: {},
+              create: {
+                movieId: movie.id,
+                genreId: genre.id
+              }
+            });
+          }
+        }
+      }
+
       // Sync/Upsert Episodes
       let syncedEpisodesCount = 0;
       if (data.episodes && data.episodes.length > 0) {

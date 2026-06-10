@@ -87,6 +87,7 @@ model Movie {
   personalTiers  PersonalTierList[]
   leaderboard    GlobalTierLeaderboard?
   watchlist      Watchlist[]
+  genres         MovieGenre[]
 
   @@index([releaseYear(sort: Desc), rating(sort: Desc)], name: "idx_movie_release_rating")
   @@index([viewsCount(sort: Desc)], name: "idx_movie_popularity")
@@ -256,4 +257,23 @@ model ScrapingQueue {
   updatedAt   DateTime       @updatedAt @db.Timestamptz
 
   @@index([status, createdAt], name: "idx_scraping_queue_status")
+}
+
+// 12. Genre Model
+model Genre {
+  id        String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name      String       @unique @db.VarChar(100)
+  slug      String       @unique @db.VarChar(100)
+  movies    MovieGenre[]
+}
+
+// 13. MovieGenre Link Model
+model MovieGenre {
+  movieId   String   @db.Uuid
+  genreId   String   @db.Uuid
+  movie     Movie    @relation(fields: [movieId], references: [id], onDelete: Cascade)
+  genre     Genre    @relation(fields: [genreId], references: [id], onDelete: Cascade)
+
+  @@id([movieId, genreId])
+  @@index([genreId], name: "idx_movie_genre")
 }

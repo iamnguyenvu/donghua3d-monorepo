@@ -26,6 +26,7 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
 export interface ApiResponse<T> {
   success: boolean;
   data?: T;
+  meta?: any;
   error?: {
     code: string;
     message: string;
@@ -213,6 +214,28 @@ export const catalogApi = {
       method: 'POST',
       body: JSON.stringify({ progress, completed }),
     });
+  }
+};
+
+// ==============================================================================
+// GENRE SYSTEM ENDPOINTS
+// ==============================================================================
+export interface GenrePayload {
+  id: string;
+  name: string;
+  slug: string;
+  _count?: {
+    movies: number;
+  };
+}
+
+export const genreApi = {
+  async getGenres(): Promise<ApiResponse<GenrePayload[]>> {
+    return apiFetch<GenrePayload[]>('/genres');
+  },
+
+  async getGenre(slug: string): Promise<ApiResponse<{ genre: GenrePayload; movies: MoviePayload[] }>> {
+    return apiFetch<{ genre: GenrePayload; movies: MoviePayload[] }>(`/genres/${slug}`);
   }
 };
 

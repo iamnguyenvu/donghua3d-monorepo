@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { Film, Search, User, LogOut, Loader2, ChevronDown, Bell, Menu, X, Clock } from 'lucide-react';
-import { authApi, UserPayload } from '../lib/api';
+import { authApi, catalogApi, UserPayload, MoviePayload } from '../lib/api';
 
 interface HeaderProps {
   onSearchChange?: (val: string) => void;
@@ -15,10 +15,27 @@ export default function Header({ onSearchChange }: HeaderProps) {
   const router = useRouter();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [searchVal, setSearchVal] = useState('');
+  const [moviesCache, setMoviesCache] = useState<MoviePayload[]>([]);
+  const [genresCache, setGenresCache] = useState<any[]>([]);
+  const [isSearchFocused, setIsSearchFocused] = useState(false);
+  const [searchLoading, setSearchLoading] = useState(false);
   const [user, setUser] = useState<UserPayload | null>(null);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
+  const [showBackupBanner, setShowBackupBanner] = useState(false);
+
+  useEffect(() => {
+    const dismissed = localStorage.getItem('donghua3d_dismissed_backup_banner');
+    if (!dismissed) {
+      setShowBackupBanner(true);
+    }
+  }, []);
+
+  const dismissBackupBanner = () => {
+    setShowBackupBanner(false);
+    localStorage.setItem('donghua3d_dismissed_backup_banner', 'true');
+  };
 
   // Watch History popover state
   interface LocalWatchHistoryItem {
@@ -79,6 +96,17 @@ export default function Header({ onSearchChange }: HeaderProps) {
       setLoading(false);
     }
     fetchMe();
+
+    async function fetchGenres() {
+      try {
+        const { genreApi } = await import('../lib/api');
+        const res = await genreApi.getGenres();
+        if (res.success && res.data) {
+          setGenresCache(res.data);
+        }
+      } catch (err) {}
+    }
+    fetchGenres();
   }, []);
 
   // Professional Escape Key handler to close drawer or modal instantly
@@ -114,6 +142,22 @@ export default function Header({ onSearchChange }: HeaderProps) {
     if (onSearchChange) {
       onSearchChange(val);
     }
+  };
+
+  const handleSearchFocus = async () => {
+    setIsSearchFocused(true);
+    if (moviesCache.length === 0) {
+      setSearchLoading(true);
+      const res = await catalogApi.getMovies();
+      if (res.success && res.data) {
+        setMoviesCache(res.data);
+      }
+      setSearchLoading(false);
+    }
+  };
+
+  const handleSearchBlur = () => {
+    setTimeout(() => setIsSearchFocused(false), 200);
   };
 
   const handleAuthSubmit = async (e: React.FormEvent) => {
@@ -160,7 +204,17 @@ export default function Header({ onSearchChange }: HeaderProps) {
 
   return (
     <>
-      <header className="fixed top-0 left-0 right-0 z-50 bg-[#050508]/90 backdrop-blur-md select-none border-b border-zinc-900/50">
+      {showBackupBanner && (
+        <div className="w-full bg-gradient-to-r from-violet-600/20 via-violet-500/20 to-indigo-600/20 backdrop-blur-md border-b border-violet-500/30 text-white px-4 py-2 flex items-center justify-between text-xs sm:text-sm font-bold animate-fade-in z-[60] relative">
+          <div className="flex-1 text-center">
+            🔔 Lưu ngay tên miền dự phòng <span className="text-amber-400 font-black tracking-widest uppercase">donghua3d.link</span> để truy cập khi bị chặn!
+          </div>
+          <button onClick={dismissBackupBanner} className="p-1 hover:bg-white/10 rounded-full transition-colors cursor-pointer outline-none">
+            <X className="w-4 h-4 text-zinc-300 hover:text-white" />
+          </button>
+        </div>
+      )}
+      <header className="sticky top-0 z-50 w-full bg-[#050508]/85 backdrop-blur-md border-b border-zinc-900/50">
         <div className="max-w-[1440px] mx-auto w-full px-4 sm:px-6 md:px-12 lg:px-16 h-20 md:h-[88px] flex items-center justify-between">
           {/* Left Side: Logo + Navigation clustered together */}
           <div className="flex items-center gap-4 sm:gap-10 md:gap-14">
@@ -219,24 +273,117 @@ export default function Header({ onSearchChange }: HeaderProps) {
                   <span className="absolute bottom-0 left-0 right-0 h-[2.5px] bg-violet-500 rounded-full" />
                 )}
               </Link>
+              
+              {/* Thể Loại Dropdown */}
+              <div className="relative group/genre cursor-pointer py-2.5">
+                <div className={`relative text-xs font-black uppercase tracking-wider no-underline transition-colors duration-200 flex items-center gap-1 ${
+                  pathname.startsWith('/genres') ? 'text-white' : 'text-zinc-400 group-hover/genre:text-white'
+                }`}>
+                  Thể Loại
+                  <ChevronDown className="w-3.5 h-3.5 transition-transform group-hover/genre:rotate-180" />
+                  {pathname.startsWith('/genres') && (
+                    <span className="absolute bottom-0 left-0 right-0 h-[2.5px] bg-violet-500 rounded-full" />
+                  )}
+                </div>
+                <div className="absolute left-0 top-full pt-2 w-96 opacity-0 invisible group-hover/genre:opacity-100 group-hover/genre:visible transition-all duration-300 transform translate-y-2 group-hover/genre:translate-y-0 z-50">
+                  <div className="bg-[#0c0c10]/95 backdrop-blur-xl border border-zinc-900 rounded-[4px] p-4 shadow-[0_10px_40px_rgba(0,0,0,0.8)] grid grid-cols-2 gap-2">
+                    {genresCache.length > 0 ? (
+                      genresCache.map((g) => (
+                        <Link 
+                          key={g.id} 
+                          href={`/genres/${g.slug}`}
+                          className="px-3 py-2 text-xs font-bold text-zinc-300 hover:text-white hover:bg-zinc-900 rounded-[2px] transition-colors no-underline flex items-center justify-between group/item"
+                        >
+                          <span>{g.name}</span>
+                          {g._count?.movies !== undefined && (
+                            <span className="text-[9px] text-zinc-600 group-hover/item:text-violet-400 bg-zinc-950 px-1.5 py-0.5 rounded-[2px]">
+                              {g._count.movies}
+                            </span>
+                          )}
+                        </Link>
+                      ))
+                    ) : (
+                      <div className="col-span-2 text-center text-xs text-zinc-500 py-2">Đang tải...</div>
+                    )}
+                  </div>
+                </div>
+              </div>
             </nav>
           </div>
 
           {/* Right Side: Search + Actions clustered together */}
           <div className="flex items-center gap-4 sm:gap-6 flex-shrink-0">
-            {/* Search Bar Input Container (Desktop only: hidden md:flex) */}
-            {onSearchChange && (
-              <div className="flex items-center gap-3 px-4 py-2.5 rounded-[4px] bg-black/50 border border-zinc-800/80 focus-within:border-violet-500/80 focus-within:bg-black/85 transition-all duration-300 w-40 sm:w-48 lg:w-64 hidden md:flex shadow-inner">
-                <Search className="w-4 h-4 text-zinc-400 flex-shrink-0 transition-colors" />
-                <input
-                  type="text"
-                  placeholder="Tìm kiếm phim..."
-                  value={searchVal}
-                  onChange={handleSearch}
-                  className="w-full bg-transparent text-zinc-100 placeholder-zinc-500 text-xs outline-none border-0 p-0 focus:ring-0 focus:outline-none"
-                />
-              </div>
-            )}
+            {/* Search Bar Input Container (Always Visible) */}
+            <div className="relative flex items-center gap-3 px-4 py-2.5 rounded-[4px] bg-black/50 border border-zinc-800/80 focus-within:border-violet-500/80 focus-within:bg-black/85 transition-all duration-300 w-40 sm:w-48 lg:w-64 hidden md:flex shadow-inner">
+              <Search className="w-4 h-4 text-zinc-400 flex-shrink-0 transition-colors" />
+              <input
+                type="text"
+                placeholder="Tìm kiếm phim..."
+                value={searchVal}
+                onChange={handleSearch}
+                onFocus={handleSearchFocus}
+                onBlur={handleSearchBlur}
+                className="w-full bg-transparent text-zinc-100 placeholder-zinc-500 text-xs outline-none border-0 p-0 focus:ring-0 focus:outline-none"
+              />
+              
+              {/* Search Suggestions Dropdown */}
+              {isSearchFocused && (
+                <div className="absolute top-full left-0 right-0 mt-2 bg-[#0c0c10]/95 backdrop-blur-xl border border-zinc-900 rounded-[4px] shadow-2xl z-50 overflow-hidden flex flex-col">
+                  {searchLoading ? (
+                    <div className="p-4 flex justify-center"><Loader2 className="w-4 h-4 animate-spin text-violet-500" /></div>
+                  ) : (
+                    <div className="max-h-[300px] overflow-y-auto custom-scrollbar flex flex-col">
+                      {searchVal.trim() === '' ? (
+                        <>
+                          <div className="px-3 py-2 text-[9px] font-black uppercase tracking-wider text-zinc-500 border-b border-zinc-900">
+                            Phim Trending
+                          </div>
+                          {moviesCache
+                            .sort((a, b) => (b.viewsCount || 0) - (a.viewsCount || 0))
+                            .slice(0, 5)
+                            .map((m) => (
+                              <Link key={m.id} href={`/movies/${m.id}`} className="flex items-center gap-2.5 px-3 py-2 hover:bg-zinc-900/80 border-b border-zinc-900/50 no-underline group last:border-0">
+                                <div className="w-8 h-10 bg-zinc-800 rounded-[2px] overflow-hidden flex-shrink-0 border border-zinc-800 group-hover:border-violet-500/40">
+                                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                                  <img src={m.posterUrl || '/static/uploads/default_poster.jpg'} alt={m.title} className="w-full h-full object-cover" />
+                                </div>
+                                <div className="flex flex-col overflow-hidden">
+                                  <span className="text-xs font-bold text-zinc-200 group-hover:text-violet-400 truncate">{m.title}</span>
+                                  <span className="text-[9px] text-zinc-500 truncate">{m.altTitles[0] || m.releaseYear}</span>
+                                </div>
+                              </Link>
+                            ))}
+                        </>
+                      ) : (
+                        <>
+                          <div className="px-3 py-2 text-[9px] font-black uppercase tracking-wider text-zinc-500 border-b border-zinc-900">
+                            Kết Quả Tìm Kiếm
+                          </div>
+                          {moviesCache
+                            .filter(m => 
+                              m.title.toLowerCase().includes(searchVal.toLowerCase()) || 
+                              m.altTitles.some(a => a.toLowerCase().includes(searchVal.toLowerCase()))
+                            )
+                            .slice(0, 5)
+                            .map((m) => (
+                              <Link key={m.id} href={`/movies/${m.id}`} className="flex items-center gap-2.5 px-3 py-2 hover:bg-zinc-900/80 border-b border-zinc-900/50 no-underline group last:border-0">
+                                <div className="w-8 h-10 bg-zinc-800 rounded-[2px] overflow-hidden flex-shrink-0 border border-zinc-800 group-hover:border-violet-500/40">
+                                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                                  <img src={m.posterUrl || '/static/uploads/default_poster.jpg'} alt={m.title} className="w-full h-full object-cover" />
+                                </div>
+                                <div className="flex flex-col overflow-hidden">
+                                  <span className="text-xs font-bold text-zinc-200 group-hover:text-violet-400 truncate">{m.title}</span>
+                                  <span className="text-[9px] text-zinc-500 truncate">{m.altTitles[0] || m.releaseYear}</span>
+                                </div>
+                              </Link>
+                            ))}
+                        </>
+                      )}
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
 
             {/* Right action area */}
             <div className="flex items-center gap-4">

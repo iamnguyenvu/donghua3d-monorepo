@@ -24,6 +24,7 @@ export default function MovieDetails() {
   const params = useParams() as { id: string };
   const [movie, setMovie] = useState<MovieWithEpisodes | null>(null);
   const [reviews, setReviews] = useState<ReviewPayload[]>([]);
+  const [ratingCount, setRatingCount] = useState<number>(0);
   const [loading, setLoading] = useState(true);
   const [relatedParts, setRelatedParts] = useState<MoviePayload[]>([]);
 
@@ -124,6 +125,7 @@ export default function MovieDetails() {
         const reviewRes = await ratingApi.getReviews(params.id);
         if (reviewRes.success && reviewRes.data) {
           setReviews(reviewRes.data);
+          setRatingCount(reviewRes.meta?.totalRatings || 0);
         }
 
         // Fetch related parts of the series using a semantic root title match
@@ -266,7 +268,7 @@ export default function MovieDetails() {
                 {movie.studio}
               </span>
               <span className="border border-zinc-800 bg-zinc-950/60 text-amber-400 px-2.5 py-1.5 rounded-[4px] text-[10px] font-extrabold tracking-wider uppercase flex items-center gap-1">
-                ⭐ {movie.rating > 0 ? movie.rating.toFixed(1) : '9.0'} / 10
+                ⭐ {movie.rating > 0 ? movie.rating.toFixed(1) : '9.0'} / 10 {ratingCount > 0 && `(${ratingCount.toLocaleString()} lượt)`}
               </span>
               {movie.imdbRating && (
                 <span className="border border-zinc-800 bg-zinc-950/60 text-[#F5C518] px-2.5 py-1.5 rounded-[4px] text-[10px] font-extrabold tracking-wider uppercase flex items-center gap-1.5">
