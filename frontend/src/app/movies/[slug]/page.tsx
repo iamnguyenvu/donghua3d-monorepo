@@ -4,8 +4,8 @@ import MovieClientPage from './MovieClientPage';
 import { Film } from 'lucide-react';
 import Link from 'next/link';
 
-// Use ISR with 1 hour revalidation to keep content fresh but fast
-export const revalidate = 3600;
+// Use ISR with 5 minutes revalidation to keep content fresh but fast
+export const revalidate = 300;
 
 export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
   const res = await catalogApi.getMovie(params.slug);
