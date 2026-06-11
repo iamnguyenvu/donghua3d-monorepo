@@ -158,7 +158,7 @@ jobs:
             docker compose exec -T backend npx prisma db push --accept-data-loss
             
             # Backfill any legacy records with newly introduced slugs
-            docker compose exec -T backend npx ts-node src/scripts/backfill_movie_slugs.ts
+            docker compose exec -T backend node dist/scripts/backfill_movie_slugs.js
             
             # Prune obsolete images to reclaim server disk space
             docker image prune -f
