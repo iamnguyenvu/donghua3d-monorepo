@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { useParams, useRouter } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { 
   ArrowLeft, Star, MessageSquare, Loader2, Send, Flag 
 } from 'lucide-react';
