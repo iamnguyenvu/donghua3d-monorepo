@@ -149,6 +149,7 @@ jobs:
             
             # Deploy optimized multi-container cluster
             docker compose down --remove-orphans
+            docker builder prune -af
             docker compose up --build -d db backend frontend nginx
             
             # Wait for database container to boot completely
@@ -160,5 +161,6 @@ jobs:
             # Backfill any legacy records with newly introduced slugs
             docker compose exec -T backend node dist/scripts/backfill_movie_slugs.js
             
-            # Prune obsolete images to reclaim server disk space
+            # Prune obsolete images and build cache to reclaim server disk space
             docker image prune -f
+            docker builder prune -f --filter "until=24h"
