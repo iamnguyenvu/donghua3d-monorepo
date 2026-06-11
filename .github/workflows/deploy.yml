@@ -93,6 +93,19 @@ jobs:
           VPS_USER: ${{ secrets.VPS_USER }}
           VPS_SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
 
+      - name: Clean Obsolete Source Files on VPS
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          port: 22
+          script: |
+            mkdir -p /home/ubuntu/donghua3d
+            cd /home/ubuntu/donghua3d
+            # Thoroughly remove source directories to prevent obsolete files (e.g. old Next.js routes) from lingering
+            rm -rf backend frontend nginx docker-compose.yml
+
       - name: Copy Repository Files to VPS via SCP
         uses: appleboy/scp-action@v0.1.7
         with:
