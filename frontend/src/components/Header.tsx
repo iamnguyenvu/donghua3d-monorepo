@@ -23,20 +23,7 @@ export default function Header({ onSearchChange }: HeaderProps) {
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
-  const [showBackupBanner, setShowBackupBanner] = useState(false);
 
-  useEffect(() => {
-    const dismissed = localStorage.getItem('donghua3d_dismissed_backup_banner');
-    if (!dismissed) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setShowBackupBanner(true);
-    }
-  }, []);
-
-  const dismissBackupBanner = () => {
-    setShowBackupBanner(false);
-    localStorage.setItem('donghua3d_dismissed_backup_banner', 'true');
-  };
 
   // Watch History popover state
   interface LocalWatchHistoryItem {
@@ -207,16 +194,7 @@ export default function Header({ onSearchChange }: HeaderProps) {
 
   return (
     <>
-      {showBackupBanner && (
-        <div className="w-full bg-gradient-to-r from-violet-600/20 via-violet-500/20 to-indigo-600/20 backdrop-blur-md border-b border-violet-500/30 text-white px-4 py-2 flex items-center justify-between text-xs sm:text-sm font-bold animate-fade-in z-[60] relative">
-          <div className="flex-1 text-center">
-            🔔 Lưu ngay tên miền dự phòng <span className="text-amber-400 font-black tracking-widest uppercase">donghua3d.link</span> để truy cập khi bị chặn!
-          </div>
-          <button onClick={dismissBackupBanner} className="p-1 hover:bg-white/10 rounded-full transition-colors cursor-pointer outline-none">
-            <X className="w-4 h-4 text-zinc-300 hover:text-white" />
-          </button>
-        </div>
-      )}
+
       <header className="sticky top-0 z-50 w-full bg-[#050508]/85 backdrop-blur-md border-b border-zinc-900/50">
         <div className="max-w-[1440px] mx-auto w-full px-4 sm:px-6 md:px-12 lg:px-16 h-20 md:h-[88px] flex items-center justify-between">
           {/* Left Side: Logo + Navigation clustered together */}
