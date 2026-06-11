@@ -32,7 +32,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   ];
 
   // Movie pages
-  const movies = await fetchJson<SitemapMovie[]>('/movies');
+  const movies = await fetchJson<SitemapMovie[]>('/catalog/movies');
   if (movies) {
     for (const movie of movies) {
       entries.push({
