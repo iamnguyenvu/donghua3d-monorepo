@@ -110,7 +110,7 @@ export default function WatchlistPage() {
                 {/* Poster Frame */}
                 <div className="relative overflow-hidden rounded-[6px] border border-zinc-900/60 aspect-[2/3] bg-zinc-950 transition-all duration-500 hover:scale-[1.04] hover:border-violet-500/50 hover:shadow-[0_0_25px_rgba(139,92,246,0.25)] shadow-lg">
                   {/* Poster Image link */}
-                  <Link href={`/movies/${movie.id}`} className="block w-full h-full relative">
+                  <Link href={`/movies/${movie.slug || movie.id}`} className="block w-full h-full relative">
                     <Image
                       src={movie.bannerUrl || movie.posterUrl || '/static/uploads/default_poster.jpg'}
                       alt={movie.title}

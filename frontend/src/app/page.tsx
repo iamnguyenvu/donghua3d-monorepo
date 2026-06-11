@@ -280,7 +280,7 @@ export default function Home() {
 
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3.5 mt-2.5 w-full sm:w-auto">
             <Link
-              href={`/movies/${heroMovie.id}`}
+              href={`/movies/${heroMovie.slug || heroMovie.id}`}
               className="px-6 py-3.5 rounded-[4px] bg-violet-600 hover:bg-violet-700 text-white font-extrabold flex items-center justify-center gap-2 text-[11px] uppercase tracking-wider transition-all duration-300 hover:scale-[1.03] active:scale-95 shadow-[0_4px_20px_rgba(124,58,237,0.3)] hover:shadow-[0_4px_25px_rgba(124,58,237,0.5)] cursor-pointer border-0 outline-none no-underline w-full sm:w-auto"
             >
               <Play className="w-4 h-4 fill-white text-white" />
@@ -308,7 +308,7 @@ export default function Home() {
             </button>
 
             <Link
-              href={`/movies/${heroMovie.id}`}
+              href={`/movies/${heroMovie.slug || heroMovie.id}`}
               className="px-6 py-3.5 rounded-[4px] bg-zinc-950 border border-zinc-850 hover:bg-zinc-900 text-zinc-300 font-extrabold flex items-center justify-center gap-2 text-[11px] uppercase tracking-wider transition-all duration-300 active:scale-95 text-xs no-underline w-full sm:w-auto"
             >
               Chi tiết phim
@@ -365,7 +365,7 @@ export default function Home() {
               .filter(m => m.leaderboard?.globalTier === 'S')
               .slice(0, 8)
               .map(movie => (
-                <Link href={`/movies/${movie.id}`} key={movie.id} className="no-underline group flex flex-col gap-2">
+                <Link href={`/movies/${movie.slug || movie.id}`} key={movie.id} className="no-underline group flex flex-col gap-2">
                   {/* Poster Container with premium cinematic hover and shadow */}
                   <div className="relative overflow-hidden rounded-[6px] border border-zinc-900/60 aspect-[2/3] cursor-pointer transition-all duration-500 hover:scale-[1.04] hover:border-violet-500/50 hover:shadow-[0_0_25px_rgba(139,92,246,0.25)] bg-zinc-950 shadow-lg">
                     {/* Poster Image using horizontal bannerUrl inside vertical card */}
@@ -518,7 +518,7 @@ export default function Home() {
         ) : filteredMovies.length > 0 ? (
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-8 gap-x-6 gap-y-8">
             {filteredMovies.map((movie) => (
-              <Link href={`/movies/${movie.id}`} key={movie.id} className="no-underline group flex flex-col gap-2">
+              <Link href={`/movies/${movie.slug || movie.id}`} key={movie.id} className="no-underline group flex flex-col gap-2">
                 {/* Poster Frame */}
                 <div className="relative overflow-hidden rounded-[6px] border border-zinc-900/60 aspect-[2/3] cursor-pointer transition-all duration-500 hover:scale-[1.04] hover:border-violet-500/50 hover:shadow-[0_0_25px_rgba(139,92,246,0.25)] bg-zinc-950 shadow-lg">
                   {/* Poster Image */}

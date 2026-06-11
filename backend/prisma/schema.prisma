@@ -61,6 +61,7 @@ model User {
 model Movie {
   id             String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   title          String     @db.VarChar(255)
+  slug           String     @unique @default(dbgenerated("gen_random_uuid()")) @db.VarChar(255)
   altTitles      Json       @default("[]") // JSONB format
   description    String?    @db.Text
   bannerUrl      String?    @db.VarChar(512)

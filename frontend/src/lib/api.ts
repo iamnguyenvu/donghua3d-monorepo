@@ -141,6 +141,7 @@ export interface LeaderboardPayload {
 export interface MoviePayload {
   id: string;
   title: string;
+  slug?: string;
   altTitles: string[];
   description?: string;
   studio?: string;

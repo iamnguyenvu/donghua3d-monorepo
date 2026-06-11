@@ -126,6 +126,7 @@ export class ScraperService {
         movie = await prisma.movie.create({
           data: {
             title: normalizedTitle,
+            slug: ophimMovie.slug || slugify(normalizedTitle),
             altTitles: [ophimMovie.origin_name, ...(ophimMovie.sub_doc ? [ophimMovie.sub_doc] : [])],
             description: cleanDesc,
             releaseYear,

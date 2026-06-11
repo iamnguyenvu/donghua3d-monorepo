@@ -70,8 +70,10 @@ router.get('/movies/:id', async (req: AuthenticatedRequest, res: Response, next:
   try {
     const { id } = req.params;
 
-    const movie = await prisma.movie.findUnique({
-      where: { id },
+    const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(id);
+
+    const movie = await prisma.movie.findFirst({
+      where: isUUID ? { id } : { slug: id },
       include: {
         episodes: {
           orderBy: { episodeNumber: 'asc' },

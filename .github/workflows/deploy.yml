@@ -144,5 +144,8 @@ jobs:
             # Force schema sync in the backend container
             docker compose exec -T backend npx prisma db push --accept-data-loss
             
+            # Backfill any legacy records with newly introduced slugs
+            docker compose exec -T backend npx ts-node src/scripts/backfill_movie_slugs.ts
+            
             # Prune obsolete images to reclaim server disk space
             docker image prune -f

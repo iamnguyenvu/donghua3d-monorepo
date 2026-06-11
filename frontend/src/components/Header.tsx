@@ -323,7 +323,7 @@ export default function Header({ onSearchChange }: HeaderProps) {
                             .sort((a, b) => (b.viewsCount || 0) - (a.viewsCount || 0))
                             .slice(0, 5)
                             .map((m) => (
-                              <Link key={m.id} href={`/movies/${m.id}`} className="flex items-center gap-2.5 px-3 py-2 hover:bg-zinc-900/80 border-b border-zinc-900/50 no-underline group last:border-0">
+                              <Link key={m.id} href={`/movies/${m.slug || m.id}`} className="flex items-center gap-2.5 px-3 py-2 hover:bg-zinc-900/80 border-b border-zinc-900/50 no-underline group last:border-0">
                                 <div className="w-8 h-10 bg-zinc-800 rounded-[2px] overflow-hidden flex-shrink-0 border border-zinc-800 group-hover:border-violet-500/40">
                                   {/* eslint-disable-next-line @next/next/no-img-element */}
                                   <img src={m.posterUrl || '/static/uploads/default_poster.jpg'} alt={m.title} className="w-full h-full object-cover" />
@@ -347,7 +347,7 @@ export default function Header({ onSearchChange }: HeaderProps) {
                             )
                             .slice(0, 5)
                             .map((m) => (
-                              <Link key={m.id} href={`/movies/${m.id}`} className="flex items-center gap-2.5 px-3 py-2 hover:bg-zinc-900/80 border-b border-zinc-900/50 no-underline group last:border-0">
+                              <Link key={m.id} href={`/movies/${m.slug || m.id}`} className="flex items-center gap-2.5 px-3 py-2 hover:bg-zinc-900/80 border-b border-zinc-900/50 no-underline group last:border-0">
                                 <div className="w-8 h-10 bg-zinc-800 rounded-[2px] overflow-hidden flex-shrink-0 border border-zinc-800 group-hover:border-violet-500/40">
                                   {/* eslint-disable-next-line @next/next/no-img-element */}
                                   <img src={m.posterUrl || '/static/uploads/default_poster.jpg'} alt={m.title} className="w-full h-full object-cover" />

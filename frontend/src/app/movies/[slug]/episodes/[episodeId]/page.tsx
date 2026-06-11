@@ -14,8 +14,7 @@ import {
   cleanEpisodeTitle
 } from '@/lib/api';
 
-export default function WatchEpisode() {
-  const params = useParams() as { id: string; episodeId: string };
+export default function EpisodePage({ params }: { params: { slug: string; episodeId: string } }) {
   const router = useRouter();
   
   const [episode, setEpisode] = useState<EpisodePayload | null>(null);
@@ -47,7 +46,7 @@ export default function WatchEpisode() {
     async function loadData() {
       setLoading(true);
       const epRes = await catalogApi.getEpisode(params.episodeId);
-      const mvRes = await catalogApi.getMovie(params.id);
+      const mvRes = await catalogApi.getMovie(params.slug);
       
       if (epRes.success && epRes.data && mvRes.success && mvRes.data) {
         setEpisode(epRes.data);
@@ -64,13 +63,13 @@ export default function WatchEpisode() {
           setInitialProgress(epRes.data.watchHistory.progress);
         }
 
-        // Fetch comments and reviews
-        const commentRes = await commentApi.getComments(params.id, params.episodeId);
+        // Fetch comments and reviews using movie.id
+        const commentRes = await commentApi.getComments(mvRes.data.id, params.episodeId);
         if (commentRes.success && commentRes.data) {
           setComments(commentRes.data);
         }
         
-        const reviewRes = await ratingApi.getReviews(params.id);
+        const reviewRes = await ratingApi.getReviews(mvRes.data.id);
         if (reviewRes.success && reviewRes.data) {
           setReviews(reviewRes.data);
         }
@@ -78,7 +77,7 @@ export default function WatchEpisode() {
         // Fallback mockup states for instant visual WOW if API offline
         setEpisode({
           id: params.episodeId,
-          movieId: params.id,
+          movieId: params.slug,
           episodeNumber: 1,
           title: 'Khởi đầu hoàn mỹ của Thạch Hạo',
           description: 'Cậu bé Thạch Thôn bộc lộ sức mạnh đáng sợ từ thuở ấu thơ, thu hút ánh nhìn của các tộc trưởng cổ xưa.',
@@ -94,7 +93,7 @@ export default function WatchEpisode() {
           ]
         });
         setMovie({
-          id: params.id,
+          id: params.slug,
           title: 'Perfect World',
           altTitles: ['Thế Giới Hoàn Mỹ'],
           rating: 9.2,
@@ -107,7 +106,7 @@ export default function WatchEpisode() {
       setLoading(false);
     }
     loadData();
-  }, [params.id, params.episodeId]);
+  }, [params.slug, params.episodeId]);
 
   const handleProgressPulse = (currentTime: number, isCompleted: boolean) => {
     if (episode && movie) {
@@ -171,13 +170,13 @@ export default function WatchEpisode() {
 
   const handlePrevEpisode = () => {
     if (prevEpisode && movie) {
-      router.push(`/movies/${movie.id}/episodes/${prevEpisode.id}`);
+      router.push(`/movies/${movie.slug || movie.id}/episodes/${prevEpisode.id}`);
     }
   };
 
   const handleNextEpisode = () => {
     if (nextEpisode && movie) {
-      router.push(`/movies/${movie.id}/episodes/${nextEpisode.id}`);
+      router.push(`/movies/${movie.slug || movie.id}/episodes/${nextEpisode.id}`);
     }
   };
 
@@ -186,7 +185,7 @@ export default function WatchEpisode() {
     if (autoplayCountdown === null) return;
     if (autoplayCountdown === 0) {
       if (nextEpisode && movie) {
-        router.push(`/movies/${movie.id}/episodes/${nextEpisode.id}`);
+        router.push(`/movies/${movie.slug || movie.id}/episodes/${nextEpisode.id}`);
       }
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setAutoplayCountdown(null);
@@ -284,7 +283,7 @@ export default function WatchEpisode() {
             <div className="flex items-center gap-3 w-full">
               <button
                 onClick={() => {
-                  router.push(`/movies/${movie.id}/episodes/${nextEpisode.id}`);
+                  router.push(`/movies/${movie.slug || movie.id}/episodes/${nextEpisode.id}`);
                   setAutoplayCountdown(null);
                 }}
                 className="flex-grow py-2.5 bg-violet-600 hover:bg-violet-700 text-white font-extrabold text-[10px] uppercase tracking-wider rounded-[2px] cursor-pointer transition-all border-0 outline-none"
@@ -306,7 +305,7 @@ export default function WatchEpisode() {
          CINEMATIC WATCH PLAYER BLOCK (Layout 02 Netflix Style - Custom Vidstack Player)
          ============================================================================== */}
       <main className="w-full px-6 md:px-12 lg:px-16 mt-28">
-        <Link href={`/movies/${movie.id}`} className="flex items-center gap-1.5 text-zinc-400 hover:text-white no-underline text-[10px] font-bold uppercase tracking-wider mb-5 transition-colors">
+        <Link href={`/movies/${movie.slug || movie.id}`} className="flex items-center gap-1.5 text-zinc-400 hover:text-white no-underline text-[10px] font-bold uppercase tracking-wider mb-5 transition-colors">
           <ArrowLeft className="w-3.5 h-3.5" />
           Quay lại danh mục {movie.title}
         </Link>
@@ -415,7 +414,7 @@ export default function WatchEpisode() {
                 {movie.seriesMovies.map((part) => (
                   <Link
                     key={part.id}
-                    href={`/movies/${part.id}`}
+                    href={`/movies/${part.slug || part.id}`}
                     className="px-3 py-1.5 rounded-[2px] text-[10px] font-black bg-zinc-900 hover:bg-zinc-800 text-zinc-300 hover:text-white border border-zinc-800 hover:border-zinc-700 uppercase tracking-wide transition-all no-underline"
                   >
                     {part.seriesLabel || part.title}
@@ -448,7 +447,7 @@ export default function WatchEpisode() {
                 return (
                   <Link
                     key={ep.id}
-                    href={`/movies/${movie.id}/episodes/${ep.id}`}
+                    href={`/movies/${movie.slug || movie.id}/episodes/${ep.id}`}
                     className={`
                       py-3 text-center rounded-[2px] font-black text-xs transition-all no-underline flex flex-col justify-center items-center cursor-pointer border
                       ${isActive 
