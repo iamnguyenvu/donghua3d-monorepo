@@ -12,7 +12,7 @@ import 'vidstack/styles/base.css';
 import { 
   Play, Pause, Volume2, VolumeX, Maximize2, Minimize2, 
   SkipForward, SkipBack, Settings, Loader2, Sparkles,
-  Bookmark, Star, Lightbulb, ToggleLeft, ToggleRight
+  Bookmark, Star, Lightbulb, ToggleLeft, ToggleRight, List
 } from 'lucide-react';
 
 interface PremiumPlayerProps {
@@ -751,7 +751,9 @@ function CustomControls({
                 <button
                   onClick={() => setShowEpisodes(!showEpisodes)}
                   className={`flex items-center gap-1.5 p-2 rounded-[4px] bg-white/5 border border-white/10 hover:bg-white/10 cursor-pointer transition-all outline-none ${showEpisodes ? 'text-violet-400 border-violet-500/40 bg-violet-500/10' : 'text-zinc-400 hover:text-white'}`}
+                  title="Danh sách tập"
                 >
+                  <List className="w-5 h-5" />
                   <span className="text-xs font-bold uppercase tracking-wider hidden sm:block">Danh sách tập</span>
                 </button>
 
@@ -832,14 +834,14 @@ function CustomControls({
                   </div>
 
                   {/* Server Source Settings Section */}
-                  {sources && sources.length > 0 && onSelectServer && (
+                  {onSelectServer && (
                     <>
                       <div className="border-t border-zinc-900 my-1"></div>
                       <div className="flex flex-col gap-1">
                         <span className="text-[9px] font-black text-zinc-550 uppercase tracking-widest pl-1.5 pb-1">Nguồn Server</span>
-                        {sources.map(srv => (
+                        {(!sources || sources.length === 0 ? [{ id: 'vip1', serverName: 'VIP 1', videoUrl: '' }, { id: 'vip2', serverName: 'VIP 2', videoUrl: '' }] : sources).map(srv => (
                           <button
-                            key={srv.id}
+                            key={srv.id || srv.serverName}
                             onClick={() => {
                               onSelectServer(srv.serverName);
                               setShowSettings(false);
