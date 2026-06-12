@@ -15,11 +15,11 @@ export async function generateMetadata({ params }: { params: { slug: string } })
     };
   }
 
-  const movie = res.data as any; // Cast to access episodes array
+  const movie = res.data;
   
   let latestEpisodeNumber = 0;
   if (movie.episodes && Array.isArray(movie.episodes) && movie.episodes.length > 0) {
-    latestEpisodeNumber = Math.max(...movie.episodes.map((ep: any) => ep.episodeNumber));
+    latestEpisodeNumber = Math.max(...movie.episodes.map((ep) => ep.episodeNumber));
   }
 
   const pageTitle = latestEpisodeNumber > 0 

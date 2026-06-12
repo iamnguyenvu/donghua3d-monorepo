@@ -1,12 +1,11 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { useParams } from 'next/navigation';
 import { Play, Star, Film, Loader2 } from 'lucide-react';
 import Header from '../../../components/Header';
-import { genreApi, watchlistApi, MoviePayload, GenrePayload } from '../../../lib/api';
+import { MoviePayload, GenrePayload } from '../../../lib/api';
 
 export default function GenreClient({ 
   genre, 
