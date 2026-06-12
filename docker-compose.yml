@@ -49,6 +49,7 @@ services:
       - "3000:3000"
     environment:
       NEXT_PUBLIC_API_URL: "https://donghua3d.me/api"
+      INTERNAL_API_URL: "http://backend:5000"
     depends_on:
       - backend
 

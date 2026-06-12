@@ -18,7 +18,9 @@ export enum RatingType {
   EXPERT = 'EXPERT',
 }
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+const API_BASE_URL = typeof window !== 'undefined' 
+  ? (process.env.NEXT_PUBLIC_API_URL || '')
+  : (process.env.INTERNAL_API_URL || process.env.NEXT_PUBLIC_API_URL || 'http://backend:5000');
 
 /**
  * Custom Response wrapper matches backend structure
