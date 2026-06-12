@@ -231,6 +231,116 @@ router.get('/episodes/:id', async (req: AuthenticatedRequest, res: Response, nex
   }
 });
 
+// 4.5 GET /api/movies/:movieSlug/episodes/number/:episodeNumber - SEO Episode Details
+router.get('/movies/:movieSlug/episodes/number/:episodeNumber', async (req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    const { movieSlug, episodeNumber } = req.params;
+    const epNum = parseInt(episodeNumber, 10);
+
+    if (isNaN(epNum)) {
+      res.status(400).json({
+        success: false,
+        error: { code: 'BAD_REQUEST', message: 'Số tập không hợp lệ.' },
+      });
+      return;
+    }
+
+    const movie = await prisma.movie.findFirst({
+      where: {
+        OR: [
+          { slug: movieSlug },
+          { id: movieSlug }
+        ]
+      }
+    });
+
+    if (!movie) {
+      res.status(404).json({
+        success: false,
+        error: { code: 'NOT_FOUND', message: 'Phim không tồn tại.' },
+      });
+      return;
+    }
+
+    const episode = await prisma.episode.findFirst({
+      where: { 
+        movieId: movie.id,
+        episodeNumber: epNum
+      },
+      include: { sources: { orderBy: { priority: 'desc' } } }
+    });
+
+    if (!episode) {
+      res.status(404).json({
+        success: false,
+        error: { code: 'NOT_FOUND', message: 'Tập phim không tồn tại.' },
+      });
+      return;
+    }
+
+    // Proactively increment parent movie's viewsCount in the background (non-blocking)
+    prisma.movie.update({
+      where: { id: episode.movieId },
+      data: { viewsCount: { increment: 1 } }
+    }).catch(err => {
+      console.error(`[Views Counter Error] Failed to increment views count for movie ${episode.movieId}:`, err.message);
+    });
+
+    // Resolve user watch progress if logged in
+    let watchProgress = 0.0;
+    let watchCompleted = false;
+    let isVip = false;
+
+    if (req.user) {
+      const dbUser = await prisma.user.findUnique({
+        where: { id: req.user.id }
+      });
+      if (dbUser) {
+        isVip = dbUser.role === Role.ADMIN || dbUser.role === Role.EXPERT || dbUser.reputationScore >= 110;
+      }
+
+      const history = await prisma.watchHistory.findUnique({
+        where: {
+          unique_user_watch_progress: {
+            userId: req.user.id,
+            episodeId: episode.id,
+          },
+        },
+      });
+      if (history) {
+        watchProgress = history.progress;
+        watchCompleted = history.completed;
+      }
+    }
+
+    // Handle anti-leech for 4K video using secure presigned URLs (1 hour expiration)
+    let finalVideoUrl4k: string | null = null;
+    let isVipOnly = false;
+
+    if (episode.videoUrl4k) {
+      isVipOnly = true;
+      if (isVip) {
+        finalVideoUrl4k = await storageService.generatePresignedUrl(episode.videoUrl4k, 3600);
+      }
+    }
+
+    res.status(200).json({
+      success: true,
+      data: {
+        ...episode,
+        videoUrl4k: finalVideoUrl4k,
+        isVipOnly,
+        watchHistory: {
+          progress: watchProgress,
+          completed: watchCompleted,
+        }
+      },
+    });
+  } catch (err) {
+    next(err);
+  }
+});
+
 // 5. POST /api/movies/:id/episodes - Create New Episode (Admin Only)
 router.post('/movies/:id/episodes', requireRole([Role.ADMIN]), async (req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> => {
   try {

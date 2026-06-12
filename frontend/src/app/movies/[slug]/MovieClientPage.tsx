@@ -375,7 +375,7 @@ export default function MovieClientPage({
                   {filteredAndSortedEpisodes && filteredAndSortedEpisodes.length > 0 ? (
                     filteredAndSortedEpisodes.map((ep) => (
                       <Link
-                        href={`/movies/${movie.slug || movie.id}/episodes/${ep.id}`}
+                        href={`/movies/${movie.slug || movie.id}/tap-${ep.episodeNumber}`}
                         key={ep.id}
                         className="bg-[#0c0c0f]/40 border border-zinc-900/60 hover:border-zinc-800 rounded-[4px] overflow-hidden flex flex-col group transition-all duration-300 shadow-md no-underline animate-fade-in"
                       >
@@ -418,7 +418,7 @@ export default function MovieClientPage({
                   {filteredAndSortedEpisodes && filteredAndSortedEpisodes.length > 0 ? (
                     filteredAndSortedEpisodes.map((ep) => (
                       <Link
-                        href={`/movies/${movie.slug || movie.id}/episodes/${ep.id}`}
+                        href={`/movies/${movie.slug || movie.id}/tap-${ep.episodeNumber}`}
                         key={ep.id}
                         className="p-3 bg-[#0c0c0f]/80 border border-zinc-900/85 hover:border-violet-500/50 hover:bg-violet-500/10 rounded-[4px] text-center flex flex-col justify-center items-center group transition-all duration-300 no-underline shadow-md cursor-pointer animate-fade-in"
                       >

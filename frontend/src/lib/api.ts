@@ -216,6 +216,10 @@ export const catalogApi = {
     return apiFetch<EpisodePayload>(`/catalog/episodes/${id}`);
   },
 
+  async getEpisodeByNumber(movieSlug: string, episodeNumber: number | string): Promise<ApiResponse<EpisodePayload>> {
+    return apiFetch<EpisodePayload>(`/catalog/movies/${movieSlug}/episodes/number/${episodeNumber}`);
+  },
+
   async saveWatchHistory(episodeId: string, progress: number, completed: boolean): Promise<ApiResponse<unknown>> {
     return apiFetch<unknown>(`/catalog/episodes/${episodeId}/watch-history`, {
       method: 'POST',

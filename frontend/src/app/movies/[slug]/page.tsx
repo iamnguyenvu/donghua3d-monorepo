@@ -15,9 +15,20 @@ export async function generateMetadata({ params }: { params: { slug: string } })
     };
   }
 
-  const movie = res.data;
-  const pageTitle = `${movie.title} - Xem Donghua 3D Vietsub Thuyết Minh | Donghua3D`;
-  const pageDescription = movie.description || `Xem phim hoạt hình 3D Trung Quốc ${movie.title} Vietsub Thuyết Minh chuẩn HD, load siêu nhanh trên Donghua3D.`;
+  const movie = res.data as any; // Cast to access episodes array
+  
+  let latestEpisodeNumber = 0;
+  if (movie.episodes && Array.isArray(movie.episodes) && movie.episodes.length > 0) {
+    latestEpisodeNumber = Math.max(...movie.episodes.map((ep: any) => ep.episodeNumber));
+  }
+
+  const pageTitle = latestEpisodeNumber > 0 
+    ? `${movie.title} Tập ${latestEpisodeNumber} [Vietsub 4K] | Donghua3D` 
+    : `${movie.title} - Xem Donghua 3D Vietsub Thuyết Minh | Donghua3D`;
+
+  const shortDesc = movie.description ? movie.description.substring(0, 120) + '...' : '';
+  const pageDescription = `Xem phim hoạt hình 3D Trung Quốc ${movie.title} ${latestEpisodeNumber > 0 ? `Tập ${latestEpisodeNumber}` : ''} Vietsub Thuyết Minh chuẩn HD 4K, load siêu nhanh. ${shortDesc}`;
+  
   const poster = movie.posterUrl || movie.bannerUrl || 'https://donghua3d.me/static/uploads/default_poster.jpg';
 
   return {

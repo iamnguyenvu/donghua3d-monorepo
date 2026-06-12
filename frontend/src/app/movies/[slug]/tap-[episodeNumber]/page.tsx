@@ -14,7 +14,7 @@ import {
   cleanEpisodeTitle
 } from '@/lib/api';
 
-export default function EpisodePage({ params }: { params: { slug: string; episodeId: string } }) {
+export default function EpisodePage({ params }: { params: { slug: string; episodeNumber: string } }) {
   const router = useRouter();
   
   const [episode, setEpisode] = useState<EpisodePayload | null>(null);
@@ -45,7 +45,7 @@ export default function EpisodePage({ params }: { params: { slug: string; episod
   useEffect(() => {
     async function loadData() {
       setLoading(true);
-      const epRes = await catalogApi.getEpisode(params.episodeId);
+      const epRes = await catalogApi.getEpisodeByNumber(params.slug, params.episodeNumber);
       const mvRes = await catalogApi.getMovie(params.slug);
       
       if (epRes.success && epRes.data && mvRes.success && mvRes.data) {
@@ -64,7 +64,7 @@ export default function EpisodePage({ params }: { params: { slug: string; episod
         }
 
         // Fetch comments and reviews using movie.id
-        const commentRes = await commentApi.getComments(mvRes.data.id, params.episodeId);
+        const commentRes = await commentApi.getComments(mvRes.data.id, epRes.data.id);
         if (commentRes.success && commentRes.data) {
           setComments(commentRes.data);
         }
@@ -76,9 +76,9 @@ export default function EpisodePage({ params }: { params: { slug: string; episod
       } else {
         // Fallback mockup states for instant visual WOW if API offline
         setEpisode({
-          id: params.episodeId,
+          id: 'mock-123',
           movieId: params.slug,
-          episodeNumber: 1,
+          episodeNumber: parseInt(params.episodeNumber) || 1,
           title: 'Khởi đầu hoàn mỹ của Thạch Hạo',
           description: 'Cậu bé Thạch Thôn bộc lộ sức mạnh đáng sợ từ thuở ấu thơ, thu hút ánh nhìn của các tộc trưởng cổ xưa.',
           videoUrl: 'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8', // Public sample HLS stream
@@ -106,7 +106,7 @@ export default function EpisodePage({ params }: { params: { slug: string; episod
       setLoading(false);
     }
     loadData();
-  }, [params.slug, params.episodeId]);
+  }, [params.slug, params.episodeNumber]);
 
   const handleProgressPulse = (currentTime: number, isCompleted: boolean) => {
     if (episode && movie) {
@@ -170,13 +170,13 @@ export default function EpisodePage({ params }: { params: { slug: string; episod
 
   const handlePrevEpisode = () => {
     if (prevEpisode && movie) {
-      router.push(`/movies/${movie.slug || movie.id}/episodes/${prevEpisode.id}`);
+      router.push(`/movies/${movie.slug || movie.id}/tap-${prevEpisode.episodeNumber}`);
     }
   };
 
   const handleNextEpisode = () => {
     if (nextEpisode && movie) {
-      router.push(`/movies/${movie.slug || movie.id}/episodes/${nextEpisode.id}`);
+      router.push(`/movies/${movie.slug || movie.id}/tap-${nextEpisode.episodeNumber}`);
     }
   };
 
@@ -185,7 +185,7 @@ export default function EpisodePage({ params }: { params: { slug: string; episod
     if (autoplayCountdown === null) return;
     if (autoplayCountdown === 0) {
       if (nextEpisode && movie) {
-        router.push(`/movies/${movie.slug || movie.id}/episodes/${nextEpisode.id}`);
+        router.push(`/movies/${movie.slug || movie.id}/tap-${nextEpisode.episodeNumber}`);
       }
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setAutoplayCountdown(null);
@@ -205,13 +205,12 @@ export default function EpisodePage({ params }: { params: { slug: string; episod
     }
   };
 
-  // 2. Submission Handlers
   const handleRatingSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (userRating === 0 || !movie) return;
+    if (userRating === 0 || !movie || !episode) return;
     setSubmittingReview(true);
 
-    const res = await ratingApi.submitRating(movie.id, params.episodeId, userRating, reviewText);
+    const res = await ratingApi.submitRating(movie.id, episode.id, userRating, reviewText);
     if (res.success && res.data) {
       setReviews([res.data, ...reviews]);
       setReviewText('');
@@ -222,12 +221,12 @@ export default function EpisodePage({ params }: { params: { slug: string; episod
 
   const handleCommentSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!commentText.trim() || !movie) return;
+    if (!commentText.trim() || !movie || !episode) return;
     setSubmittingComment(true);
 
     const res = await commentApi.postComment(
       movie.id,
-      params.episodeId,
+      episode.id,
       null, // Flat parent mapping for standard feeds, nested tree rendered locally
       commentText,
       isSpoilerComment
@@ -283,7 +282,7 @@ export default function EpisodePage({ params }: { params: { slug: string; episod
             <div className="flex items-center gap-3 w-full">
               <button
                 onClick={() => {
-                  router.push(`/movies/${movie.slug || movie.id}/episodes/${nextEpisode.id}`);
+                  router.push(`/movies/${movie.slug || movie.id}/tap-${nextEpisode.episodeNumber}`);
                   setAutoplayCountdown(null);
                 }}
                 className="flex-grow py-2.5 bg-violet-600 hover:bg-violet-700 text-white font-extrabold text-[10px] uppercase tracking-wider rounded-[2px] cursor-pointer transition-all border-0 outline-none"
@@ -447,7 +446,7 @@ export default function EpisodePage({ params }: { params: { slug: string; episod
                 return (
                   <Link
                     key={ep.id}
-                    href={`/movies/${movie.slug || movie.id}/episodes/${ep.id}`}
+                    href={`/movies/${movie.slug || movie.id}/tap-${ep.episodeNumber}`}
                     className={`
                       py-3 text-center rounded-[2px] font-black text-xs transition-all no-underline flex flex-col justify-center items-center cursor-pointer border
                       ${isActive 
