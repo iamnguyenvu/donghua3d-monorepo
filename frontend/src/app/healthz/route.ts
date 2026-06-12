@@ -11,7 +11,7 @@ export async function GET() {
     let rawFetchResult: unknown = null;
     try {
       const urlToFetch = internalUrl !== 'NOT_SET' ? internalUrl : 'http://backend:5000';
-      const res = await fetch(`${urlToFetch}/catalog/movies`);
+      const res = await fetch(`${urlToFetch}/catalog/movies/the-gioi-hoan-my`);
       rawFetchResult = {
         status: res.status,
         statusText: res.statusText,
