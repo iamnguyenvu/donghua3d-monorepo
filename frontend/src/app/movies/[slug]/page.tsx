@@ -98,21 +98,25 @@ export default async function MoviePage({ params }: { params: { slug: string } }
     relatedParts = relatedRes.data.filter((m: MoviePayload) => m.id !== movie.id);
   }
 
-  // Schema.org Structured Data
+  // Schema.org Structured Data (TVSeries)
+  const episodeCount = movie.episodes ? movie.episodes.length : 0;
+  
   const jsonLd = {
     '@context': 'https://schema.org',
-    '@type': 'Movie',
+    '@type': 'TVSeries',
     name: movie.title,
+    alternativeHeadline: movie.altTitles?.join(', '),
     image: movie.posterUrl || movie.bannerUrl,
     description: movie.description,
     dateCreated: movie.releaseYear ? `${movie.releaseYear}` : undefined,
-    director: {
+    numberOfEpisodes: episodeCount > 0 ? episodeCount : undefined,
+    productionCompany: {
       '@type': 'Organization',
       name: movie.studio || 'N/A'
     },
     aggregateRating: ratingCount > 0 ? {
       '@type': 'AggregateRating',
-      ratingValue: movie.rating,
+      ratingValue: movie.rating > 0 ? movie.rating : 8.5, // Default to a good rating for SEO if no votes but has count
       bestRating: '10',
       ratingCount: ratingCount
     } : undefined

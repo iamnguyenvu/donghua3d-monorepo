@@ -347,10 +347,10 @@ export default function HomeClient({ initialMovies = [] }: { initialMovies: Movi
             </h2>
           </div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-8 gap-6">
+          <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-8 2xl:grid-cols-10 gap-3">
             {movies
               .filter(m => m.leaderboard?.globalTier === 'S')
-              .slice(0, 8)
+              .slice(0, 10)
               .map(movie => (
                 <Link href={`/movies/${movie.slug || movie.id}`} key={movie.id} className="no-underline group flex flex-col gap-2">
                   {/* Poster Container with premium cinematic hover and shadow */}
@@ -377,11 +377,18 @@ export default function HomeClient({ initialMovies = [] }: { initialMovies: Movi
                       <span className="text-[10px] font-extrabold text-zinc-300 text-center block mt-0.5">{movie.releaseYear}</span>
                     </div>
 
-                    {/* Rating star badge in top-right with amber star */}
-                    <div className="absolute top-2.5 right-2.5 bg-black/80 backdrop-blur-md border border-amber-400/25 text-amber-400 px-2 py-1 rounded-[4px] text-[10px] font-extrabold flex items-center gap-1 z-10 shadow-md">
-                      <Star className="w-3 h-3 fill-amber-400 text-amber-400" />
+                    {/* Rating star badge in bottom-right with amber star */}
+                    <div className="absolute bottom-2.5 right-2.5 bg-black/80 backdrop-blur-md border border-amber-400/25 text-amber-400 px-1.5 py-1 rounded-[4px] text-[9px] font-extrabold flex items-center gap-0.5 z-10 shadow-md">
+                      <Star className="w-2.5 h-2.5 fill-amber-400 text-amber-400" />
                       {movie.rating > 0 ? movie.rating.toFixed(1) : '9.0'}
                     </div>
+
+                    {/* Episode Badge on top-right (High CTR Bright Red/Orange like competitors) */}
+                    {movie.episodeCount !== undefined && movie.episodeCount > 0 && (
+                      <div className="absolute top-2.5 right-2.5 bg-gradient-to-r from-orange-500 to-red-600 border border-red-400/50 text-white font-black px-2 py-0.5 rounded-[3px] text-[10px] uppercase tracking-wider shadow-[0_0_10px_rgba(239,68,68,0.5)] z-10 select-none">
+                        Tập {movie.episodeCount}
+                      </div>
+                    )}
 
                     {/* Trending label in top-left */}
                     <div className="absolute top-2.5 left-2.5 bg-gradient-to-r from-violet-600 to-indigo-600 text-white text-[8px] font-extrabold tracking-widest px-2 py-1.5 rounded-[4px] z-10 shadow-md">
@@ -503,7 +510,7 @@ export default function HomeClient({ initialMovies = [] }: { initialMovies: Movi
             ))}
           </div>
         ) : filteredMovies.length > 0 ? (
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-8 gap-x-6 gap-y-8">
+          <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-8 2xl:grid-cols-10 gap-x-3 gap-y-6">
             {filteredMovies.map((movie) => (
               <Link href={`/movies/${movie.slug || movie.id}`} key={movie.id} className="no-underline group flex flex-col gap-2">
                 {/* Poster Frame */}
@@ -530,8 +537,8 @@ export default function HomeClient({ initialMovies = [] }: { initialMovies: Movi
                     <span className="text-[10px] font-extrabold text-zinc-300 text-center block mt-0.5">{movie.releaseYear}</span>
                   </div>
 
-                  {/* Rating Badge */}
-                  <div className="absolute top-2.5 right-2.5 bg-black/80 backdrop-blur-md border border-amber-400/25 text-amber-400 px-1.5 py-1 rounded-[4px] text-[9px] font-extrabold flex items-center gap-0.5 z-10 shadow-md select-none">
+                  {/* Rating Badge in bottom-right */}
+                  <div className="absolute bottom-2.5 right-2.5 bg-black/80 backdrop-blur-md border border-amber-400/25 text-amber-400 px-1.5 py-1 rounded-[4px] text-[9px] font-extrabold flex items-center gap-0.5 z-10 shadow-md select-none">
                     {movie.rating > 0 ? (
                       <>
                         <Star className="w-2.5 h-2.5 fill-amber-400 text-amber-400" />
@@ -542,7 +549,7 @@ export default function HomeClient({ initialMovies = [] }: { initialMovies: Movi
                     )}
                   </div>
 
-                  {/* Global Tier Badge (Only shown if genuinely voted or S-Tier to keep layout clean and prestige high) */}
+                  {/* Global Tier Badge */}
                   {movie.leaderboard && (
                     movie.leaderboard.globalTier === 'S' ||
                     (movie.leaderboard.s_tier_count || 0) +
@@ -559,9 +566,9 @@ export default function HomeClient({ initialMovies = [] }: { initialMovies: Movi
                     </div>
                   )}
 
-                  {/* Episode Badge on Poster (Premium OTT styling matching hoathinh3d.co & hh3d.cx) */}
+                  {/* Episode Badge on Poster (High CTR Bright Red/Orange like competitors) */}
                   {movie.episodeCount !== undefined && movie.episodeCount > 0 && (
-                    <div className="absolute bottom-2.5 left-2.5 bg-gradient-to-r from-violet-600 to-indigo-600 text-white font-black px-2 py-0.5 rounded-[3px] text-[9.5px] uppercase tracking-wider shadow-lg z-10 select-none">
+                    <div className="absolute top-2.5 right-2.5 bg-gradient-to-r from-orange-500 to-red-600 border border-red-400/50 text-white font-black px-2 py-0.5 rounded-[3px] text-[10px] uppercase tracking-wider shadow-[0_0_10px_rgba(239,68,68,0.5)] z-10 select-none">
                       Tập {movie.episodeCount}
                     </div>
                   )}
