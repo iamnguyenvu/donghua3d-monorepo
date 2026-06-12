@@ -3,15 +3,16 @@ import { catalogApi } from '@/lib/api';
 import EpisodeClient from './EpisodeClient';
 
 type Props = {
-  params: { slug: string; episodeNumber: string };
+  params: Promise<{ slug: string; episodeNumber: string }>;
 };
 
 export async function generateMetadata(
   { params }: Props,
   parent: ResolvingMetadata
 ): Promise<Metadata> {
-  const movieRes = await catalogApi.getMovie(params.slug);
-  const epRes = await catalogApi.getEpisodeByNumber(params.slug, params.episodeNumber);
+  const { slug, episodeNumber } = await params;
+  const movieRes = await catalogApi.getMovie(slug);
+  const epRes = await catalogApi.getEpisodeByNumber(slug, episodeNumber);
 
   if (!movieRes.success || !movieRes.data || !epRes.success || !epRes.data) {
     return { title: 'Không tìm thấy tập phim' };
@@ -48,9 +49,10 @@ export async function generateMetadata(
 }
 
 export default async function Page({ params }: Props) {
+  const { slug, episodeNumber } = await params;
   // Fetch for JSON-LD structured data (TVEpisode)
-  const movieRes = await catalogApi.getMovie(params.slug);
-  const epRes = await catalogApi.getEpisodeByNumber(params.slug, params.episodeNumber);
+  const movieRes = await catalogApi.getMovie(slug);
+  const epRes = await catalogApi.getEpisodeByNumber(slug, episodeNumber);
 
   if (movieRes.success && movieRes.data && epRes.success && epRes.data) {
     const movie = movieRes.data;
@@ -77,11 +79,11 @@ export default async function Page({ params }: Props) {
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
-        <EpisodeClient params={params} />
+        <EpisodeClient slug={slug} episodeNumber={episodeNumber} />
       </>
     );
   }
 
   // Fallback to client rendering without SEO data if fetch fails on server
-  return <EpisodeClient params={params} />;
+  return <EpisodeClient slug={slug} episodeNumber={episodeNumber} />;
 }

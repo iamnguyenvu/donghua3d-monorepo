@@ -7,8 +7,9 @@ import Link from 'next/link';
 // Use ISR with 5 minutes revalidation to keep content fresh but fast
 export const revalidate = 300;
 
-export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
-  const res = await catalogApi.getMovie(params.slug);
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+  const { slug } = await params;
+  const res = await catalogApi.getMovie(slug);
   if (!res.success || !res.data) {
     return {
       title: 'Không tìm thấy bộ phim | Donghua3D',
@@ -62,9 +63,10 @@ export async function generateMetadata({ params }: { params: { slug: string } })
   };
 }
 
-export default async function MoviePage({ params }: { params: { slug: string } }) {
+export default async function MoviePage({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params;
   // Fetch data on the server
-  const movieRes = await catalogApi.getMovie(params.slug);
+  const movieRes = await catalogApi.getMovie(slug);
   
   if (!movieRes.success || !movieRes.data) {
     return (

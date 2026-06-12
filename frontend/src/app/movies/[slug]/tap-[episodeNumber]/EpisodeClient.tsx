@@ -14,7 +14,7 @@ import {
   cleanEpisodeTitle
 } from '@/lib/api';
 
-export default function EpisodePage({ params }: { params: { slug: string; episodeNumber: string } }) {
+export default function EpisodePage({ slug, episodeNumber }: { slug: string; episodeNumber: string }) {
   const router = useRouter();
   
   const [episode, setEpisode] = useState<EpisodePayload | null>(null);
@@ -45,8 +45,8 @@ export default function EpisodePage({ params }: { params: { slug: string; episod
   useEffect(() => {
     async function loadData() {
       setLoading(true);
-      const epRes = await catalogApi.getEpisodeByNumber(params.slug, params.episodeNumber);
-      const mvRes = await catalogApi.getMovie(params.slug);
+      const epRes = await catalogApi.getEpisodeByNumber(slug, episodeNumber);
+      const mvRes = await catalogApi.getMovie(slug);
       
       if (epRes.success && epRes.data && mvRes.success && mvRes.data) {
         setEpisode(epRes.data);
@@ -77,8 +77,8 @@ export default function EpisodePage({ params }: { params: { slug: string; episod
         // Fallback mockup states for instant visual WOW if API offline
         setEpisode({
           id: 'mock-123',
-          movieId: params.slug,
-          episodeNumber: parseInt(params.episodeNumber) || 1,
+          movieId: slug,
+          episodeNumber: parseInt(episodeNumber) || 1,
           title: 'Khởi đầu hoàn mỹ của Thạch Hạo',
           description: 'Cậu bé Thạch Thôn bộc lộ sức mạnh đáng sợ từ thuở ấu thơ, thu hút ánh nhìn của các tộc trưởng cổ xưa.',
           videoUrl: 'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8', // Public sample HLS stream
@@ -93,7 +93,7 @@ export default function EpisodePage({ params }: { params: { slug: string; episod
           ]
         });
         setMovie({
-          id: params.slug,
+          id: slug,
           title: 'Perfect World',
           altTitles: ['Thế Giới Hoàn Mỹ'],
           rating: 9.2,
@@ -106,7 +106,7 @@ export default function EpisodePage({ params }: { params: { slug: string; episod
       setLoading(false);
     }
     loadData();
-  }, [params.slug, params.episodeNumber]);
+  }, [slug, episodeNumber]);
 
   const handleProgressPulse = (currentTime: number, isCompleted: boolean) => {
     if (episode && movie) {
