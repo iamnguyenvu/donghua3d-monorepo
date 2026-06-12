@@ -38,6 +38,12 @@ interface PremiumPlayerProps {
   isWatchParty?: boolean;
   movieId?: string;
   episodeId?: string;
+  episodes?: { id: string; episodeNumber: number; title: string; }[];
+  currentEpisodeNumber?: number;
+  movieSlug?: string;
+  sources?: { id: string; serverName: string; videoUrl: string }[];
+  selectedServer?: string;
+  onSelectServer?: (server: string) => void;
 }
 
 function formatResumeTime(seconds: number): string {
@@ -72,7 +78,13 @@ export default function PremiumPlayer({
   onNextEpisode,
   isWatchParty = false,
   movieId,
-  episodeId
+  episodeId,
+  episodes,
+  currentEpisodeNumber,
+  movieSlug,
+  sources,
+  selectedServer,
+  onSelectServer
 }: PremiumPlayerProps) {
   const [selectedQuality, setSelectedQuality] = useState<'1080p' | '4K'>('1080p');
   const [showResumePrompt, setShowResumePrompt] = useState(false);
@@ -194,6 +206,12 @@ export default function PremiumPlayer({
             setIsCinemaMode={setIsCinemaMode}
             movieId={movieId}
             episodeId={episodeId}
+            episodes={episodes}
+            currentEpisodeNumber={currentEpisodeNumber}
+            movieSlug={movieSlug}
+            sources={sources}
+            selectedServer={selectedServer}
+            onSelectServer={onSelectServer}
           />
         </MediaPlayer>
 
@@ -290,6 +308,12 @@ interface CustomControlsProps {
   setIsCinemaMode: (val: boolean) => void;
   movieId?: string;
   episodeId?: string;
+  episodes?: { id: string; episodeNumber: number; title: string; }[];
+  currentEpisodeNumber?: number;
+  movieSlug?: string;
+  sources?: { id: string; serverName: string; videoUrl: string }[];
+  selectedServer?: string;
+  onSelectServer?: (server: string) => void;
 }
 
 function CustomControls({
@@ -306,7 +330,13 @@ function CustomControls({
   isCinemaMode,
   setIsCinemaMode,
   movieId,
-  episodeId
+  episodeId,
+  episodes,
+  currentEpisodeNumber,
+  movieSlug,
+  sources,
+  selectedServer,
+  onSelectServer
 }: CustomControlsProps) {
   const remote = useMediaRemote();
 
@@ -326,8 +356,8 @@ function CustomControls({
 
   // Community & Interactive Toolbar Local States
   const [autoSkipIntro, setAutoSkipIntro] = useState(false);
-  const [isFollowed, setIsFollowed] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
+  const [showEpisodes, setShowEpisodes] = useState(false);
   const [playbackSpeed, setPlaybackSpeed] = useState(1);
 
   // Monitor mouse activity to auto-hide cursor in fullscreen mode
@@ -385,14 +415,7 @@ function CustomControls({
     if (savedAutoSkip === 'true') {
       setAutoSkipIntro(true);
     }
-
-    if (movieId) {
-      const savedFollow = localStorage.getItem(`donghua3d_followed_${movieId}`);
-      if (savedFollow === 'true') {
-        setIsFollowed(true);
-      }
-    }
-  }, [remote, movieId]);
+  }, [remote]);
 
   // Declared skipping functions with useCallback before useEffect keydown
   const handleSkipIntro = useCallback(() => {
@@ -553,27 +576,6 @@ function CustomControls({
     localStorage.setItem('donghua3d_auto_skip_intro', newVal.toString());
   };
 
-  const handleToggleFollow = () => {
-    const newVal = !isFollowed;
-    setIsFollowed(newVal);
-    if (movieId) {
-      localStorage.setItem(`donghua3d_followed_${movieId}`, newVal.toString());
-    }
-    alert(newVal ? `Đã thêm phim (ID: ${movieId || 'N/A'}) vào danh sách Theo dõi thành công!` : 'Đã bỏ theo dõi phim.');
-  };
-
-  const handleRatePrompt = () => {
-    const score = prompt(`Nhập điểm số đánh giá tập phim (${episodeId || 'Hiện tại'}) từ 1 đến 10:`, '10');
-    if (score) {
-      const num = parseInt(score, 10);
-      if (!isNaN(num) && num >= 1 && num <= 10) {
-        alert(`Cảm ơn bạn đã đánh giá ${num}/10 điểm! Đánh giá đã được ghi nhận vào hệ thống.`);
-      } else {
-        alert('Điểm số không hợp lệ. Vui lòng nhập từ 1 đến 10.');
-      }
-    }
-  };
-
   const formatTime = (seconds: number) => {
     const m = Math.floor(seconds / 60);
     const s = Math.floor(seconds % 60);
@@ -596,11 +598,11 @@ function CustomControls({
 
         {/* Large Central Pause icon on active hover */}
         {!waiting && (
-          <div className="opacity-0 group-hover:opacity-100 scale-75 group-hover:scale-100 p-5 rounded-full bg-black/55 backdrop-blur-sm border border-white/10 hover:border-violet-500/30 hover:scale-110 active:scale-90 transition-all duration-300 shadow-2xl">
+          <div className="opacity-0 scale-75 group-hover:scale-100 p-5 rounded-full bg-transparent hover:bg-black/55 backdrop-blur-sm border border-transparent hover:border-white/10 hover:scale-110 active:scale-90 transition-all duration-300">
             {paused ? (
-              <Play className="w-8 h-8 fill-white text-white translate-x-0.5" />
+              <Play className="w-8 h-8 fill-white text-white translate-x-0.5 opacity-0 hover:opacity-100" />
             ) : (
-              <Pause className="w-8 h-8 fill-white text-white" />
+              <Pause className="w-8 h-8 fill-white text-white opacity-0" />
             )}
           </div>
         )}
@@ -714,29 +716,6 @@ function CustomControls({
 
           {/* Interactive Community Actions Block (Benchmarked vs Hoathinh3D) */}
           <div className="hidden lg:flex items-center gap-3 bg-white/5 border border-white/10 px-3 py-1.5 rounded-[4px] backdrop-blur-md">
-            {/* Follow / Watchlist Button */}
-            <button
-              onClick={handleToggleFollow}
-              className={`flex items-center gap-1.5 px-2.5 py-1 rounded-[2px] text-xs font-bold transition-all cursor-pointer outline-none border-0 ${isFollowed ? 'bg-violet-600 text-white shadow-[0_0_12px_rgba(139,92,246,0.4)]' : 'bg-transparent text-zinc-300 hover:bg-white/10 hover:text-white'}`}
-              title="Thêm vào danh sách theo dõi"
-            >
-              <Bookmark className={`w-3.5 h-3.5 ${isFollowed ? 'fill-white' : ''}`} />
-              <span>{isFollowed ? 'Đã Theo dõi' : 'Theo dõi'}</span>
-            </button>
-
-            <span className="text-zinc-700">|</span>
-
-            {/* Rate Prompt Button */}
-            <button
-              onClick={handleRatePrompt}
-              className="flex items-center gap-1.5 px-2.5 py-1 bg-transparent hover:bg-white/10 text-zinc-300 hover:text-white rounded-[2px] text-xs font-bold transition-all cursor-pointer outline-none border-0"
-              title="Đánh giá phim"
-            >
-              <Star className="w-3.5 h-3.5 text-amber-400 fill-amber-400" />
-              <span>Đánh giá</span>
-            </button>
-
-            <span className="text-zinc-700">|</span>
 
             {/* Auto Skip Toggle */}
             <button
@@ -766,10 +745,52 @@ function CustomControls({
           </div>
 
           <div className="flex items-center gap-4">
+            {/* Episode List Trigger */}
+            {episodes && episodes.length > 0 && (
+              <div className="relative">
+                <button
+                  onClick={() => setShowEpisodes(!showEpisodes)}
+                  className={`flex items-center gap-1.5 p-2 rounded-[4px] bg-white/5 border border-white/10 hover:bg-white/10 cursor-pointer transition-all outline-none ${showEpisodes ? 'text-violet-400 border-violet-500/40 bg-violet-500/10' : 'text-zinc-400 hover:text-white'}`}
+                >
+                  <span className="text-xs font-bold uppercase tracking-wider hidden sm:block">Danh sách tập</span>
+                </button>
+
+                {/* Episodes Sidebar / Popup overlay */}
+                {showEpisodes && (
+                  <div className="absolute bottom-12 right-0 w-72 bg-[#0c0c10]/95 backdrop-blur-xl border border-zinc-900 rounded-[4px] p-4 flex flex-col gap-3 shadow-2xl z-40 select-none">
+                    <div className="flex items-center justify-between border-b border-zinc-800/80 pb-2">
+                      <span className="text-xs font-black text-white uppercase tracking-wider">Chọn Tập</span>
+                      <span className="text-[10px] text-zinc-500 font-bold uppercase tracking-wider">{episodes.length} tập</span>
+                    </div>
+                    <div className="grid grid-cols-5 gap-1.5 max-h-[300px] overflow-y-auto pr-1 custom-scrollbar">
+                      {episodes
+                        .slice()
+                        .sort((a, b) => a.episodeNumber - b.episodeNumber)
+                        .map(ep => {
+                        const isActive = ep.episodeNumber === currentEpisodeNumber;
+                        return (
+                          <a
+                            key={ep.id}
+                            href={`/movies/${movieSlug}/tap-${ep.episodeNumber}`}
+                            className={`py-2 text-center rounded-[2px] font-black text-[11px] transition-all no-underline flex justify-center items-center cursor-pointer border ${isActive ? 'bg-violet-600 border-violet-500 text-white shadow-md' : 'bg-zinc-950 hover:bg-zinc-800 border-zinc-900 text-zinc-400 hover:text-white'}`}
+                          >
+                            {ep.episodeNumber}
+                          </a>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
             {/* Settings trigger */}
             <div className="relative">
               <button 
-                onClick={() => setShowSettings(!showSettings)}
+                onClick={() => {
+                  setShowSettings(!showSettings);
+                  if (showEpisodes) setShowEpisodes(false);
+                }}
                 className={`p-2 rounded-[4px] bg-white/5 border border-white/10 hover:bg-white/10 cursor-pointer transition-all outline-none flex items-center gap-1.5 ${showSettings ? 'text-violet-400 border-violet-500/40 bg-violet-500/10' : 'text-zinc-400 hover:text-white'}`}
               >
                 <Settings className="w-4 h-4" />
@@ -810,7 +831,29 @@ function CustomControls({
                     </button>
                   </div>
 
-                  <div className="border-t border-zinc-900 my-0.5"></div>
+                  {/* Server Source Settings Section */}
+                  {sources && sources.length > 0 && onSelectServer && (
+                    <>
+                      <div className="border-t border-zinc-900 my-1"></div>
+                      <div className="flex flex-col gap-1">
+                        <span className="text-[9px] font-black text-zinc-550 uppercase tracking-widest pl-1.5 pb-1">Nguồn Server</span>
+                        {sources.map(srv => (
+                          <button
+                            key={srv.id}
+                            onClick={() => {
+                              onSelectServer(srv.serverName);
+                              setShowSettings(false);
+                            }}
+                            className={`text-left px-2.5 py-1.5 text-[10px] font-bold rounded-[2px] cursor-pointer outline-none border-0 transition-colors ${selectedServer === srv.serverName ? 'bg-violet-600 text-white' : 'bg-transparent text-zinc-400 hover:bg-white/5 hover:text-white'}`}
+                          >
+                            {srv.serverName}
+                          </button>
+                        ))}
+                      </div>
+                    </>
+                  )}
+
+                  <div className="border-t border-zinc-900 my-1"></div>
 
                   {/* Playback speed section */}
                   <div className="flex flex-col gap-1">

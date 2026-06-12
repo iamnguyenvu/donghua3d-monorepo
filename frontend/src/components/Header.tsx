@@ -405,7 +405,7 @@ export default function Header({ onSearchChange }: HeaderProps) {
                             watchHistory.map((hist) => (
                               <Link 
                                 key={hist.id} 
-                                href={`/movies/${hist.movieId}/episodes/${hist.episodeId}`}
+                                href={`/movies/${hist.movieId}/tap-${hist.episodeNumber}`}
                                 className="flex items-center gap-3 p-1.5 rounded-[2px] bg-zinc-950/40 hover:bg-zinc-900 border border-transparent hover:border-zinc-850/60 transition-all no-underline"
                               >
                                 {/* Thẻ ảnh nhỏ đại diện tập */}

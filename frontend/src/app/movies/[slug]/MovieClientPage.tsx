@@ -191,7 +191,7 @@ export default function MovieClientPage({
               {movie.episodes && movie.episodes.length > 0 ? (
                 <>
                   <Link
-                    href={`/movies/${movie.slug || movie.id}/episodes/${movie.episodes[0].id}`}
+                    href={`/movies/${movie.slug || movie.id}/tap-${movie.episodes[0].episodeNumber}`}
                     className="px-6 py-3.5 rounded-[4px] bg-violet-600 hover:bg-violet-700 text-white font-extrabold flex items-center justify-center gap-2 text-[11px] uppercase tracking-wider transition-all duration-300 hover:scale-[1.03] active:scale-95 shadow-[0_4px_20px_rgba(124,58,237,0.3)] hover:shadow-[0_4px_25px_rgba(124,58,237,0.5)] border-0 outline-none no-underline w-full sm:w-auto"
                   >
                     <Play className="w-4 h-4 fill-white text-white" />
@@ -200,7 +200,7 @@ export default function MovieClientPage({
 
                   {movie.episodes.length > 1 && (
                     <Link
-                      href={`/movies/${movie.slug || movie.id}/episodes/${[...movie.episodes].sort((a, b) => b.episodeNumber - a.episodeNumber)[0].id}`}
+                      href={`/movies/${movie.slug || movie.id}/tap-${[...movie.episodes].sort((a, b) => b.episodeNumber - a.episodeNumber)[0].episodeNumber}`}
                       className="px-6 py-3.5 rounded-[4px] bg-gradient-to-r from-violet-750 to-indigo-750 hover:from-violet-650 hover:to-indigo-650 text-white font-extrabold flex items-center justify-center gap-2 text-[11px] uppercase tracking-wider transition-all duration-300 hover:scale-[1.03] active:scale-95 shadow-[0_4px_20px_rgba(139,92,246,0.3)] hover:shadow-[0_4px_25px_rgba(139,92,246,0.5)] border-0 outline-none no-underline w-full sm:w-auto"
                     >
                       <span>⚡ Tập Mới Nhất ({movie.episodes.length})</span>

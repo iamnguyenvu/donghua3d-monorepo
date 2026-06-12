@@ -343,9 +343,43 @@ export default function EpisodePage({ slug, episodeNumber }: { slug: string; epi
           <h1 className="text-xl md:text-2xl font-black text-white uppercase tracking-wider mb-2">
             {cleanEpisodeTitle(episode.title, episode.episodeNumber)}
           </h1>
-          <p className="text-xs text-zinc-400 leading-relaxed max-w-4xl">
+          <p className="text-xs text-zinc-400 leading-relaxed max-w-4xl mb-4">
             {episode.description}
           </p>
+
+          {/* Social Actions Panel */}
+          <div className="flex items-center gap-3">
+            <button
+              onClick={async () => {
+                const newVal = !false; // Temporary toggle state for local UI until connected to backend
+                if (movie) {
+                  localStorage.setItem(`donghua3d_followed_${movie.id}`, newVal.toString());
+                  alert(newVal ? `Đã thêm phim vào danh sách Theo dõi thành công!` : 'Đã bỏ theo dõi phim.');
+                }
+              }}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-[2px] text-xs font-bold transition-all cursor-pointer outline-none border border-zinc-800 bg-zinc-950/80 hover:bg-zinc-900 text-zinc-300 hover:text-white shadow-sm"
+            >
+              <Bookmark className="w-3.5 h-3.5" />
+              <span>Theo dõi phim</span>
+            </button>
+            <button
+              onClick={() => {
+                const score = prompt(`Nhập điểm số đánh giá tập phim từ 1 đến 10:`, '10');
+                if (score) {
+                  const num = parseInt(score, 10);
+                  if (!isNaN(num) && num >= 1 && num <= 10) {
+                    alert(`Cảm ơn bạn đã đánh giá ${num}/10 điểm! Đánh giá đã được ghi nhận vào hệ thống.`);
+                  } else {
+                    alert('Điểm số không hợp lệ. Vui lòng nhập từ 1 đến 10.');
+                  }
+                }
+              }}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-[2px] text-xs font-bold transition-all cursor-pointer outline-none border border-zinc-800 bg-zinc-950/80 hover:bg-zinc-900 text-amber-400 shadow-sm"
+            >
+              <Star className="w-3.5 h-3.5 fill-amber-400" />
+              <span>Đánh giá phim</span>
+            </button>
+          </div>
         </div>
 
         {/* ==============================================================================
@@ -364,28 +398,6 @@ export default function EpisodePage({ slug, episodeNumber }: { slug: string; epi
 
             {/* Server CDN Selector & Sorting Controls */}
             <div className="flex flex-wrap items-center gap-3">
-              {/* Server indicator */}
-              <div className="flex items-center gap-2 bg-zinc-950/80 border border-zinc-900 px-3 py-2 rounded-[2px]">
-                <span className="text-[9px] font-black text-zinc-500 uppercase tracking-widest">Nguồn:</span>
-                <div className="flex items-center gap-1.5 ml-1">
-                  {(episode.sources && episode.sources.length > 0
-                    ? episode.sources.map(s => s.serverName)
-                    : ['VIP 1', 'VIP 2']).map((srv) => (
-                    <button
-                      key={srv}
-                      onClick={() => setSelectedServer(srv)}
-                      className={`px-2.5 py-1 rounded-[2px] text-[9px] font-black uppercase tracking-wider transition-all border-0 cursor-pointer ${
-                        selectedServer === srv
-                          ? 'bg-violet-600 text-white shadow-sm'
-                          : 'bg-zinc-900 text-zinc-400 hover:text-white hover:bg-zinc-800'
-                      }`}
-                    >
-                      {srv}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
               {/* Sorting Toggle button */}
               <button
                 onClick={() => setSortAsc(!sortAsc)}
