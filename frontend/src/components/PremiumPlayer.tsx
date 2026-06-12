@@ -650,7 +650,7 @@ function CustomControls({
         </div>
 
         {/* Action Controls and Settings bar */}
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between relative">
           <div className="flex items-center gap-5">
             {/* Prev Episode Button */}
             <button 
@@ -715,7 +715,7 @@ function CustomControls({
           </div>
 
           {/* Interactive Community Actions Block (Benchmarked vs Hoathinh3D) */}
-          <div className="hidden lg:flex items-center gap-3 bg-white/5 border border-white/10 px-3 py-1.5 rounded-[4px] backdrop-blur-md">
+          <div className="hidden lg:flex items-center gap-3 bg-white/5 border border-white/10 px-3 py-1.5 rounded-[4px] backdrop-blur-md absolute left-1/2 -translate-x-1/2">
 
             {/* Auto Skip Toggle */}
             <button
