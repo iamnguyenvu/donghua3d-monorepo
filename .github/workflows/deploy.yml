@@ -147,10 +147,9 @@ jobs:
             NEXT_PUBLIC_API_URL="https://donghua3d.me/api"
             EOF
             
-            # Deploy optimized multi-container cluster
-            docker compose down --remove-orphans
-            docker builder prune -af
-            docker compose up --build -d db backend frontend nginx
+            # Deploy optimized multi-container cluster using rolling updates
+            docker compose build
+            docker compose up -d
             
             # Wait for database container to boot completely
             sleep 5
@@ -161,6 +160,5 @@ jobs:
             # Backfill any legacy records with newly introduced slugs
             docker compose exec -T backend node dist/scripts/backfill_movie_slugs.js
             
-            # Prune obsolete images and build cache to reclaim server disk space
+            # Prune obsolete images to reclaim server disk space
             docker image prune -f
-            docker builder prune -f --filter "until=24h"
