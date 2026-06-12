@@ -3,14 +3,15 @@ import { catalogApi } from '@/lib/api';
 import EpisodeClient from './EpisodeClient';
 
 type Props = {
-  params: Promise<{ slug: string; episodeNumber: string }>;
+  params: Promise<{ slug: string; episodeSlug: string }>;
 };
 
 export async function generateMetadata(
   { params }: Props,
   parent: ResolvingMetadata
 ): Promise<Metadata> {
-  const { slug, episodeNumber } = await params;
+  const { slug, episodeSlug } = await params;
+  const episodeNumber = episodeSlug.replace('tap-', '');
   const movieRes = await catalogApi.getMovie(slug);
   const epRes = await catalogApi.getEpisodeByNumber(slug, episodeNumber);
 
@@ -49,7 +50,8 @@ export async function generateMetadata(
 }
 
 export default async function Page({ params }: Props) {
-  const { slug, episodeNumber } = await params;
+  const { slug, episodeSlug } = await params;
+  const episodeNumber = episodeSlug.replace('tap-', '');
   // Fetch for JSON-LD structured data (TVEpisode)
   const movieRes = await catalogApi.getMovie(slug);
   const epRes = await catalogApi.getEpisodeByNumber(slug, episodeNumber);
