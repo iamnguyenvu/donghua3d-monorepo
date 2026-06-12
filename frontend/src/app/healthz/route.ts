@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { catalogApi } from '@/lib/api';
 
 export const dynamic = 'force-dynamic';
 
@@ -10,20 +11,9 @@ export async function GET() {
     let fetchError: unknown = null;
     let rawFetchResult: unknown = null;
     try {
-      const urlToFetch = internalUrl !== 'NOT_SET' ? internalUrl : 'http://backend:5000';
-      const res = await fetch(`${urlToFetch}/catalog/movies/the-gioi-hoan-my`);
-      rawFetchResult = {
-        status: res.status,
-        statusText: res.statusText,
-        ok: res.ok,
-        data: await res.text(),
-      };
-    } catch (e: unknown) {
-      if (e instanceof Error) {
-        fetchError = { message: e.message, stack: e.stack, name: e.name };
-      } else {
-        fetchError = String(e);
-      }
+      rawFetchResult = await catalogApi.getMovie('the-gioi-hoan-my');
+    } catch (e: any) {
+      fetchError = e.message;
     }
 
     return NextResponse.json({
