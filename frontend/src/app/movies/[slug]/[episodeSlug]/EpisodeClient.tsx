@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { 
-  ArrowLeft, Star, MessageSquare, Loader2, Send, Flag 
+  ArrowLeft, Star, MessageSquare, Loader2, Send, Flag, Bookmark
 } from 'lucide-react';
 import Header from '@/components/Header';
 import PremiumPlayer from '@/components/PremiumPlayer';
