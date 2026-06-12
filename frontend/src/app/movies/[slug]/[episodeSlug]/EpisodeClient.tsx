@@ -331,6 +331,12 @@ export default function EpisodePage({ slug, episodeNumber }: { slug: string; epi
           onEnded={handleVideoEnded}
           onPrevEpisode={prevEpisode ? handlePrevEpisode : undefined}
           onNextEpisode={nextEpisode ? handleNextEpisode : undefined}
+          episodes={movie.episodes}
+          currentEpisodeNumber={episode.episodeNumber}
+          movieSlug={movie.slug || movie.id}
+          sources={episode.sources}
+          selectedServer={selectedServer}
+          onSelectServer={setSelectedServer}
         />
 
         {/* EPISODE DETAILS INFO */}
