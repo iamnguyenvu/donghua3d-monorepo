@@ -12,8 +12,8 @@ export async function GET() {
     let rawFetchResult: unknown = null;
     try {
       rawFetchResult = await catalogApi.getMovie('the-gioi-hoan-my');
-    } catch (e: any) {
-      fetchError = e.message;
+    } catch (e: unknown) {
+      fetchError = e instanceof Error ? e.message : String(e);
     }
 
     return NextResponse.json({
