@@ -245,13 +245,10 @@ router.get('/movies/:movieSlug/episodes/number/:episodeNumber', async (req: Auth
       return;
     }
 
+    const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(movieSlug);
+
     const movie = await prisma.movie.findFirst({
-      where: {
-        OR: [
-          { slug: movieSlug },
-          { id: movieSlug }
-        ]
-      }
+      where: isUUID ? { id: movieSlug } : { slug: movieSlug }
     });
 
     if (!movie) {
