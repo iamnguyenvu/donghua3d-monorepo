@@ -40,9 +40,15 @@ export default function EpisodePage({ slug, episodeNumber }: { slug: string; epi
   const [submittingReview, setSubmittingReview] = useState(false);
   const [submittingComment, setSubmittingComment] = useState(false);
   const [visibleSpoilers, setVisibleSpoilers] = useState<Record<string, boolean>>({});
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   // 1. Fetch Episode Details, Movies, and Reviews
   useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const token = localStorage.getItem('donghua3d_token');
+      setIsLoggedIn(!!token);
+    }
+    
     async function loadData() {
       setLoading(true);
       const epRes = await catalogApi.getEpisodeByNumber(slug, episodeNumber);
@@ -500,40 +506,48 @@ export default function EpisodePage({ slug, episodeNumber }: { slug: string; epi
             </h2>
 
             {/* Post review panel form */}
-            <form onSubmit={handleRatingSubmit} className="p-5 bg-zinc-950/40 border border-zinc-900 rounded-[4px] flex flex-col gap-4 shadow-lg select-none">
-              <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider">Bạn đánh giá tập phim này bao nhiêu?</span>
-              
-              {/* Star selector buttons */}
-              <div className="flex flex-wrap items-center justify-between sm:justify-start gap-1">
-                {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((star) => (
-                  <button
-                    key={star}
-                    type="button"
-                    onClick={() => setUserRating(star)}
-                    className="p-1.5 xs:p-2 sm:p-1 bg-transparent border-0 cursor-pointer transition-transform hover:scale-125 outline-none flex items-center justify-center"
-                    title={`Đánh giá ${star}/10 sao`}
-                  >
-                    <Star className={`w-6 h-6 xs:w-7 xs:h-7 sm:w-5 sm:h-5 md:w-4 md:h-4 ${star <= userRating ? 'fill-amber-400 text-amber-400' : 'text-zinc-750'}`} />
-                  </button>
-                ))}
+            {isLoggedIn ? (
+              <form onSubmit={handleRatingSubmit} className="p-5 bg-zinc-950/40 border border-zinc-900 rounded-[4px] flex flex-col gap-4 shadow-lg select-none">
+                <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider">Bạn đánh giá tập phim này bao nhiêu?</span>
+                
+                {/* Star selector buttons */}
+                <div className="flex flex-wrap items-center justify-between sm:justify-start gap-1">
+                  {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((star) => (
+                    <button
+                      key={star}
+                      type="button"
+                      onClick={() => setUserRating(star)}
+                      className="p-1.5 xs:p-2 sm:p-1 bg-transparent border-0 cursor-pointer transition-transform hover:scale-125 outline-none flex items-center justify-center"
+                      title={`Đánh giá ${star}/10 sao`}
+                    >
+                      <Star className={`w-6 h-6 xs:w-7 xs:h-7 sm:w-5 sm:h-5 md:w-4 md:h-4 ${star <= userRating ? 'fill-amber-400 text-amber-400' : 'text-zinc-750'}`} />
+                    </button>
+                  ))}
+                </div>
+
+                <textarea
+                  rows={3}
+                  placeholder="Viết nhận xét ngắn gọn của bạn tại đây (không bắt buộc)..."
+                  value={reviewText}
+                  onChange={(e) => setReviewText(e.target.value)}
+                  className="bg-[#0c0c0f] border border-zinc-800/80 text-white rounded-[4px] p-3 text-xs outline-none focus:border-zinc-750 transition-all w-full"
+                />
+
+                <button
+                  type="submit"
+                  disabled={userRating === 0 || submittingReview}
+                  className="py-2.5 px-5 rounded-[4px] bg-violet-600 hover:bg-violet-700 text-white font-extrabold text-[11px] uppercase tracking-wider transition-all duration-200 active:scale-95 shadow-md disabled:opacity-50 cursor-pointer outline-none border-0"
+                >
+                  Gửi Đánh Giá {userRating > 0 && `(${userRating}/10)`}
+                </button>
+              </form>
+            ) : (
+              <div className="p-5 bg-zinc-950/40 border border-zinc-900 rounded-[4px] flex flex-col items-center justify-center gap-3 text-center shadow-lg select-none py-10">
+                <Star className="w-8 h-8 text-zinc-700 mb-1" />
+                <p className="text-xs font-bold text-zinc-300 uppercase tracking-wider">Vui lòng đăng nhập</p>
+                <p className="text-[10px] text-zinc-500 max-w-[200px]">Đăng nhập ở menu trên cùng để tham gia đánh giá chất lượng phim.</p>
               </div>
-
-              <textarea
-                rows={3}
-                placeholder="Viết nhận xét ngắn gọn của bạn tại đây (không bắt buộc)..."
-                value={reviewText}
-                onChange={(e) => setReviewText(e.target.value)}
-                className="bg-[#0c0c0f] border border-zinc-800/80 text-white rounded-[4px] p-3 text-xs outline-none focus:border-zinc-750 transition-all w-full"
-              />
-
-              <button
-                type="submit"
-                disabled={userRating === 0 || submittingReview}
-                className="py-2.5 px-5 rounded-[4px] bg-violet-600 hover:bg-violet-700 text-white font-extrabold text-[11px] uppercase tracking-wider transition-all duration-200 active:scale-95 shadow-md disabled:opacity-50 cursor-pointer outline-none border-0"
-              >
-                Gửi Đánh Giá {userRating > 0 && `(${userRating}/10)`}
-              </button>
-            </form>
+            )}
 
             {/* List reviews feed */}
             <div className="flex flex-col gap-4 max-h-[400px] overflow-y-auto pr-2 select-none">
@@ -571,37 +585,45 @@ export default function EpisodePage({ slug, episodeNumber }: { slug: string; epi
             </h2>
 
             {/* Post comment form */}
-            <form onSubmit={handleCommentSubmit} className="p-5 bg-zinc-950/40 border border-zinc-900 rounded-[4px] flex flex-col gap-4 shadow-lg select-none">
-              <textarea
-                rows={3}
-                placeholder="Bình luận suy nghĩ hoặc giả thuyết của bạn về tập này..."
-                value={commentText}
-                onChange={(e) => setCommentText(e.target.value)}
-                className="bg-[#0c0c0f] border border-zinc-800/80 text-white rounded-[4px] p-3 text-xs outline-none focus:border-zinc-750 transition-all w-full"
-                required
-              />
+            {isLoggedIn ? (
+              <form onSubmit={handleCommentSubmit} className="p-5 bg-zinc-950/40 border border-zinc-900 rounded-[4px] flex flex-col gap-4 shadow-lg select-none">
+                <textarea
+                  rows={3}
+                  placeholder="Bình luận suy nghĩ hoặc giả thuyết của bạn về tập này..."
+                  value={commentText}
+                  onChange={(e) => setCommentText(e.target.value)}
+                  className="bg-[#0c0c0f] border border-zinc-800/80 text-white rounded-[4px] p-3 text-xs outline-none focus:border-zinc-750 transition-all w-full"
+                  required
+                />
 
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 w-full">
-                <label className="flex items-center gap-2 cursor-pointer text-[10px] text-zinc-400 select-none uppercase font-bold tracking-wider">
-                  <input
-                    type="checkbox"
-                    checked={isSpoilerComment}
-                    onChange={(e) => setIsSpoilerComment(e.target.checked)}
-                    className="accent-violet-600 rounded border-zinc-800 bg-zinc-950"
-                  />
-                  Chứa tiết lộ nội dung (Spoiler Alert!)
-                </label>
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 w-full">
+                  <label className="flex items-center gap-2 cursor-pointer text-[10px] text-zinc-400 select-none uppercase font-bold tracking-wider">
+                    <input
+                      type="checkbox"
+                      checked={isSpoilerComment}
+                      onChange={(e) => setIsSpoilerComment(e.target.checked)}
+                      className="accent-violet-600 rounded border-zinc-800 bg-zinc-950"
+                    />
+                    Chứa tiết lộ nội dung (Spoiler Alert!)
+                  </label>
 
-                <button
-                  type="submit"
-                  disabled={submittingComment}
-                  className="py-2.5 px-4 rounded-[4px] bg-violet-600 hover:bg-violet-700 text-white font-extrabold text-[11px] uppercase tracking-wider transition-all duration-200 active:scale-95 shadow-md disabled:opacity-50 flex items-center justify-center gap-1.5 cursor-pointer outline-none border-0 w-full sm:w-auto"
-                >
-                  <Send className="w-3 h-3" />
-                  Gửi Bình Luận
-                </button>
+                  <button
+                    type="submit"
+                    disabled={submittingComment}
+                    className="py-2.5 px-4 rounded-[4px] bg-violet-600 hover:bg-violet-700 text-white font-extrabold text-[11px] uppercase tracking-wider transition-all duration-200 active:scale-95 shadow-md disabled:opacity-50 flex items-center justify-center gap-1.5 cursor-pointer outline-none border-0 w-full sm:w-auto"
+                  >
+                    <Send className="w-3 h-3" />
+                    Gửi Bình Luận
+                  </button>
+                </div>
+              </form>
+            ) : (
+              <div className="p-5 bg-zinc-950/40 border border-zinc-900 rounded-[4px] flex flex-col items-center justify-center gap-3 text-center shadow-lg select-none py-10">
+                <MessageSquare className="w-8 h-8 text-zinc-700 mb-1" />
+                <p className="text-xs font-bold text-zinc-300 uppercase tracking-wider">Vui lòng đăng nhập</p>
+                <p className="text-[10px] text-zinc-500 max-w-[250px]">Đăng nhập ở menu trên cùng để tham gia thảo luận giả thuyết cùng cộng đồng Donghua3D.</p>
               </div>
-            </form>
+            )}
 
             {/* Feed Comments list */}
             <div className="flex flex-col gap-6 select-none">
