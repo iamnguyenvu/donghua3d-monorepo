@@ -490,7 +490,7 @@ export default function HomeClient({ initialMovies = [] }: { initialMovies: Movi
               <Link href={`/movies/${movie.slug || movie.id}`} key={`weekly-${movie.id}`} className="no-underline group flex-shrink-0 w-32 md:w-36 flex flex-col gap-2">
                 <div className="relative overflow-hidden rounded-[6px] border border-zinc-900/60 aspect-[2/3] cursor-pointer transition-all duration-300 group-hover:border-violet-500/50 bg-zinc-950">
                   <Image
-                    src={movie.posterUrl || '/static/uploads/default_poster.jpg'}
+                    src={movie.posterUrl || movie.bannerUrl || '/static/uploads/default_poster.jpg'}
                     alt={movie.title}
                     fill
                     sizes="(max-width: 768px) 150px, 200px"
@@ -520,35 +520,97 @@ export default function HomeClient({ initialMovies = [] }: { initialMovies: Movi
       {recentlyUpdatedMovies.length > 0 && (
         <section className="w-full px-6 md:px-12 lg:px-16 mt-14 select-none animate-fade-in-up">
           <div className="flex items-center gap-2 mb-6 border-b border-zinc-900/60 pb-4">
-            <h2 className="text-lg font-black text-white tracking-wider uppercase border-l-2 border-emerald-500 pl-3 flex items-center gap-1.5">
+            <h2 className="text-lg font-black text-white tracking-wider uppercase border-l-2 border-violet-500 pl-3 flex items-center gap-1.5">
               🚀 Phim Mới Cập Nhật
             </h2>
           </div>
           
-          <div className="overflow-x-auto hide-scrollbar pb-4 -mx-6 px-6 md:-mx-12 md:px-12 lg:-mx-16 lg:px-16 flex items-start gap-3">
+          <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-8 2xl:grid-cols-10 gap-x-3 gap-y-6">
             {recentlyUpdatedMovies.map(movie => (
-              <Link href={`/movies/${movie.slug || movie.id}`} key={`recent-${movie.id}`} className="no-underline group flex-shrink-0 w-[140px] md:w-[160px] flex flex-col gap-2">
-                <div className="relative overflow-hidden rounded-[6px] border border-zinc-900/60 aspect-[2/3] cursor-pointer transition-all duration-300 group-hover:border-emerald-500/50 group-hover:shadow-[0_0_15px_rgba(16,185,129,0.2)] bg-zinc-950">
-                  <Image
-                    src={movie.posterUrl || '/static/uploads/default_poster.jpg'}
-                    alt={movie.title}
-                    fill
-                    sizes="(max-width: 768px) 150px, 200px"
-                    className="object-cover object-center transition-transform duration-500 group-hover:scale-105"
-                  />
-                  <div className="absolute top-1.5 left-1.5 bg-emerald-600/90 text-white font-extrabold px-1.5 py-0.5 rounded-[2px] text-[8px] uppercase tracking-widest z-10">
-                    MỚI NHẤT
+              <Link href={`/movies/${movie.slug || movie.id}`} key={`recent-${movie.id}`} className="no-underline group flex flex-col gap-2">
+                {/* Poster Frame */}
+                <div className="relative overflow-hidden rounded-[6px] border border-zinc-900/60 aspect-[2/3] cursor-pointer transition-all duration-500 hover:scale-[1.04] hover:border-violet-500/50 hover:shadow-[0_0_25px_rgba(139,92,246,0.25)] bg-zinc-950 shadow-lg">
+                  {/* Poster Image */}
+                  <div className="relative w-full h-full">
+                    <Image
+                      src={movie.posterUrl || movie.bannerUrl || '/static/uploads/default_poster.jpg'}
+                      alt={movie.title}
+                      fill
+                      sizes="(max-width: 768px) 50vw, (max-width: 1200px) 25vw, 20vw"
+                      className="object-cover object-top transition-transform duration-700 ease-out group-hover:scale-110"
+                    />
+                    {/* Gradient overlay for cinematic shadow depth */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-[#050508]/90 via-[#050508]/15 to-transparent opacity-60 transition-opacity duration-300 group-hover:opacity-80" />
                   </div>
+
+                  {/* Quick premium micro-info displaying on hover */}
+                  <div className="absolute inset-0 flex flex-col justify-end p-3 bg-[#050508]/60 backdrop-blur-[2px] opacity-0 group-hover:opacity-100 transition-all duration-350 ease-out z-20">
+                    <div className="flex items-center justify-center w-8 h-8 rounded-full bg-violet-600 text-white mx-auto mb-2.5 shadow-lg transform translate-y-4 group-hover:translate-y-0 transition-all duration-350 delay-75">
+                      <Play className="w-4 h-4 fill-white ml-0.5" />
+                    </div>
+                    <span className="text-[9px] font-black tracking-widest text-violet-400 uppercase text-center block">{movie.studio || 'Donghua'}</span>
+                    <span className="text-[10px] font-extrabold text-zinc-300 text-center block mt-0.5">{movie.releaseYear}</span>
+                  </div>
+
+                  {/* Rating Badge in bottom-right */}
+                  <div className="absolute bottom-2.5 right-2.5 bg-black/80 backdrop-blur-md border border-amber-400/25 text-amber-400 px-1.5 py-1 rounded-[4px] text-[9px] font-extrabold flex items-center gap-0.5 z-10 shadow-md select-none">
+                    {movie.rating > 0 ? (
+                      <>
+                        <Star className="w-2.5 h-2.5 fill-amber-400 text-amber-400" />
+                        {movie.rating.toFixed(1)}
+                      </>
+                    ) : (
+                      <span className="text-[8px] tracking-wider font-extrabold text-amber-400 uppercase">1080P</span>
+                    )}
+                  </div>
+
+                  {/* Global Tier Badge */}
+                  {movie.leaderboard && (
+                    movie.leaderboard.globalTier === 'S' ||
+                    (movie.leaderboard.s_tier_count || 0) +
+                    (movie.leaderboard.a_tier_count || 0) +
+                    (movie.leaderboard.b_tier_count || 0) +
+                    (movie.leaderboard.c_tier_count || 0) +
+                    (movie.leaderboard.d_tier_count || 0) +
+                    (movie.leaderboard.f_tier_count || 0) > 0
+                  ) && (
+                    <div className="absolute top-2.5 left-2.5 bg-black/80 backdrop-blur-md px-2 py-1 rounded-[4px] border border-zinc-800 text-[8px] font-extrabold tracking-wider z-10 shadow-md" style={{
+                      color: movie.leaderboard.globalTier === 'S' ? '#ff7f7f' : movie.leaderboard.globalTier === 'A' ? '#ffbf7f' : '#bfff7f'
+                    }}>
+                      {movie.leaderboard.globalTier}-TIER
+                    </div>
+                  )}
+
+                  {/* Episode Badge on Poster (High CTR Bright Red/Orange like competitors) */}
                   {movie.episodeCount !== undefined && movie.episodeCount > 0 && (
-                    <div className="absolute top-1.5 right-1.5 bg-rose-600 border border-rose-400 text-white font-black px-1.5 py-0.5 rounded-[2px] text-[8px] uppercase tracking-wider z-10">
+                    <div className="absolute top-2.5 right-2.5 bg-gradient-to-r from-orange-500 to-red-600 border border-red-400/50 text-white font-black px-2 py-0.5 rounded-[3px] text-[10px] uppercase tracking-wider shadow-[0_0_10px_rgba(239,68,68,0.5)] z-10 select-none">
                       Tập {movie.episodeCount}
                     </div>
                   )}
-                  <div className="absolute bottom-0 inset-x-0 p-2 bg-gradient-to-t from-black/90 to-transparent">
-                    <span className="text-[10px] text-zinc-300 line-clamp-1">{movie.updatedAt ? new Date(movie.updatedAt).toLocaleDateString('vi-VN') : ''}</span>
+
+                  {/* Updated Time Overlay */}
+                  <div className="absolute bottom-2.5 left-2.5 bg-violet-950/90 backdrop-blur-md border border-violet-500/30 text-violet-350 px-1.5 py-0.5 rounded-[3px] text-[8px] font-extrabold tracking-wider z-10 select-none">
+                    {movie.updatedAt ? new Date(movie.updatedAt).toLocaleDateString('vi-VN') : 'MỚI'}
                   </div>
                 </div>
-                <h3 className="text-[12px] font-bold text-white group-hover:text-emerald-400 transition-colors truncate">{movie.title}</h3>
+
+                {/* Movie Info — title + update status + studio */}
+                <div className="flex flex-col gap-0.5 mt-1 select-none">
+                  <h3 className="text-[12px] font-bold text-white group-hover:text-violet-400 transition-colors truncate leading-tight">
+                    {movie.title}
+                  </h3>
+                  {movie.altTitles?.[0] && (
+                    <p className="text-[10px] text-zinc-550 truncate leading-tight">
+                      {movie.altTitles[0]}
+                    </p>
+                  )}
+                  <div className="flex items-center justify-between text-[10px] text-zinc-550 mt-0.5 gap-1 flex-wrap">
+                    <span className="text-[9px] font-extrabold text-violet-400 tracking-wider">
+                      CẬP NHẬT
+                    </span>
+                    <span className="text-[9px] font-bold text-zinc-400 bg-zinc-900 px-1 rounded-[2px] uppercase truncate max-w-[70px]">{movie.studio || 'Donghua'}</span>
+                  </div>
+                </div>
               </Link>
             ))}
           </div>
@@ -617,7 +679,7 @@ export default function HomeClient({ initialMovies = [] }: { initialMovies: Movi
                   {/* Poster Image */}
                   <div className="relative w-full h-full">
                     <Image
-                      src={movie.bannerUrl || movie.posterUrl || '/static/uploads/default_poster.jpg'}
+                      src={movie.posterUrl || movie.bannerUrl || '/static/uploads/default_poster.jpg'}
                       alt={movie.title}
                       fill
                       sizes="(max-width: 768px) 50vw, (max-width: 1200px) 25vw, 20vw"
