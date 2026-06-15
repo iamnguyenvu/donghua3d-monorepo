@@ -80,6 +80,7 @@ router.get('/stats', async (_req: AuthenticatedRequest, res: Response, next: Nex
         totalUsers,
         totalMovies,
         totalComments,
+        totalRatings,
         flaggedCommentsCount,
         activeSessions,
         totalViews,
