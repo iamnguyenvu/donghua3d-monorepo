@@ -103,26 +103,43 @@ export default async function MoviePage({ params }: { params: Promise<{ slug: st
   // Schema.org Structured Data (TVSeries)
   const episodeCount = movie.episodes ? movie.episodes.length : 0;
   
-  const jsonLd = {
-    '@context': 'https://schema.org',
-    '@type': 'TVSeries',
-    name: movie.title,
-    alternativeHeadline: movie.altTitles?.join(', '),
-    image: movie.posterUrl || movie.bannerUrl,
-    description: movie.description,
-    dateCreated: movie.releaseYear ? `${movie.releaseYear}` : undefined,
-    numberOfEpisodes: episodeCount > 0 ? episodeCount : undefined,
-    productionCompany: {
-      '@type': 'Organization',
-      name: movie.studio || 'N/A'
+  const uploadDate = movie.createdAt ? new Date(movie.createdAt).toISOString() : new Date().toISOString();
+
+  const jsonLd = [
+    {
+      '@context': 'https://schema.org',
+      '@type': 'TVSeries',
+      name: movie.title,
+      alternativeHeadline: movie.altTitles?.join(', '),
+      image: movie.posterUrl || movie.bannerUrl,
+      description: movie.description,
+      dateCreated: movie.releaseYear ? `${movie.releaseYear}` : undefined,
+      numberOfEpisodes: episodeCount > 0 ? episodeCount : undefined,
+      productionCompany: {
+        '@type': 'Organization',
+        name: movie.studio || 'N/A'
+      },
+      aggregateRating: ratingCount > 0 ? {
+        '@type': 'AggregateRating',
+        ratingValue: movie.rating > 0 ? movie.rating : 8.5,
+        bestRating: '10',
+        ratingCount: ratingCount
+      } : undefined
     },
-    aggregateRating: ratingCount > 0 ? {
-      '@type': 'AggregateRating',
-      ratingValue: movie.rating > 0 ? movie.rating : 8.5, // Default to a good rating for SEO if no votes but has count
-      bestRating: '10',
-      ratingCount: ratingCount
-    } : undefined
-  };
+    {
+      '@context': 'https://schema.org',
+      '@type': 'Article',
+      headline: movie.title,
+      image: [movie.posterUrl || movie.bannerUrl || ''],
+      datePublished: uploadDate,
+      dateModified: uploadDate,
+      author: [{
+          '@type': 'Organization',
+          name: 'Donghua3D',
+          url: 'https://donghua3d.me'
+      }]
+    }
+  ];
 
   return (
     <>

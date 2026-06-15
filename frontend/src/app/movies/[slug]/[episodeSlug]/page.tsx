@@ -60,20 +60,36 @@ export default async function Page({ params }: Props) {
     const movie = movieRes.data;
     const episode = epRes.data;
 
-    const jsonLd = {
-      '@context': 'https://schema.org',
-      '@type': 'TVEpisode',
-      name: `Tập ${episode.episodeNumber}`,
-      episodeNumber: episode.episodeNumber,
-      description: episode.description,
-      image: episode.thumbnail || movie.posterUrl || movie.bannerUrl,
-      timeRequired: episode.duration ? `PT${Math.floor(episode.duration / 60)}M` : undefined,
-      partOfSeries: {
-        '@type': 'TVSeries',
-        name: movie.title,
-        url: `https://donghua3d.me/movies/${movie.slug || movie.id}`
+    const poster = episode.thumbnail || movie.posterUrl || movie.bannerUrl;
+    const pageDescription = episode.description || `Xem ngay phim ${movie.title} tập ${episode.episodeNumber} chất lượng cao Full HD, vietsub tại Donghua3D.`;
+    const uploadDate = movie.createdAt ? new Date(movie.createdAt).toISOString() : new Date().toISOString();
+
+    const jsonLd = [
+      {
+        '@context': 'https://schema.org',
+        '@type': 'TVEpisode',
+        name: `Tập ${episode.episodeNumber}`,
+        episodeNumber: episode.episodeNumber,
+        description: pageDescription,
+        image: poster,
+        timeRequired: episode.duration ? `PT${Math.floor(episode.duration / 60)}M` : undefined,
+        partOfSeries: {
+          '@type': 'TVSeries',
+          name: movie.title,
+          url: `https://donghua3d.me/movies/${movie.slug || movie.id}`
+        }
+      },
+      {
+        '@context': 'https://schema.org',
+        '@type': 'VideoObject',
+        name: `${movie.title} Tập ${episode.episodeNumber}`,
+        description: pageDescription,
+        thumbnailUrl: poster ? [poster] : [],
+        uploadDate: uploadDate,
+        duration: episode.duration ? `PT${Math.floor(episode.duration / 60)}M` : undefined,
+        embedUrl: `https://donghua3d.me/movies/${movie.slug || movie.id}/tap-${episode.episodeNumber}`
       }
-    };
+    ];
 
     return (
       <>

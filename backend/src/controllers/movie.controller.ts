@@ -65,6 +65,33 @@ router.get('/movies', async (req: AuthenticatedRequest, res: Response, next: Nex
   }
 });
 
+// 1.5 GET /api/sitemap-data - Fast query for Sitemap generation
+router.get('/sitemap-data', async (_req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    const movies = await prisma.movie.findMany({
+      select: {
+        id: true,
+        slug: true,
+        updatedAt: true,
+        episodes: {
+          select: {
+            episodeNumber: true,
+            createdAt: true,
+          },
+          orderBy: { episodeNumber: 'asc' }
+        }
+      }
+    });
+
+    res.status(200).json({
+      success: true,
+      data: movies,
+    });
+  } catch (err) {
+    next(err);
+  }
+});
+
 // 2. GET /api/movies/:id - Movie Details
 router.get('/movies/:id', async (req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> => {
   try {

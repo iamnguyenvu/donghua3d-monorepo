@@ -5,8 +5,10 @@ const SITE_URL = 'https://donghua3d.me';
 
 interface SitemapMovie {
   id: string;
-  title: string;
+  title?: string;
+  slug?: string;
   updatedAt?: string;
+  episodes?: { episodeNumber: number; createdAt: string }[];
 }
 
 interface SitemapGenre {
@@ -31,16 +33,31 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${SITE_URL}/genres`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.6 },
   ];
 
-  // Movie pages
-  const movies = await fetchJson<SitemapMovie[]>('/catalog/movies');
+  // Movie & Episode pages via sitemap-data
+  const movies = await fetchJson<SitemapMovie[]>('/catalog/sitemap-data');
   if (movies) {
     for (const movie of movies) {
+      const movieUrl = `${SITE_URL}/movies/${movie.slug || movie.id}`;
+      
+      // Add Movie page
       entries.push({
-        url: `${SITE_URL}/movies/${movie.id}`,
+        url: movieUrl,
         lastModified: movie.updatedAt ? new Date(movie.updatedAt) : new Date(),
         changeFrequency: 'weekly',
         priority: 0.8,
       });
+
+      // Add Episode pages
+      if (movie.episodes && movie.episodes.length > 0) {
+        for (const ep of movie.episodes) {
+          entries.push({
+            url: `${movieUrl}/tap-${ep.episodeNumber}`,
+            lastModified: ep.createdAt ? new Date(ep.createdAt) : new Date(),
+            changeFrequency: 'weekly',
+            priority: 0.9, // Higher priority for episode pages
+          });
+        }
+      }
     }
   }
 
