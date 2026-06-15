@@ -17,9 +17,9 @@ function removeAccents(str: string): string {
 }
 
 // Module-level day mapping for weekly schedule filter (stable reference, no useMemo deps issue)
-const DAY_MAP: Record<string, string> = {
-  'Thứ 2': 'Monday', 'Thứ 3': 'Tuesday', 'Thứ 4': 'Wednesday',
-  'Thứ 5': 'Thursday', 'Thứ 6': 'Friday', 'Thứ 7': 'Saturday', 'CN': 'Sunday'
+const DAY_MAP: Record<string, number> = {
+  'Thứ 2': 1, 'Thứ 3': 2, 'Thứ 4': 3,
+  'Thứ 5': 4, 'Thứ 6': 5, 'Thứ 7': 6, 'CN': 7
 };
 
 // Pre-seeded high quality default fallback mock items to ensure immediate cinematic rendering
@@ -41,7 +41,7 @@ const fallbacks: MoviePayload[] = [
     leaderboard: { globalTier: Tier.S, tierScore: 94.5, rank: 1 },
     episodeCount: 168,
     viewsCount: 45300,
-    airingDay: 'Friday'
+    airingDay: 5
   },
   {
     id: 'sl-1',
@@ -60,7 +60,7 @@ const fallbacks: MoviePayload[] = [
     leaderboard: { globalTier: Tier.A, tierScore: 86.2, rank: 2 },
     episodeCount: 263,
     viewsCount: 92400,
-    airingDay: 'Saturday'
+    airingDay: 6
   },
   {
     id: 'mj-1',
@@ -79,7 +79,7 @@ const fallbacks: MoviePayload[] = [
     leaderboard: { globalTier: Tier.S, tierScore: 91.0, rank: 3 },
     episodeCount: 110,
     viewsCount: 52100,
-    airingDay: 'Sunday'
+    airingDay: 7
   }
 ];
 

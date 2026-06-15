@@ -177,7 +177,7 @@ export interface MoviePayload {
   // New fields for premium card display
   episodeCount?: number;
   viewsCount?: number;
-  airingDay?: string;
+  airingDay?: number | string | null;
   seriesId?: string;
   seriesLabel?: string;
   loreMetadata?: { title?: string; levels?: { name: string; desc?: string }[] } | null;
