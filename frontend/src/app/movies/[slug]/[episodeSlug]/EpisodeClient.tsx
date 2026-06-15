@@ -46,6 +46,7 @@ export default function EpisodePage({ slug, episodeNumber }: { slug: string; epi
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const token = localStorage.getItem('donghua3d_token');
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setIsLoggedIn(!!token);
     }
     

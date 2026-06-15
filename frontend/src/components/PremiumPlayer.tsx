@@ -12,7 +12,7 @@ import 'vidstack/styles/base.css';
 import { 
   Play, Pause, Volume2, VolumeX, Maximize2, Minimize2, 
   SkipForward, SkipBack, Settings, Loader2, Sparkles,
-  Bookmark, Star, Lightbulb, ToggleLeft, ToggleRight, List
+  Lightbulb, ToggleLeft, ToggleRight, List
 } from 'lucide-react';
 
 interface PremiumPlayerProps {
@@ -650,8 +650,8 @@ function CustomControls({
         </div>
 
         {/* Action Controls and Settings bar */}
-        <div className="flex items-center justify-between relative">
-          <div className="flex items-center gap-5">
+        <div className="flex items-center justify-between w-full">
+          <div className="flex items-center gap-4 md:gap-5 flex-1 justify-start">
             {/* Prev Episode Button */}
             <button 
               onClick={onPrevEpisode}
@@ -715,36 +715,38 @@ function CustomControls({
           </div>
 
           {/* Interactive Community Actions Block (Benchmarked vs Hoathinh3D) */}
-          <div className="hidden lg:flex items-center gap-3 bg-white/5 border border-white/10 px-3 py-1.5 rounded-[4px] backdrop-blur-md absolute left-1/2 -translate-x-1/2">
+          <div className="hidden lg:flex flex-1 justify-center pointer-events-none">
+            <div className="flex items-center gap-3 bg-white/5 border border-white/10 px-3 py-1.5 rounded-[4px] backdrop-blur-md pointer-events-auto">
 
-            {/* Auto Skip Toggle */}
-            <button
-              onClick={handleToggleAutoSkip}
-              className="flex items-center gap-1.5 px-2.5 py-1 bg-transparent hover:bg-white/10 text-zinc-300 hover:text-white rounded-[2px] text-xs font-bold transition-all cursor-pointer outline-none border-0"
-              title="Tự động tua qua nhạc dạo Intro/Outro"
-            >
-              <span>Auto-Skip</span>
-              {autoSkipIntro ? (
-                <ToggleRight className="w-5 h-5 text-violet-400" />
-              ) : (
-                <ToggleLeft className="w-5 h-5 text-zinc-500" />
-              )}
-            </button>
+              {/* Auto Skip Toggle */}
+              <button
+                onClick={handleToggleAutoSkip}
+                className="flex items-center gap-1.5 px-2.5 py-1 bg-transparent hover:bg-white/10 text-zinc-300 hover:text-white rounded-[2px] text-xs font-bold transition-all cursor-pointer outline-none border-0"
+                title="Tự động tua qua nhạc dạo Intro/Outro"
+              >
+                <span>Auto-Skip</span>
+                {autoSkipIntro ? (
+                  <ToggleRight className="w-5 h-5 text-violet-400" />
+                ) : (
+                  <ToggleLeft className="w-5 h-5 text-zinc-500" />
+                )}
+              </button>
 
-            <span className="text-zinc-700">|</span>
+              <span className="text-zinc-700">|</span>
 
-            {/* Cinema Light Toggle */}
-            <button
-              onClick={() => setIsCinemaMode(!isCinemaMode)}
-              className={`flex items-center gap-1.5 px-2.5 py-1 rounded-[2px] text-xs font-bold transition-all cursor-pointer outline-none border-0 ${isCinemaMode ? 'bg-amber-500 text-black shadow-[0_0_12px_rgba(245,158,11,0.4)]' : 'bg-transparent text-zinc-300 hover:bg-white/10 hover:text-white'}`}
-              title="Bật/tắt chế độ rạp chiếu (Tắt đèn)"
-            >
-              <Lightbulb className="w-3.5 h-3.5" />
-              <span>{isCinemaMode ? 'Bật đèn' : 'Tắt đèn'}</span>
-            </button>
+              {/* Cinema Light Toggle */}
+              <button
+                onClick={() => setIsCinemaMode(!isCinemaMode)}
+                className={`flex items-center gap-1.5 px-2.5 py-1 rounded-[2px] text-xs font-bold transition-all cursor-pointer outline-none border-0 ${isCinemaMode ? 'bg-amber-500 text-black shadow-[0_0_12px_rgba(245,158,11,0.4)]' : 'bg-transparent text-zinc-300 hover:bg-white/10 hover:text-white'}`}
+                title="Bật/tắt chế độ rạp chiếu (Tắt đèn)"
+              >
+                <Lightbulb className="w-3.5 h-3.5" />
+                <span>{isCinemaMode ? 'Bật đèn' : 'Tắt đèn'}</span>
+              </button>
+            </div>
           </div>
 
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-4 flex-1 justify-end">
             {/* Episode List Trigger */}
             {episodes && episodes.length > 0 && (
               <div className="relative">
