@@ -415,6 +415,21 @@ function CustomControls({
     if (savedAutoSkip === 'true') {
       setAutoSkipIntro(true);
     }
+
+    const savedVolume = localStorage.getItem('donghua3d_volume');
+    if (savedVolume && remote) {
+      const v = parseFloat(savedVolume);
+      if (!isNaN(v)) {
+        remote.changeVolume(v);
+      }
+    }
+
+    const savedMuted = localStorage.getItem('donghua3d_muted');
+    if (savedMuted === 'true' && remote) {
+      remote.mute();
+    } else if (savedMuted === 'false' && remote) {
+      remote.unmute();
+    }
   }, [remote]);
 
   // Declared skipping functions with useCallback before useEffect keydown
@@ -487,8 +502,10 @@ function CustomControls({
           e.preventDefault();
           if (muted) {
             remote.unmute();
+            localStorage.setItem('donghua3d_muted', 'false');
           } else {
             remote.mute();
+            localStorage.setItem('donghua3d_muted', 'true');
           }
           break;
 
@@ -505,13 +522,29 @@ function CustomControls({
         // ArrowUp: Increase volume 10%
         case 'ArrowUp':
           e.preventDefault();
-          remote.changeVolume(Math.min(1, volume + 0.1));
+          {
+            const newVol = Math.min(1, volume + 0.1);
+            remote.changeVolume(newVol);
+            localStorage.setItem('donghua3d_volume', newVol.toString());
+            if (newVol > 0 && muted) {
+              remote.unmute();
+              localStorage.setItem('donghua3d_muted', 'false');
+            }
+          }
           break;
 
         // ArrowDown: Decrease volume 10%
         case 'ArrowDown':
           e.preventDefault();
-          remote.changeVolume(Math.max(0, volume - 0.1));
+          {
+            const newVol = Math.max(0, volume - 0.1);
+            remote.changeVolume(newVol);
+            localStorage.setItem('donghua3d_volume', newVol.toString());
+            if (newVol === 0) {
+              remote.mute();
+              localStorage.setItem('donghua3d_muted', 'true');
+            }
+          }
           break;
 
         // Intro skip (fallback 'S')
@@ -550,16 +583,24 @@ function CustomControls({
   const handleVolumeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = parseFloat(e.target.value);
     remote.changeVolume(val);
+    localStorage.setItem('donghua3d_volume', val.toString());
     if (val > 0 && muted) {
       remote.unmute();
+      localStorage.setItem('donghua3d_muted', 'false');
+    }
+    if (val === 0) {
+      remote.mute();
+      localStorage.setItem('donghua3d_muted', 'true');
     }
   };
 
   const toggleMute = () => {
     if (muted) {
       remote.unmute();
+      localStorage.setItem('donghua3d_muted', 'false');
     } else {
       remote.mute();
+      localStorage.setItem('donghua3d_muted', 'true');
     }
   };
 

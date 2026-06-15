@@ -55,6 +55,7 @@ model User {
   watchHistories  WatchHistory[]
   personalTiers   PersonalTierList[]
   watchlist       Watchlist[]
+  behaviorLogs    UserBehaviorLog[]
 }
 
 // 2. Movie Entity Model
@@ -202,6 +203,21 @@ model WatchHistory {
 
   @@unique([userId, episodeId], name: "unique_user_watch_progress")
 }
+
+// 6b. User Behavior Tracking Log Model (Analytics)
+model UserBehaviorLog {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId    String?  @db.Uuid
+  action    String   @db.VarChar(50) // e.g. 'PAGE_VIEW', 'VIDEO_PLAY', 'SEARCH'
+  metadata  Json?    // Stores path, query, videoTime, etc.
+  createdAt DateTime @default(now()) @db.Timestamptz
+
+  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([action, createdAt(sort: Desc)], name: "idx_behavior_action_time")
+  @@index([userId], name: "idx_behavior_user")
+}
+
 
 // 7. Personal Tier List Model
 model PersonalTierList {

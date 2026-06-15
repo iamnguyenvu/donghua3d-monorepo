@@ -5,7 +5,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { Star, Play, Film, ArrowRight, Sparkles, Plus, Check, Loader2, ChevronLeft, ChevronRight } from 'lucide-react';
 import Header from '../components/Header';
-import { MoviePayload, watchlistApi, Tier } from '../lib/api';
+import { MoviePayload, watchlistApi, Tier, analyticsApi } from '../lib/api';
 
 // Helper to strip diacritics / accents for seamless Vietnamese unaccented search
 function removeAccents(str: string): string {
@@ -103,6 +103,8 @@ export default function HomeClient({ initialMovies = [] }: { initialMovies: Movi
   const [selectedDay, setSelectedDay] = useState<DayKey | 'all'>('all');
 
   useEffect(() => {
+    analyticsApi.trackBehavior('PAGE_VIEW', { path: '/' });
+    
     async function loadWatchlist() {
       const token = localStorage.getItem('donghua3d_token');
       if (token) {
@@ -182,11 +184,23 @@ export default function HomeClient({ initialMovies = [] }: { initialMovies: Movi
       result.sort((a, b) => a.title.localeCompare(b.title));
     }
 
-    return result.filter(m => {
-      if (selectedDay === 'all') return true;
-      return m.airingDay === DAY_MAP[selectedDay as DayKey];
-    });
-  }, [movies, searchQuery, selectedYear, sortBy, selectedDay]);
+    return result;
+  }, [movies, searchQuery, selectedYear, sortBy]);
+
+  // Independent list for Weekly Schedule
+  const weeklyScheduleMovies = useMemo(() => {
+    if (selectedDay === 'all') return [];
+    return movies.filter(m => m.airingDay === DAY_MAP[selectedDay as DayKey]);
+  }, [movies, selectedDay]);
+
+  // Independent list for Recently Updated Movies
+  const recentlyUpdatedMovies = useMemo(() => {
+    return [...movies].sort((a, b) => {
+      const timeA = a.updatedAt ? new Date(a.updatedAt).getTime() : new Date(a.createdAt).getTime();
+      const timeB = b.updatedAt ? new Date(b.updatedAt).getTime() : new Date(b.createdAt).getTime();
+      return timeB - timeA;
+    }).slice(0, 12);
+  }, [movies]);
 
   // Rotate Hero Carousel slide
   useEffect(() => {
@@ -449,12 +463,83 @@ export default function HomeClient({ initialMovies = [] }: { initialMovies: Movi
         </div>
 
         {/* Show empty state if no movies airing today */}
-        {selectedDay !== 'all' && filteredMovies.length === 0 && (
+        {selectedDay !== 'all' && weeklyScheduleMovies.length === 0 && (
           <div className="text-center py-8 text-[11px] text-zinc-600 italic border border-zinc-900/50 rounded-[4px] bg-zinc-950/30">
             Chưa có phim nào lên sóng vào {selectedDay} tuần này.
           </div>
         )}
+
+        {/* Horizontal scroll list for weekly movies */}
+        {selectedDay !== 'all' && weeklyScheduleMovies.length > 0 && (
+          <div className="mt-6 overflow-x-auto hide-scrollbar pb-4 -mx-6 px-6 md:-mx-12 md:px-12 lg:-mx-16 lg:px-16 flex items-start gap-4">
+            {weeklyScheduleMovies.map(movie => (
+              <Link href={`/movies/${movie.slug || movie.id}`} key={`weekly-${movie.id}`} className="no-underline group flex-shrink-0 w-32 md:w-36 flex flex-col gap-2">
+                <div className="relative overflow-hidden rounded-[6px] border border-zinc-900/60 aspect-[2/3] cursor-pointer transition-all duration-300 group-hover:border-violet-500/50 bg-zinc-950">
+                  <Image
+                    src={movie.posterUrl || '/static/uploads/default_poster.jpg'}
+                    alt={movie.title}
+                    fill
+                    sizes="(max-width: 768px) 150px, 200px"
+                    className="object-cover object-center transition-transform duration-500 group-hover:scale-105"
+                  />
+                  {movie.episodeCount !== undefined && movie.episodeCount > 0 && (
+                    <div className="absolute top-1.5 right-1.5 bg-rose-600 border border-rose-400 text-white font-black px-1.5 py-0.5 rounded-[2px] text-[8px] uppercase tracking-wider z-10">
+                      Tập {movie.episodeCount}
+                    </div>
+                  )}
+                  <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <div className="w-8 h-8 rounded-full bg-violet-600 flex items-center justify-center">
+                      <Play className="w-4 h-4 text-white fill-white ml-0.5" />
+                    </div>
+                  </div>
+                </div>
+                <h3 className="text-[11px] font-bold text-white group-hover:text-violet-400 transition-colors truncate">{movie.title}</h3>
+              </Link>
+            ))}
+          </div>
+        )}
       </section>
+
+      {/* ==============================================================================
+         RECENTLY UPDATED ROW
+         ============================================================================== */}
+      {recentlyUpdatedMovies.length > 0 && (
+        <section className="w-full px-6 md:px-12 lg:px-16 mt-14 select-none animate-fade-in-up">
+          <div className="flex items-center gap-2 mb-6 border-b border-zinc-900/60 pb-4">
+            <h2 className="text-lg font-black text-white tracking-wider uppercase border-l-2 border-emerald-500 pl-3 flex items-center gap-1.5">
+              🚀 Phim Mới Cập Nhật
+            </h2>
+          </div>
+          
+          <div className="overflow-x-auto hide-scrollbar pb-4 -mx-6 px-6 md:-mx-12 md:px-12 lg:-mx-16 lg:px-16 flex items-start gap-3">
+            {recentlyUpdatedMovies.map(movie => (
+              <Link href={`/movies/${movie.slug || movie.id}`} key={`recent-${movie.id}`} className="no-underline group flex-shrink-0 w-[140px] md:w-[160px] flex flex-col gap-2">
+                <div className="relative overflow-hidden rounded-[6px] border border-zinc-900/60 aspect-[2/3] cursor-pointer transition-all duration-300 group-hover:border-emerald-500/50 group-hover:shadow-[0_0_15px_rgba(16,185,129,0.2)] bg-zinc-950">
+                  <Image
+                    src={movie.posterUrl || '/static/uploads/default_poster.jpg'}
+                    alt={movie.title}
+                    fill
+                    sizes="(max-width: 768px) 150px, 200px"
+                    className="object-cover object-center transition-transform duration-500 group-hover:scale-105"
+                  />
+                  <div className="absolute top-1.5 left-1.5 bg-emerald-600/90 text-white font-extrabold px-1.5 py-0.5 rounded-[2px] text-[8px] uppercase tracking-widest z-10">
+                    MỚI NHẤT
+                  </div>
+                  {movie.episodeCount !== undefined && movie.episodeCount > 0 && (
+                    <div className="absolute top-1.5 right-1.5 bg-rose-600 border border-rose-400 text-white font-black px-1.5 py-0.5 rounded-[2px] text-[8px] uppercase tracking-wider z-10">
+                      Tập {movie.episodeCount}
+                    </div>
+                  )}
+                  <div className="absolute bottom-0 inset-x-0 p-2 bg-gradient-to-t from-black/90 to-transparent">
+                    <span className="text-[10px] text-zinc-300 line-clamp-1">{movie.updatedAt ? new Date(movie.updatedAt).toLocaleDateString('vi-VN') : ''}</span>
+                  </div>
+                </div>
+                <h3 className="text-[12px] font-bold text-white group-hover:text-emerald-400 transition-colors truncate">{movie.title}</h3>
+              </Link>
+            ))}
+          </div>
+        </section>
+      )}
 
       {/* ==============================================================================
          GRID CATALOG & SEARCH FILTERS

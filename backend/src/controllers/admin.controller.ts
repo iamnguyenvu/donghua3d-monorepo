@@ -12,13 +12,67 @@ router.use(requireRole([Role.ADMIN]));
 // 1. GET /api/admin/stats - Quick platform overview statistics
 router.get('/stats', async (_req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> => {
   try {
-    const [totalUsers, totalMovies, totalComments, totalRatings, flaggedCommentsCount] = await Promise.all([
+    const [totalUsers, totalMovies, totalComments, totalRatings, flaggedCommentsCount, viewsAgg] = await Promise.all([
       prisma.user.count(),
       prisma.movie.count(),
       prisma.comment.count(),
       prisma.rating.count(),
       prisma.comment.count({ where: { isFlagged: true } }),
+      prisma.movie.aggregate({ _sum: { viewsCount: true } })
     ]);
+    const totalViews = viewsAgg._sum.viewsCount || 0;
+
+    // Calculate real trends from UserBehaviorLog over the last 7 days
+    const now = new Date();
+    const sevenDaysAgo = new Date(now);
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+
+    // Group logs by day
+    const recentLogs = await prisma.userBehaviorLog.findMany({
+      where: {
+        createdAt: { gte: sevenDaysAgo },
+        action: 'PAGE_VIEW'
+      },
+      select: { createdAt: true }
+    });
+
+    const recentSignups = await prisma.user.findMany({
+      where: {
+        createdAt: { gte: sevenDaysAgo }
+      },
+      select: { createdAt: true }
+    });
+
+    // Initialize trendData map
+    const trendMap: Record<string, { views: number, signups: number }> = {};
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date(now);
+      d.setDate(d.getDate() - i);
+      const dateStr = d.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit' });
+      trendMap[dateStr] = { views: 0, signups: 0 };
+    }
+
+    recentLogs.forEach(log => {
+      const dateStr = log.createdAt.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit' });
+      if (trendMap[dateStr]) trendMap[dateStr].views++;
+    });
+
+    recentSignups.forEach(u => {
+      const dateStr = u.createdAt.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit' });
+      if (trendMap[dateStr]) trendMap[dateStr].signups++;
+    });
+
+    const trendData = Object.keys(trendMap).map(date => ({
+      date,
+      views: trendMap[date].views,
+      signups: trendMap[date].signups,
+    }));
+
+    // Real active sessions could be estimated by behaviors in the last 15 minutes
+    const fifteenMinsAgo = new Date(now.getTime() - 15 * 60000);
+    const activeSessions = await prisma.userBehaviorLog.count({
+      where: { createdAt: { gte: fifteenMinsAgo } }
+    });
 
     res.status(200).json({
       success: true,
@@ -26,8 +80,10 @@ router.get('/stats', async (_req: AuthenticatedRequest, res: Response, next: Nex
         totalUsers,
         totalMovies,
         totalComments,
-        totalRatings,
         flaggedCommentsCount,
+        activeSessions,
+        totalViews,
+        trends: trendData,
       }
     });
   } catch (err) {

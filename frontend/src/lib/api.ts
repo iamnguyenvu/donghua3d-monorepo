@@ -126,6 +126,23 @@ export const authApi = {
 };
 
 // ==============================================================================
+// ANALYTICS & BEHAVIOR TRACKING
+// ==============================================================================
+export const analyticsApi = {
+  async trackBehavior(action: string, metadata?: Record<string, any>): Promise<void> {
+    try {
+      await apiFetch('/analytics/track', {
+        method: 'POST',
+        body: JSON.stringify({ action, metadata }),
+      });
+    } catch (e) {
+      // Silently fail tracking calls to not interrupt user experience
+      console.error('[Analytics] Failed to track:', e);
+    }
+  }
+};
+
+// ==============================================================================
 // MOVIE & EPISODE CATALOG ENDPOINTS
 // ==============================================================================
 export interface LeaderboardPayload {
@@ -519,6 +536,13 @@ export interface AdminStatsPayload {
   totalComments: number;
   totalRatings: number;
   flaggedCommentsCount: number;
+  activeSessions: number;
+  totalViews: number;
+  trends: Array<{
+    date: string;
+    views: number;
+    signups: number;
+  }>;
 }
 
 export interface AdminUserPayload {
