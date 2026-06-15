@@ -59,6 +59,22 @@ async function run() {
     }
   }
 
+  // Backfill airing days for test validation
+  console.log('🔄 Đang cập nhật lịch phát sóng phim (airingDay)...');
+  await prisma.movie.updateMany({
+    where: { title: { contains: 'Thế Giới Hoàn Mỹ', mode: 'insensitive' } },
+    data: { airingDay: 5 }
+  });
+  await prisma.movie.updateMany({
+    where: { title: { contains: 'Kiếm Lai', mode: 'insensitive' } },
+    data: { airingDay: 6 }
+  });
+  await prisma.movie.updateMany({
+    where: { title: { contains: 'Phàm Nhân Tu Tiên', mode: 'insensitive' } },
+    data: { airingDay: 7 }
+  });
+  console.log('✅ Đã cập nhật xong lịch phát sóng.');
+
   console.log(`\n🎉 Hoàn thành backfill!`);
   console.log(`   - Thành công: ${successCount}`);
   console.log(`   - Thất bại: ${errorCount}`);
