@@ -641,9 +641,9 @@ export default function AdminDashboard() {
               <option value="6m">6 tháng qua</option>
               <option value="1y">1 năm qua</option>
               <option value="2y">2 năm qua</option>
-              <option value="this_year">Năm hiện tại</option>
-              <option value="last_year">Năm ngoái</option>
-              <option value="prev_year">Năm trước nữa</option>
+              <option value="this_year">Năm {new Date().getFullYear()}</option>
+              <option value="last_year">Năm {new Date().getFullYear() - 1}</option>
+              <option value="prev_year">Năm {new Date().getFullYear() - 2}</option>
               <option value="custom">Tùy chỉnh khoảng ngày</option>
             </select>
 

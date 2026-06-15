@@ -5,7 +5,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { Star, Play, Film, ArrowRight, Sparkles, Plus, Check, Loader2, ChevronLeft, ChevronRight } from 'lucide-react';
 import Header from '../components/Header';
-import { MoviePayload, watchlistApi, Tier, analyticsApi } from '../lib/api';
+import { MoviePayload, watchlistApi, Tier, analyticsApi, catalogApi } from '../lib/api';
 
 // Helper to strip diacritics / accents for seamless Vietnamese unaccented search
 function removeAccents(str: string): string {
@@ -84,9 +84,23 @@ const fallbacks: MoviePayload[] = [
 ];
 
 export default function HomeClient({ initialMovies = [] }: { initialMovies: MoviePayload[] }) {
-  const [movies] = useState<MoviePayload[]>(initialMovies.length > 0 ? initialMovies : fallbacks);
+  const [movies, setMovies] = useState<MoviePayload[]>(initialMovies.length > 0 ? initialMovies : fallbacks);
   const loading = false;
   const [activeHeroIdx, setActiveHeroIdx] = useState(0);
+
+  useEffect(() => {
+    async function syncLatestMovies() {
+      try {
+        const res = await catalogApi.getMovies();
+        if (res.success && res.data) {
+          setMovies(res.data);
+        }
+      } catch (err) {
+        console.error('Failed to sync movies on homepage:', err);
+      }
+    }
+    syncLatestMovies();
+  }, []);
   
   // Filtering & Sorting values
   const [searchQuery, setSearchQuery] = useState('');
