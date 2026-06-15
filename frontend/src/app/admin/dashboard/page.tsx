@@ -178,6 +178,7 @@ export default function AdminDashboard() {
   // Set up real-time polling every 10 seconds
   useEffect(() => {
     if (isAdmin) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       loadDashboardData();
       const interval = setInterval(() => {
         loadDashboardData();
