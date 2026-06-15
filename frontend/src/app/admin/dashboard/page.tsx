@@ -57,6 +57,7 @@ export default function AdminDashboard() {
   const [filterLogStatus, setFilterLogStatus] = useState<'ALL' | 'SUCCESS' | 'FAILED'>('ALL');
   
   const [isRefreshing, setIsRefreshing] = useState<string | null>(null);
+  const [timeRange, setTimeRange] = useState<string>('24h');
 
   // Movie edit drawer state
   const [editingMovie, setEditingMovie] = useState<MoviePayload | null>(null);
@@ -117,7 +118,7 @@ export default function AdminDashboard() {
     setLoading(true);
     try {
       const [statsRes, usersRes, commentsRes, queueRes, moviesRes, logsRes] = await Promise.all([
-        adminApi.getStats(),
+        adminApi.getStats(timeRange),
         adminApi.getUsers(),
         adminApi.getFlaggedComments(),
         adminApi.getScrapingQueue().catch(() => ({ success: false, data: [] })),
@@ -185,7 +186,8 @@ export default function AdminDashboard() {
       }, 10000);
       return () => clearInterval(interval);
     }
-  }, [isAdmin]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isAdmin, timeRange]);
 
   // Section-specific targeted reloading
   const handleReloadSection = async (section: 'users' | 'movies' | 'scraper' | 'logs' | 'comments' | 'all') => {
@@ -214,7 +216,7 @@ export default function AdminDashboard() {
         if (res.success && res.data) setFlaggedComments(res.data);
       }
       
-      const statsRes = await adminApi.getStats();
+      const statsRes = await adminApi.getStats(timeRange);
       if (statsRes.success && statsRes.data) setStats(statsRes.data);
     } catch (err) {
       console.error('Failed to reload section:', err);
@@ -453,14 +455,29 @@ export default function AdminDashboard() {
             </h1>
           </div>
 
-          <button 
-            onClick={loadDashboardData}
-            disabled={loading}
-            className="px-4 py-2 bg-zinc-950 border border-zinc-900 hover:bg-zinc-900 text-zinc-300 rounded-[4px] text-xs font-black uppercase tracking-wider flex items-center gap-1.5 transition-all outline-none cursor-pointer active:scale-95 disabled:opacity-50"
-          >
-            <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin text-violet-500' : ''}`} />
-            {loading ? 'Đang cập nhật...' : 'Làm mới dữ liệu'}
-          </button>
+          <div className="flex items-center gap-3">
+            <select
+              value={timeRange}
+              onChange={(e) => setTimeRange(e.target.value)}
+              className="px-3 py-2 bg-zinc-950 border border-zinc-900 text-zinc-300 rounded-[4px] text-xs font-black uppercase tracking-wider outline-none cursor-pointer transition-all focus:border-violet-500/50"
+            >
+              <option value="60m">60 phút qua</option>
+              <option value="24h">24 giờ qua</option>
+              <option value="3d">3 ngày qua</option>
+              <option value="7d">7 ngày qua</option>
+              <option value="1m">1 tháng qua</option>
+              <option value="3m">3 tháng qua</option>
+            </select>
+
+            <button 
+              onClick={loadDashboardData}
+              disabled={loading}
+              className="px-4 py-2 bg-zinc-950 border border-zinc-900 hover:bg-zinc-900 text-zinc-300 rounded-[4px] text-xs font-black uppercase tracking-wider flex items-center gap-1.5 transition-all outline-none cursor-pointer active:scale-95 disabled:opacity-50"
+            >
+              <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin text-violet-500' : ''}`} />
+              {loading ? 'Đang cập nhật...' : 'Làm mới dữ liệu'}
+            </button>
+          </div>
         </div>
 
         {/* OVERVIEW STATISTICS CARDS GRID */}
@@ -666,7 +683,7 @@ export default function AdminDashboard() {
 
                   {/* Views Chart */}
                   <div className="bg-zinc-950/60 border border-zinc-900 p-5 rounded-[4px]">
-                    <h3 className="text-xs font-black text-zinc-400 uppercase tracking-wider mb-4 flex items-center gap-1.5"><Film className="w-3.5 h-3.5 text-violet-400" /> Tăng Trưởng Lượt Xem (7 Ngày)</h3>
+                    <h3 className="text-xs font-black text-zinc-400 uppercase tracking-wider mb-4 flex items-center gap-1.5"><Film className="w-3.5 h-3.5 text-violet-400" /> Tăng Trưởng Lượt Xem ({timeRange === '60m' ? '60 Phút' : timeRange === '24h' ? '24 Giờ' : timeRange === '3d' ? '3 Ngày' : timeRange === '7d' ? '7 Ngày' : timeRange === '1m' ? '30 Ngày' : '90 Ngày'})</h3>
                     <div className="h-48 w-full">
                       <ResponsiveContainer width="100%" height="100%">
                         <AreaChart data={stats.trends || []}>
@@ -692,7 +709,7 @@ export default function AdminDashboard() {
 
                 {/* Signups Bar Chart */}
                 <div className="bg-zinc-950/60 border border-zinc-900 p-5 rounded-[4px] w-full">
-                  <h3 className="text-xs font-black text-zinc-400 uppercase tracking-wider mb-4 flex items-center gap-1.5"><Users className="w-3.5 h-3.5 text-emerald-400" /> Thành Viên Đăng Ký Mới (7 Ngày)</h3>
+                  <h3 className="text-xs font-black text-zinc-400 uppercase tracking-wider mb-4 flex items-center gap-1.5"><Users className="w-3.5 h-3.5 text-emerald-400" /> Thành Viên Đăng Ký Mới ({timeRange === '60m' ? '60 Phút' : timeRange === '24h' ? '24 Giờ' : timeRange === '3d' ? '3 Ngày' : timeRange === '7d' ? '7 Ngày' : timeRange === '1m' ? '30 Ngày' : '90 Ngày'})</h3>
                   <div className="h-48 w-full">
                     <ResponsiveContainer width="100%" height="100%">
                       <BarChart data={stats.trends || []}>
@@ -707,6 +724,96 @@ export default function AdminDashboard() {
                         <Bar dataKey="signups" name="Tài khoản mới" fill="#10b981" radius={[2, 2, 0, 0]} />
                       </BarChart>
                     </ResponsiveContainer>
+                  </div>
+                </div>
+
+                {/* New sections: Geo Distribution, Devices, and Genre views */}
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
+                  {/* Genre Views Ranking */}
+                  <div className="bg-zinc-950/60 border border-zinc-900 p-5 rounded-[4px] flex flex-col justify-between">
+                    <h3 className="text-xs font-black text-zinc-400 uppercase tracking-wider mb-4 flex items-center gap-1.5"><Film className="w-3.5 h-3.5 text-pink-400" /> Thể Loại Thịnh Hành (Lượt xem)</h3>
+                    <div className="flex flex-col gap-3">
+                      {stats.genreStats && stats.genreStats.length > 0 ? (
+                        stats.genreStats.map((genre, idx) => (
+                          <div key={idx} className="flex flex-col gap-1">
+                            <div className="flex justify-between text-xs">
+                              <span className="font-bold text-zinc-350">{genre.name}</span>
+                              <span className="text-zinc-500 font-mono">{genre.views.toLocaleString('vi-VN')} views</span>
+                            </div>
+                            <div className="w-full bg-zinc-900 h-1.5 rounded-full overflow-hidden">
+                              <div 
+                                className="bg-gradient-to-r from-pink-500 to-violet-500 h-full rounded-full" 
+                                style={{ 
+                                  width: `${stats.genreStats && stats.genreStats[0]?.views ? (genre.views / stats.genreStats[0].views) * 100 : 0}%` 
+                                }}
+                              />
+                            </div>
+                          </div>
+                        ))
+                      ) : (
+                        <span className="text-xs text-zinc-650 italic">Chưa có dữ liệu thể loại.</span>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Geographic Distribution */}
+                  <div className="bg-zinc-950/60 border border-zinc-900 p-5 rounded-[4px]">
+                    <h3 className="text-xs font-black text-zinc-400 uppercase tracking-wider mb-4 flex items-center gap-1.5"><Activity className="w-3.5 h-3.5 text-emerald-400" /> Phân Bố Vùng Địa Lý</h3>
+                    <div className="flex flex-col gap-3">
+                      {stats.geoStats && stats.geoStats.length > 0 ? (
+                        stats.geoStats.map((geo, idx) => (
+                          <div key={idx} className="flex items-center justify-between border-b border-zinc-900/60 pb-2 text-xs">
+                            <div className="flex items-center gap-2">
+                              <span className="w-5 h-5 rounded-full bg-zinc-900 flex items-center justify-center font-bold text-[10px] text-zinc-400">{idx + 1}</span>
+                              <span className="font-bold text-zinc-300">{geo.name}</span>
+                            </div>
+                            <div className="flex items-center gap-3">
+                              <span className="font-mono text-zinc-400">{geo.value} views</span>
+                              <span className="text-[10px] font-black text-emerald-400 bg-emerald-500/10 px-1.5 py-0.5 rounded-[2px]">
+                                {stats.geoStats ? ((geo.value / stats.geoStats.reduce((acc, g) => acc + g.value, 0)) * 100).toFixed(1) : 0}%
+                              </span>
+                            </div>
+                          </div>
+                        ))
+                      ) : (
+                        <span className="text-xs text-zinc-650 italic">Đang chờ thu thập địa chỉ IP...</span>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Device / OS & Browser Shares */}
+                  <div className="bg-zinc-950/60 border border-zinc-900 p-5 rounded-[4px] flex flex-col gap-6">
+                    <div>
+                      <h3 className="text-xs font-black text-zinc-400 uppercase tracking-wider mb-3 flex items-center gap-1.5"><Server className="w-3.5 h-3.5 text-blue-400" /> Hệ Điều Hành</h3>
+                      <div className="flex flex-col gap-2">
+                        {stats.deviceStats?.os && stats.deviceStats.os.length > 0 ? (
+                          stats.deviceStats.os.slice(0, 4).map((os, idx) => (
+                            <div key={idx} className="flex justify-between text-xs items-center">
+                              <span className="text-zinc-400 font-bold">{os.name}</span>
+                              <span className="font-mono text-zinc-550">{os.value} logs</span>
+                            </div>
+                          ))
+                        ) : (
+                          <span className="text-xs text-zinc-650 italic">Không có dữ liệu.</span>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="border-t border-zinc-900 pt-4">
+                      <h3 className="text-xs font-black text-zinc-400 uppercase tracking-wider mb-3 flex items-center gap-1.5"><Activity className="w-3.5 h-3.5 text-amber-400" /> Trình Duyệt</h3>
+                      <div className="flex flex-col gap-2">
+                        {stats.deviceStats?.browser && stats.deviceStats.browser.length > 0 ? (
+                          stats.deviceStats.browser.slice(0, 4).map((br, idx) => (
+                            <div key={idx} className="flex justify-between text-xs items-center">
+                              <span className="text-zinc-400 font-bold">{br.name}</span>
+                              <span className="font-mono text-zinc-550">{br.value} logs</span>
+                            </div>
+                          ))
+                        ) : (
+                          <span className="text-xs text-zinc-650 italic">Không có dữ liệu.</span>
+                        )}
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>

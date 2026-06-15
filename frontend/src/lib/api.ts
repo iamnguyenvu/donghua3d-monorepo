@@ -543,6 +543,12 @@ export interface AdminStatsPayload {
     views: number;
     signups: number;
   }>;
+  geoStats?: Array<{ name: string; value: number }>;
+  deviceStats?: {
+    os: Array<{ name: string; value: number }>;
+    browser: Array<{ name: string; value: number }>;
+  };
+  genreStats?: Array<{ name: string; views: number }>;
 }
 
 export interface AdminUserPayload {
@@ -602,8 +608,8 @@ export interface ScrapingLogPayload {
 
 
 export const adminApi = {
-  async getStats(): Promise<ApiResponse<AdminStatsPayload>> {
-    return apiFetch<AdminStatsPayload>('/admin/stats');
+  async getStats(range?: string): Promise<ApiResponse<AdminStatsPayload>> {
+    return apiFetch<AdminStatsPayload>(`/admin/stats${range ? `?range=${range}` : ''}`);
   },
 
   async getUsers(): Promise<ApiResponse<AdminUserPayload[]>> {
