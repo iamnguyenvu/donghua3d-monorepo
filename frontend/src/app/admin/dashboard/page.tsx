@@ -5,9 +5,8 @@ import Link from 'next/link';
 import { 
   Users, Film, MessageSquare, AlertTriangle, Star, Shield, 
   Trash2, CheckCircle, Award, Ban, Check, ArrowLeft, Loader2, RefreshCw,
-  Database, PlayCircle, Plus, Server, Clock, Activity, Edit, HelpCircle, X
+  Database, PlayCircle, Plus, Server, Clock, Activity, Edit, HelpCircle, X, LogOut
 } from 'lucide-react';
-import Header from '../../../components/Header';
 import { 
   adminApi, authApi, catalogApi, Role, AdminStatsPayload, AdminUserPayload, FlaggedCommentPayload, ScrapingQueueItem, MoviePayload, ScrapingLogPayload
 } from '../../../lib/api';
@@ -58,6 +57,8 @@ export default function AdminDashboard() {
   
   const [isRefreshing, setIsRefreshing] = useState<string | null>(null);
   const [timeRange, setTimeRange] = useState<string>('24h');
+  const [customStartDate, setCustomStartDate] = useState<string>('');
+  const [customEndDate, setCustomEndDate] = useState<string>('');
 
   // Movie edit drawer state
   const [editingMovie, setEditingMovie] = useState<MoviePayload | null>(null);
@@ -114,11 +115,11 @@ export default function AdminDashboard() {
     checkAdminAuth();
   }, []);
 
-  const loadDashboardData = async () => {
-    setLoading(true);
+  const loadDashboardData = async (silent = false) => {
+    if (!silent) setLoading(true);
     try {
       const [statsRes, usersRes, commentsRes, queueRes, moviesRes, logsRes] = await Promise.all([
-        adminApi.getStats(timeRange),
+        adminApi.getStats(timeRange, customStartDate || undefined, customEndDate || undefined),
         adminApi.getUsers(),
         adminApi.getFlaggedComments(),
         adminApi.getScrapingQueue().catch(() => ({ success: false, data: [] })),
@@ -172,17 +173,32 @@ export default function AdminDashboard() {
     } catch (err) {
       console.error('[Admin Dashboard Load Error]:', err);
     } finally {
-      setLoading(false);
+      if (!silent) setLoading(false);
     }
+  };
+
+  const handleLogout = () => {
+    authApi.logout();
+    localStorage.removeItem('donghua3d_user_email');
+    window.location.href = '/';
+  };
+
+  const handleApplyCustomRange = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!customStartDate || !customEndDate) {
+      alert('Vui lòng chọn đầy đủ ngày bắt đầu và ngày kết thúc.');
+      return;
+    }
+    loadDashboardData(false);
   };
 
   // Set up real-time polling every 10 seconds
   useEffect(() => {
     if (isAdmin) {
       // eslint-disable-next-line react-hooks/set-state-in-effect
-      loadDashboardData();
+      loadDashboardData(false); // Loud on mount/range changes
       const interval = setInterval(() => {
-        loadDashboardData();
+        loadDashboardData(true); // Silent background refreshes
       }, 10000);
       return () => clearInterval(interval);
     }
@@ -437,29 +453,184 @@ export default function AdminDashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-[#050508] text-zinc-100 flex flex-col font-sans pb-24">
-      <Header />
-
-      {/* ADMIN TITLE WRAPPER */}
-      <section className="w-full px-6 md:px-12 lg:px-16 mt-28 select-none">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-zinc-900 pb-6 mb-8">
-          <div>
-            <div className="flex items-center gap-2 mb-1.5">
-              <span className="bg-violet-600/25 border border-violet-500/35 text-violet-400 font-extrabold px-2 py-0.5 rounded-[3px] text-[8.5px] uppercase tracking-widest flex items-center gap-1 shadow-sm">
-                <Shield className="w-3 h-3 text-violet-400" />
-                Hệ Thống Quản Trị
-              </span>
-            </div>
-            <h1 className="text-2xl md:text-3xl font-black tracking-wider text-white uppercase leading-none">
-              ADMIN DASHBOARD
-            </h1>
+    <div className="min-h-screen bg-[#050508] text-zinc-100 flex font-sans">
+      {/* SIDEBAR NAVIGATION (YouTube Studio Style) */}
+      <aside className="w-64 bg-zinc-950 border-r border-zinc-900 flex-shrink-0 flex flex-col justify-between fixed top-0 bottom-0 left-0 z-30 select-none">
+        <div className="flex flex-col gap-6">
+          {/* Logo brand */}
+          <div className="p-6 border-b border-zinc-900/60">
+            <Link href="/" className="flex items-center gap-3 text-white no-underline group select-none">
+              <div className="p-2 rounded-[4px] bg-violet-600 flex items-center justify-center transition-all duration-300 group-hover:bg-violet-500 shadow-md">
+                <Film className="w-4.5 h-4.5 text-white" />
+              </div>
+              <div className="flex flex-col">
+                <span className="font-sans font-black text-sm tracking-wider text-white uppercase leading-none">
+                  DONGHUA<span className="text-violet-500">3D</span>
+                </span>
+                <span className="text-[8px] text-violet-400 font-extrabold tracking-widest uppercase mt-1">ADMIN STUDIO</span>
+              </div>
+            </Link>
           </div>
 
-          <div className="flex items-center gap-3">
+          {/* User Profile Info */}
+          <div className="px-6 flex items-center gap-3">
+            <div className="w-9 h-9 rounded-[4px] bg-violet-650 text-white font-black flex items-center justify-center text-sm shadow-md ring-1 ring-violet-500/30 flex-shrink-0">
+              {localStorage.getItem('donghua3d_user_email')?.[0]?.toUpperCase() || 'A'}
+            </div>
+            <div className="flex flex-col overflow-hidden">
+              <span className="text-xs font-black text-white truncate max-w-[150px]">
+                {localStorage.getItem('donghua3d_user_email') || 'Administrator'}
+              </span>
+              <span className="text-[9px] text-zinc-500 font-extrabold uppercase mt-0.5">Hệ thống Quản Trị</span>
+            </div>
+          </div>
+
+          {/* Navigation Links */}
+          <nav className="flex flex-col gap-1 px-3">
+            <button
+              onClick={() => setActiveTab('analytics')}
+              className={`w-full text-left px-4 py-3 rounded-[4px] text-xs font-black uppercase tracking-wider flex items-center gap-3 border-0 cursor-pointer outline-none transition-all ${
+                activeTab === 'analytics'
+                  ? 'bg-violet-600/10 text-violet-400 border-l-2 border-violet-600'
+                  : 'bg-transparent text-zinc-400 hover:text-white hover:bg-zinc-900/40'
+              }`}
+            >
+              <Activity className="w-4 h-4 text-blue-400" />
+              Thống Kê Tổng Quan
+            </button>
+
+            <button
+              onClick={() => setActiveTab('users')}
+              className={`w-full text-left px-4 py-3 rounded-[4px] text-xs font-black uppercase tracking-wider flex items-center gap-3 border-0 cursor-pointer outline-none transition-all ${
+                activeTab === 'users'
+                  ? 'bg-violet-600/10 text-violet-400 border-l-2 border-violet-600'
+                  : 'bg-transparent text-zinc-400 hover:text-white hover:bg-zinc-900/40'
+              }`}
+            >
+              <Users className="w-4 h-4 text-emerald-400" />
+              Thành Viên ({users.length})
+            </button>
+
+            <button
+              onClick={() => setActiveTab('movies')}
+              className={`w-full text-left px-4 py-3 rounded-[4px] text-xs font-black uppercase tracking-wider flex items-center gap-3 border-0 cursor-pointer outline-none transition-all ${
+                activeTab === 'movies'
+                  ? 'bg-violet-600/10 text-violet-400 border-l-2 border-violet-600'
+                  : 'bg-transparent text-zinc-400 hover:text-white hover:bg-zinc-900/40'
+              }`}
+            >
+              <Film className="w-4 h-4 text-pink-400" />
+              Thư Viện Phim
+            </button>
+
+            <button
+              onClick={() => setActiveTab('scraper')}
+              className={`w-full text-left px-4 py-3 rounded-[4px] text-xs font-black uppercase tracking-wider flex items-center gap-3 border-0 cursor-pointer outline-none transition-all ${
+                activeTab === 'scraper'
+                  ? 'bg-violet-600/10 text-violet-400 border-l-2 border-violet-600'
+                  : 'bg-transparent text-zinc-400 hover:text-white hover:bg-zinc-900/40'
+              }`}
+            >
+              <Database className="w-4 h-4 text-amber-500" />
+              Nguồn & Convert
+            </button>
+
+            <button
+              onClick={() => setActiveTab('logs')}
+              className={`w-full text-left px-4 py-3 rounded-[4px] text-xs font-black uppercase tracking-wider flex items-center gap-3 border-0 cursor-pointer outline-none transition-all ${
+                activeTab === 'logs'
+                  ? 'bg-violet-600/10 text-violet-400 border-l-2 border-violet-600'
+                  : 'bg-transparent text-zinc-400 hover:text-white hover:bg-zinc-900/40'
+              }`}
+            >
+              <Activity className="w-4 h-4 text-purple-400" />
+              Nhật Ký Scraper
+            </button>
+
+            <button
+              onClick={() => setActiveTab('comments')}
+              className={`w-full text-left px-4 py-3 rounded-[4px] text-xs font-black uppercase tracking-wider flex items-center justify-between border-0 cursor-pointer outline-none transition-all ${
+                activeTab === 'comments'
+                  ? 'bg-violet-600/10 text-violet-400 border-l-2 border-violet-600'
+                  : 'bg-transparent text-zinc-400 hover:text-white hover:bg-zinc-900/40'
+              }`}
+            >
+              <div className="flex items-center gap-3">
+                <MessageSquare className="w-4 h-4 text-rose-400" />
+                Vi Phạm
+              </div>
+              {flaggedComments.length > 0 && (
+                <span className="bg-rose-500 text-white font-extrabold text-[9px] px-1.5 py-0.5 rounded-full select-none">
+                  {flaggedComments.length}
+                </span>
+              )}
+            </button>
+          </nav>
+        </div>
+
+        {/* Sidebar Footer Buttons */}
+        <div className="p-4 border-t border-zinc-900/60 flex flex-col gap-2">
+          <Link
+            href="/"
+            className="w-full text-center py-2.5 bg-zinc-900 border border-zinc-850 hover:bg-zinc-850 text-zinc-300 rounded-[4px] text-[10px] font-black uppercase tracking-wider transition-all no-underline flex items-center justify-center gap-1.5 cursor-pointer"
+          >
+            <ArrowLeft className="w-3.5 h-3.5" />
+            Về Trang Chủ
+          </Link>
+          <button
+            onClick={handleLogout}
+            className="w-full py-2.5 bg-rose-950/20 border border-rose-900/45 hover:bg-rose-900/20 text-rose-400 hover:text-rose-300 rounded-[4px] text-[10px] font-black uppercase tracking-wider transition-all flex items-center justify-center gap-1.5 cursor-pointer outline-none border-0"
+          >
+            <LogOut className="w-3.5 h-3.5 text-rose-500" />
+            Đăng Xuất
+          </button>
+        </div>
+      </aside>
+
+      {/* MAIN CONTAINER */}
+      <div className="flex-grow pl-64 flex flex-col min-h-screen">
+        {/* Top Header Panel */}
+        <header className="h-20 bg-zinc-950/45 border-b border-zinc-900/60 px-8 flex items-center justify-between sticky top-0 z-20 backdrop-blur-md">
+          <div className="flex items-center gap-2.5">
+            <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest select-none">
+              Hệ thống
+            </span>
+            <span className="text-zinc-650 text-sm">/</span>
+            <span className="text-xs font-black text-white uppercase tracking-wider select-none">
+              {activeTab === 'analytics' ? 'Thống kê Tổng quan' : activeTab === 'users' ? 'Thành Viên' : activeTab === 'movies' ? 'Quản lý Phim' : activeTab === 'scraper' ? 'Nguồn & Convert' : activeTab === 'logs' ? 'Nhật ký Scraper' : 'Báo cáo vi phạm'}
+            </span>
+          </div>
+
+          <div className="flex items-center gap-3.5">
+            {/* Custom Range Picker */}
+            {timeRange === 'custom' && (
+              <form onSubmit={handleApplyCustomRange} className="flex items-center gap-2 select-none">
+                <input
+                  type="date"
+                  value={customStartDate}
+                  onChange={(e) => setCustomStartDate(e.target.value)}
+                  className="px-2.5 py-1.5 bg-zinc-950 border border-zinc-900 text-zinc-300 rounded-[4px] text-xs font-bold focus:outline-none focus:border-violet-500/50"
+                />
+                <span className="text-zinc-500 text-[10px] uppercase font-bold">đến</span>
+                <input
+                  type="date"
+                  value={customEndDate}
+                  onChange={(e) => setCustomEndDate(e.target.value)}
+                  className="px-2.5 py-1.5 bg-zinc-950 border border-zinc-900 text-zinc-300 rounded-[4px] text-xs font-bold focus:outline-none focus:border-violet-500/50"
+                />
+                <button
+                  type="submit"
+                  className="px-3 py-1.5 bg-violet-650 hover:bg-violet-750 text-white rounded-[4px] text-xs font-black uppercase tracking-wider transition-all cursor-pointer active:scale-95 border-0 outline-none"
+                >
+                  Áp Dụng
+                </button>
+              </form>
+            )}
+
             <select
               value={timeRange}
               onChange={(e) => setTimeRange(e.target.value)}
-              className="px-3 py-2 bg-zinc-950 border border-zinc-900 text-zinc-300 rounded-[4px] text-xs font-black uppercase tracking-wider outline-none cursor-pointer transition-all focus:border-violet-500/50"
+              className="px-3 py-2 bg-zinc-950 border border-zinc-900 text-zinc-300 rounded-[4px] text-xs font-black uppercase tracking-wider outline-none cursor-pointer transition-all focus:border-violet-500/50 select-none"
             >
               <option value="60m">60 phút qua</option>
               <option value="24h">24 giờ qua</option>
@@ -467,168 +638,99 @@ export default function AdminDashboard() {
               <option value="7d">7 ngày qua</option>
               <option value="1m">1 tháng qua</option>
               <option value="3m">3 tháng qua</option>
+              <option value="6m">6 tháng qua</option>
+              <option value="1y">1 năm qua</option>
+              <option value="2y">2 năm qua</option>
+              <option value="this_year">Năm hiện tại</option>
+              <option value="last_year">Năm ngoái</option>
+              <option value="prev_year">Năm trước nữa</option>
+              <option value="custom">Tùy chỉnh khoảng ngày</option>
             </select>
 
             <button 
-              onClick={loadDashboardData}
+              onClick={() => loadDashboardData(false)}
               disabled={loading}
-              className="px-4 py-2 bg-zinc-950 border border-zinc-900 hover:bg-zinc-900 text-zinc-300 rounded-[4px] text-xs font-black uppercase tracking-wider flex items-center gap-1.5 transition-all outline-none cursor-pointer active:scale-95 disabled:opacity-50"
+              className="px-4 py-2 bg-zinc-950 border border-zinc-900 hover:bg-zinc-900 text-zinc-300 rounded-[4px] text-xs font-black uppercase tracking-wider flex items-center gap-1.5 transition-all outline-none cursor-pointer active:scale-95 disabled:opacity-50 select-none"
             >
               <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin text-violet-500' : ''}`} />
               {loading ? 'Đang cập nhật...' : 'Làm mới dữ liệu'}
             </button>
           </div>
-        </div>
+        </header>
 
-        {/* OVERVIEW STATISTICS CARDS GRID */}
-        {stats && (
-          <div className="grid grid-cols-2 md:grid-cols-5 gap-4 md:gap-6 mb-10">
-            {/* CARD 1: TOTAL USERS */}
-            <div className="p-4 bg-zinc-950/40 border border-zinc-900 rounded-[4px] shadow-md relative overflow-hidden flex flex-col justify-between h-24">
-              <div className="flex items-center justify-between text-zinc-550">
-                <span className="text-[9px] font-black uppercase tracking-wider">Người Dùng</span>
-                <Users className="w-4 h-4 text-violet-500" />
+        {/* Content Container */}
+        <main className="p-8 flex-grow">
+          {/* OVERVIEW STATISTICS CARDS GRID */}
+          {stats && activeTab === 'analytics' && (
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-4 md:gap-6 mb-10 select-none">
+              {/* CARD 1: TOTAL USERS */}
+              <div className="p-4 bg-zinc-950/40 border border-zinc-900 rounded-[4px] shadow-md relative overflow-hidden flex flex-col justify-between h-24">
+                <div className="flex items-center justify-between text-zinc-550">
+                  <span className="text-[9px] font-black uppercase tracking-wider">Người Dùng</span>
+                  <Users className="w-4 h-4 text-violet-500" />
+                </div>
+                <span className="text-2xl font-black text-white">{stats.totalUsers}</span>
+                <div className="absolute top-0 right-0 w-16 h-16 bg-violet-600/5 rounded-full filter blur-xl translate-x-4 -translate-y-4" />
               </div>
-              <span className="text-2xl font-black text-white">{stats.totalUsers}</span>
-              <div className="absolute top-0 right-0 w-16 h-16 bg-violet-600/5 rounded-full filter blur-xl translate-x-4 -translate-y-4" />
-            </div>
 
-            {/* CARD 2: TOTAL MOVIES */}
-            <div className="p-4 bg-zinc-950/40 border border-zinc-900 rounded-[4px] shadow-md relative overflow-hidden flex flex-col justify-between h-24">
-              <div className="flex items-center justify-between text-zinc-550">
-                <span className="text-[9px] font-black uppercase tracking-wider">Phim Donghua</span>
-                <Film className="w-4 h-4 text-violet-500" />
+              {/* CARD 2: TOTAL MOVIES */}
+              <div className="p-4 bg-zinc-950/40 border border-zinc-900 rounded-[4px] shadow-md relative overflow-hidden flex flex-col justify-between h-24">
+                <div className="flex items-center justify-between text-zinc-550">
+                  <span className="text-[9px] font-black uppercase tracking-wider">Phim Donghua</span>
+                  <Film className="w-4 h-4 text-violet-500" />
+                </div>
+                <span className="text-2xl font-black text-white">{stats.totalMovies}</span>
+                <div className="absolute top-0 right-0 w-16 h-16 bg-violet-600/5 rounded-full filter blur-xl translate-x-4 -translate-y-4" />
               </div>
-              <span className="text-2xl font-black text-white">{stats.totalMovies}</span>
-              <div className="absolute top-0 right-0 w-16 h-16 bg-violet-600/5 rounded-full filter blur-xl translate-x-4 -translate-y-4" />
-            </div>
 
-            {/* CARD 3: TOTAL RATINGS */}
-            <div className="p-4 bg-zinc-950/40 border border-zinc-900 rounded-[4px] shadow-md relative overflow-hidden flex flex-col justify-between h-24">
-              <div className="flex items-center justify-between text-zinc-550">
-                <span className="text-[9px] font-black uppercase tracking-wider">Lượt Đánh Giá</span>
-                <Star className="w-4 h-4 text-amber-500" />
+              {/* CARD 3: TOTAL RATINGS */}
+              <div className="p-4 bg-zinc-950/40 border border-zinc-900 rounded-[4px] shadow-md relative overflow-hidden flex flex-col justify-between h-24">
+                <div className="flex items-center justify-between text-zinc-550">
+                  <span className="text-[9px] font-black uppercase tracking-wider">Lượt Đánh Giá</span>
+                  <Star className="w-4 h-4 text-amber-500" />
+                </div>
+                <span className="text-2xl font-black text-white">{stats.totalRatings}</span>
+                <div className="absolute top-0 right-0 w-16 h-16 bg-amber-500/5 rounded-full filter blur-xl translate-x-4 -translate-y-4" />
               </div>
-              <span className="text-2xl font-black text-white">{stats.totalRatings}</span>
-              <div className="absolute top-0 right-0 w-16 h-16 bg-amber-500/5 rounded-full filter blur-xl translate-x-4 -translate-y-4" />
-            </div>
 
-            {/* CARD 4: TOTAL COMMENTS */}
-            <div className="p-4 bg-zinc-950/40 border border-zinc-900 rounded-[4px] shadow-md relative overflow-hidden flex flex-col justify-between h-24">
-              <div className="flex items-center justify-between text-zinc-550">
-                <span className="text-[9px] font-black uppercase tracking-wider">Bình Luận</span>
-                <MessageSquare className="w-4 h-4 text-blue-500" />
+              {/* CARD 4: TOTAL COMMENTS */}
+              <div className="p-4 bg-zinc-950/40 border border-zinc-900 rounded-[4px] shadow-md relative overflow-hidden flex flex-col justify-between h-24">
+                <div className="flex items-center justify-between text-zinc-550">
+                  <span className="text-[9px] font-black uppercase tracking-wider">Bình Luận</span>
+                  <MessageSquare className="w-4 h-4 text-blue-500" />
+                </div>
+                <span className="text-2xl font-black text-white">{stats.totalComments}</span>
+                <div className="absolute top-0 right-0 w-16 h-16 bg-blue-500/5 rounded-full filter blur-xl translate-x-4 -translate-y-4" />
               </div>
-              <span className="text-2xl font-black text-white">{stats.totalComments}</span>
-              <div className="absolute top-0 right-0 w-16 h-16 bg-blue-500/5 rounded-full filter blur-xl translate-x-4 -translate-y-4" />
-            </div>
 
-            {/* CARD 5: FLAGGED COMMENTS (WARNING) */}
-            <div className={`p-4 border rounded-[4px] shadow-md relative overflow-hidden flex flex-col justify-between h-24 transition-all col-span-2 md:col-span-1 ${
-              stats.flaggedCommentsCount > 0 
-                ? 'bg-rose-950/15 border-rose-900/60 text-rose-400' 
-                : 'bg-zinc-950/40 border-zinc-900 text-zinc-500'
-            }`}>
-              <div className="flex items-center justify-between">
-                <span className="text-[9px] font-black uppercase tracking-wider">Cắm Cờ Nghi Ngờ</span>
-                <AlertTriangle className={`w-4 h-4 ${stats.flaggedCommentsCount > 0 ? 'text-rose-500 animate-bounce' : 'text-zinc-600'}`} />
+              {/* CARD 5: FLAGGED COMMENTS (WARNING) */}
+              <div className={`p-4 border rounded-[4px] shadow-md relative overflow-hidden flex flex-col justify-between h-24 transition-all col-span-2 md:col-span-1 ${
+                stats.flaggedCommentsCount > 0 
+                  ? 'bg-rose-950/15 border-rose-900/60 text-rose-400' 
+                  : 'bg-zinc-950/40 border-zinc-900 text-zinc-500'
+              }`}>
+                <div className="flex items-center justify-between">
+                  <span className="text-[9px] font-black uppercase tracking-wider">Cắm Cờ Nghi Ngờ</span>
+                  <AlertTriangle className={`w-4 h-4 ${stats.flaggedCommentsCount > 0 ? 'text-rose-500 animate-bounce' : 'text-zinc-600'}`} />
+                </div>
+                <span className={`text-2xl font-black ${stats.flaggedCommentsCount > 0 ? 'text-rose-400' : 'text-zinc-400'}`}>
+                  {stats.flaggedCommentsCount}
+                </span>
+                <div className={`absolute top-0 right-0 w-16 h-16 rounded-full filter blur-xl translate-x-4 -translate-y-4 ${
+                  stats.flaggedCommentsCount > 0 ? 'bg-rose-500/10' : 'bg-zinc-500/5'
+                }`} />
               </div>
-              <span className={`text-2xl font-black ${stats.flaggedCommentsCount > 0 ? 'text-rose-400' : 'text-zinc-400'}`}>
-                {stats.flaggedCommentsCount}
-              </span>
-              <div className={`absolute top-0 right-0 w-16 h-16 rounded-full filter blur-xl translate-x-4 -translate-y-4 ${
-                stats.flaggedCommentsCount > 0 ? 'bg-rose-500/10' : 'bg-zinc-500/5'
-              }`} />
             </div>
-          </div>
-        )}
+          )}
 
-        {/* TABS SELECTOR PANEL */}
-        <div className="flex border-b border-zinc-900 mb-6 gap-2 overflow-x-auto hide-scrollbar">
-          <button
-            onClick={() => setActiveTab('analytics')}
-            className={`px-5 py-3 border-b-2 text-xs font-black uppercase tracking-wider transition-all cursor-pointer outline-none whitespace-nowrap flex items-center gap-1.5 ${
-              activeTab === 'analytics'
-                ? 'border-violet-650 text-white bg-violet-600/5'
-                : 'border-transparent text-zinc-400 hover:text-white'
-            }`}
-          >
-            <Activity className="w-3.5 h-3.5 text-blue-400" />
-            Thống Kê Tổng Quan
-          </button>
-          
-          <button
-            onClick={() => setActiveTab('users')}
-            className={`px-5 py-3 border-b-2 text-xs font-black uppercase tracking-wider transition-all cursor-pointer outline-none whitespace-nowrap flex items-center gap-1.5 ${
-              activeTab === 'users'
-                ? 'border-violet-650 text-white bg-violet-600/5'
-                : 'border-transparent text-zinc-400 hover:text-white'
-            }`}
-          >
-            <Users className="w-3.5 h-3.5" />
-            Thành Viên ({users.length})
-          </button>
-          
-          <button
-            onClick={() => setActiveTab('movies')}
-            className={`px-5 py-3 border-b-2 text-xs font-black uppercase tracking-wider transition-all cursor-pointer outline-none whitespace-nowrap flex items-center gap-1.5 ${
-              activeTab === 'movies'
-                ? 'border-violet-650 text-white bg-violet-600/5'
-                : 'border-transparent text-zinc-400 hover:text-white'
-            }`}
-          >
-            <Film className="w-3.5 h-3.5 text-violet-400" />
-            Phim ({stats?.totalMovies || 0})
-          </button>
-
-          <button
-            onClick={() => setActiveTab('scraper')}
-            className={`px-5 py-3 border-b-2 text-xs font-black uppercase tracking-wider transition-all cursor-pointer outline-none whitespace-nowrap flex items-center gap-1.5 ${
-              activeTab === 'scraper'
-                ? 'border-violet-650 text-white bg-violet-600/5'
-                : 'border-transparent text-zinc-400 hover:text-white'
-            }`}
-          >
-            <Database className="w-3.5 h-3.5 text-amber-500" />
-            Nguồn & Convert ({scrapingTasks.length})
-          </button>
-
-          <button
-            onClick={() => setActiveTab('logs')}
-            className={`px-5 py-3 border-b-2 text-xs font-black uppercase tracking-wider transition-all cursor-pointer outline-none whitespace-nowrap flex items-center gap-1.5 ${
-              activeTab === 'logs'
-                ? 'border-violet-650 text-white bg-violet-600/5'
-                : 'border-transparent text-zinc-400 hover:text-white'
-            }`}
-          >
-            <Activity className="w-3.5 h-3.5 text-emerald-500" />
-            Nhật Ký Scraper
-          </button>
-
-          <button
-            onClick={() => setActiveTab('comments')}
-            className={`px-5 py-3 border-b-2 text-xs font-black uppercase tracking-wider transition-all cursor-pointer outline-none relative whitespace-nowrap flex items-center gap-1.5 ${
-              activeTab === 'comments'
-                ? 'border-violet-650 text-white bg-violet-600/5'
-                : 'border-transparent text-zinc-400 hover:text-white'
-            }`}
-          >
-            <MessageSquare className="w-3.5 h-3.5" />
-            Vi Phạm ({flaggedComments.length})
-            {flaggedComments.length > 0 && (
-              <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-rose-500 animate-ping" />
-            )}
-          </button>
-        </div>
-
-        {/* LOADING SHIMMER FOR DATA */}
-        {loading ? (
-          <div className="p-12 text-center border border-zinc-900/60 bg-zinc-950/20 rounded-[4px] flex flex-col items-center justify-center gap-3">
-            <Loader2 className="w-6 h-6 animate-spin text-violet-500" />
-            <span className="text-[10px] text-zinc-550 font-bold uppercase tracking-wider">Đang nạp dữ liệu quản trị hệ thống...</span>
-          </div>
-        ) : (
-          <div className="bg-zinc-950/20 border border-zinc-900/60 rounded-[4px] overflow-hidden shadow-xl">
+          {/* LOADING SHIMMER FOR DATA */}
+          {loading ? (
+            <div className="p-12 text-center border border-zinc-900/60 bg-zinc-950/20 rounded-[4px] flex flex-col items-center justify-center gap-3 select-none">
+              <Loader2 className="w-6 h-6 animate-spin text-violet-500" />
+              <span className="text-[10px] text-zinc-550 font-bold uppercase tracking-wider">Đang nạp dữ liệu quản trị hệ thống...</span>
+            </div>
+          ) : (
+            <div className="bg-zinc-950/20 border border-zinc-900/60 rounded-[4px] overflow-hidden shadow-xl">
             
             {/* ==============================================================================
                TAB 0: ANALYTICS & TRENDS
@@ -1567,7 +1669,8 @@ export default function AdminDashboard() {
 
           </div>
         )}
-      </section>
+      </main>
+    </div>
 
       {/* CUSTOM CONFIRM MODAL */}
       {confirmModal.isOpen && (

@@ -608,8 +608,13 @@ export interface ScrapingLogPayload {
 
 
 export const adminApi = {
-  async getStats(range?: string): Promise<ApiResponse<AdminStatsPayload>> {
-    return apiFetch<AdminStatsPayload>(`/admin/stats${range ? `?range=${range}` : ''}`);
+  async getStats(range?: string, startDate?: string, endDate?: string): Promise<ApiResponse<AdminStatsPayload>> {
+    const params = new URLSearchParams();
+    if (range) params.set('range', range);
+    if (startDate) params.set('startDate', startDate);
+    if (endDate) params.set('endDate', endDate);
+    const query = params.toString() ? `?${params.toString()}` : '';
+    return apiFetch<AdminStatsPayload>(`/admin/stats${query}`);
   },
 
   async getUsers(): Promise<ApiResponse<AdminUserPayload[]>> {

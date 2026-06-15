@@ -15,6 +15,7 @@ router.get('/stats', async (req: AuthenticatedRequest, res: Response, next: Next
     const range = (req.query.range as string) || '24h';
     const now = new Date();
     let sinceDate = new Date(now.getTime() - 24 * 60 * 60 * 1000); // Default 24h
+    let untilDate = now;
 
     if (range === '60m') {
       sinceDate = new Date(now.getTime() - 60 * 60 * 1000);
@@ -26,6 +27,23 @@ router.get('/stats', async (req: AuthenticatedRequest, res: Response, next: Next
       sinceDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
     } else if (range === '3m') {
       sinceDate = new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000);
+    } else if (range === '6m') {
+      sinceDate = new Date(now.getTime() - 180 * 24 * 60 * 60 * 1000);
+    } else if (range === '1y') {
+      sinceDate = new Date(now.getTime() - 365 * 24 * 60 * 60 * 1000);
+    } else if (range === '2y') {
+      sinceDate = new Date(now.getTime() - 730 * 24 * 60 * 60 * 1000);
+    } else if (range === 'this_year') {
+      sinceDate = new Date(now.getFullYear(), 0, 1);
+    } else if (range === 'last_year') {
+      sinceDate = new Date(now.getFullYear() - 1, 0, 1);
+      untilDate = new Date(now.getFullYear() - 1, 11, 31, 23, 59, 59, 999);
+    } else if (range === 'prev_year') {
+      sinceDate = new Date(now.getFullYear() - 2, 0, 1);
+      untilDate = new Date(now.getFullYear() - 2, 11, 31, 23, 59, 59, 999);
+    } else if (range === 'custom') {
+      sinceDate = req.query.startDate ? new Date(req.query.startDate as string) : new Date(now.getTime() - 24 * 60 * 60 * 1000);
+      untilDate = req.query.endDate ? new Date(new Date(req.query.endDate as string).setHours(23, 59, 59, 999)) : now;
     }
 
     const [totalUsers, totalMovies, totalComments, totalRatings, flaggedCommentsCount, viewsAgg] = await Promise.all([
@@ -41,7 +59,7 @@ router.get('/stats', async (req: AuthenticatedRequest, res: Response, next: Next
     // Fetch logs and signups in the selected period
     const recentLogs = await prisma.userBehaviorLog.findMany({
       where: {
-        createdAt: { gte: sinceDate },
+        createdAt: { gte: sinceDate, lte: untilDate },
         action: 'PAGE_VIEW'
       },
       select: { createdAt: true, metadata: true }
@@ -49,10 +67,21 @@ router.get('/stats', async (req: AuthenticatedRequest, res: Response, next: Next
 
     const recentSignups = await prisma.user.findMany({
       where: {
-        createdAt: { gte: sinceDate }
+        createdAt: { gte: sinceDate, lte: untilDate }
       },
       select: { createdAt: true }
     });
+
+    let groupByMonth = false;
+    if (['3m', '6m', '1y', '2y', 'this_year', 'last_year', 'prev_year'].includes(range)) {
+      groupByMonth = true;
+    } else if (range === 'custom') {
+      const durationMs = untilDate.getTime() - sinceDate.getTime();
+      const durationDays = durationMs / (24 * 60 * 60 * 1000);
+      if (durationDays > 31) {
+        groupByMonth = true;
+      }
+    }
 
     // Initialize trendData map
     const trendMap: Record<string, { views: number, signups: number }> = {};
@@ -70,23 +99,31 @@ router.get('/stats', async (req: AuthenticatedRequest, res: Response, next: Next
         const dateStr = `${d.getHours().toString().padStart(2, '0')}:00`;
         trendMap[dateStr] = { views: 0, signups: 0 };
       }
-    } else {
-      let daysLimit = 7;
-      if (range === '3d') daysLimit = 3;
-      else if (range === '1m') daysLimit = 30;
-      else if (range === '3m') daysLimit = 90;
-
-      for (let i = daysLimit - 1; i >= 0; i--) {
-        const d = new Date(now);
-        d.setDate(d.getDate() - i);
-        const dateStr = d.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit' });
+    } else if (groupByMonth) {
+      let curr = new Date(sinceDate.getFullYear(), sinceDate.getMonth(), 1);
+      const end = new Date(untilDate.getFullYear(), untilDate.getMonth(), 1);
+      while (curr <= end) {
+        const dateStr = `${(curr.getMonth() + 1).toString().padStart(2, '0')}/${curr.getFullYear()}`;
         trendMap[dateStr] = { views: 0, signups: 0 };
+        curr.setMonth(curr.getMonth() + 1);
+      }
+    } else {
+      let curr = new Date(sinceDate.getFullYear(), sinceDate.getMonth(), sinceDate.getDate());
+      const end = new Date(untilDate.getFullYear(), untilDate.getMonth(), untilDate.getDate());
+      let limit = 0;
+      while (curr <= end && limit < 40) {
+        const dateStr = curr.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit' });
+        trendMap[dateStr] = { views: 0, signups: 0 };
+        curr.setDate(curr.getDate() + 1);
+        limit++;
       }
     }
 
     recentLogs.forEach(log => {
       let dateStr = '';
-      if (range === '60m') {
+      if (groupByMonth) {
+        dateStr = `${(log.createdAt.getMonth() + 1).toString().padStart(2, '0')}/${log.createdAt.getFullYear()}`;
+      } else if (range === '60m') {
         const mins = Math.floor(log.createdAt.getMinutes() / 5) * 5;
         const d = new Date(log.createdAt);
         d.setMinutes(mins);
@@ -101,7 +138,9 @@ router.get('/stats', async (req: AuthenticatedRequest, res: Response, next: Next
 
     recentSignups.forEach(u => {
       let dateStr = '';
-      if (range === '60m') {
+      if (groupByMonth) {
+        dateStr = `${(u.createdAt.getMonth() + 1).toString().padStart(2, '0')}/${u.createdAt.getFullYear()}`;
+      } else if (range === '60m') {
         const mins = Math.floor(u.createdAt.getMinutes() / 5) * 5;
         const d = new Date(u.createdAt);
         d.setMinutes(mins);

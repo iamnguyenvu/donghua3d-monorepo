@@ -326,6 +326,13 @@ export class ScraperService {
         }
       }
 
+      if (syncedEpisodesCount > 0) {
+        await prisma.movie.update({
+          where: { id: movie.id },
+          data: { updatedAt: new Date() }
+        });
+      }
+
       return {
         success: true,
         message: `Đồng bộ thành công phim "${movie.title}" với ${syncedEpisodesCount} tập phim.`,

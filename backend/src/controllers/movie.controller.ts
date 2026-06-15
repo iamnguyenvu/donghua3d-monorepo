@@ -421,6 +421,12 @@ router.post('/movies/:id/episodes', requireRole([Role.ADMIN]), async (req: Authe
       },
     });
 
+    // Update parent movie's updatedAt timestamp to keep catalog dynamic
+    await prisma.movie.update({
+      where: { id: movie.id },
+      data: { updatedAt: new Date() }
+    });
+
     res.status(201).json({
       success: true,
       data: episode,
@@ -510,12 +516,16 @@ router.post('/episodes/:id/transcode', requireRole([Role.ADMIN]), async (req: Au
     encodingService.transcodeToHLS(jobId, inputFilePath, outputFolder)
       .then(async (result) => {
         // Update database with transcoded link and duration once completed
-        await prisma.episode.update({
+        const updatedEp = await prisma.episode.update({
           where: { id },
           data: {
             videoUrl: result.playlistUrl,
             duration: result.duration,
           }
+        });
+        await prisma.movie.update({
+          where: { id: updatedEp.movieId },
+          data: { updatedAt: new Date() }
         });
         console.log(`[Background Worker] Episode ${id} video path updated in database.`);
       })
