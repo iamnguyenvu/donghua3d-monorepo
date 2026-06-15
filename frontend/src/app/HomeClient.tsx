@@ -238,7 +238,7 @@ export default function HomeClient({ initialMovies = [] }: { initialMovies: Movi
         {/* Background Overlay Backdrop */}
         <div className="absolute inset-0 z-0">
           <Image
-            src={heroMovie.bannerUrl || heroMovie.posterUrl || ''}
+            src={heroMovie.posterUrl || heroMovie.bannerUrl || ''}
             alt={heroMovie.title}
             fill
             priority
@@ -490,7 +490,7 @@ export default function HomeClient({ initialMovies = [] }: { initialMovies: Movi
               <Link href={`/movies/${movie.slug || movie.id}`} key={`weekly-${movie.id}`} className="no-underline group flex-shrink-0 w-32 md:w-36 flex flex-col gap-2">
                 <div className="relative overflow-hidden rounded-[6px] border border-zinc-900/60 aspect-[2/3] cursor-pointer transition-all duration-300 group-hover:border-violet-500/50 bg-zinc-950">
                   <Image
-                    src={movie.posterUrl || movie.bannerUrl || '/static/uploads/default_poster.jpg'}
+                    src={movie.bannerUrl || movie.posterUrl || '/static/uploads/default_poster.jpg'}
                     alt={movie.title}
                     fill
                     sizes="(max-width: 768px) 150px, 200px"
@@ -533,7 +533,7 @@ export default function HomeClient({ initialMovies = [] }: { initialMovies: Movi
                   {/* Poster Image */}
                   <div className="relative w-full h-full">
                     <Image
-                      src={movie.posterUrl || movie.bannerUrl || '/static/uploads/default_poster.jpg'}
+                      src={movie.bannerUrl || movie.posterUrl || '/static/uploads/default_poster.jpg'}
                       alt={movie.title}
                       fill
                       sizes="(max-width: 768px) 50vw, (max-width: 1200px) 25vw, 20vw"
@@ -679,7 +679,7 @@ export default function HomeClient({ initialMovies = [] }: { initialMovies: Movi
                   {/* Poster Image */}
                   <div className="relative w-full h-full">
                     <Image
-                      src={movie.posterUrl || movie.bannerUrl || '/static/uploads/default_poster.jpg'}
+                      src={movie.bannerUrl || movie.posterUrl || '/static/uploads/default_poster.jpg'}
                       alt={movie.title}
                       fill
                       sizes="(max-width: 768px) 50vw, (max-width: 1200px) 25vw, 20vw"

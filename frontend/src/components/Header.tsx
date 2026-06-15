@@ -326,7 +326,7 @@ export default function Header({ onSearchChange }: HeaderProps) {
                               <Link key={m.id} href={`/movies/${m.slug || m.id}`} className="flex items-center gap-2.5 px-3 py-2 hover:bg-zinc-900/80 border-b border-zinc-900/50 no-underline group last:border-0">
                                 <div className="w-8 h-10 bg-zinc-800 rounded-[2px] overflow-hidden flex-shrink-0 border border-zinc-800 group-hover:border-violet-500/40">
                                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                                  <img src={m.posterUrl || '/static/uploads/default_poster.jpg'} alt={m.title} className="w-full h-full object-cover" />
+                                  <img src={m.bannerUrl || m.posterUrl || '/static/uploads/default_poster.jpg'} alt={m.title} className="w-full h-full object-cover" />
                                 </div>
                                 <div className="flex flex-col overflow-hidden">
                                   <span className="text-xs font-bold text-zinc-200 group-hover:text-violet-400 truncate">{m.title}</span>
@@ -350,7 +350,7 @@ export default function Header({ onSearchChange }: HeaderProps) {
                               <Link key={m.id} href={`/movies/${m.slug || m.id}`} className="flex items-center gap-2.5 px-3 py-2 hover:bg-zinc-900/80 border-b border-zinc-900/50 no-underline group last:border-0">
                                 <div className="w-8 h-10 bg-zinc-800 rounded-[2px] overflow-hidden flex-shrink-0 border border-zinc-800 group-hover:border-violet-500/40">
                                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                                  <img src={m.posterUrl || '/static/uploads/default_poster.jpg'} alt={m.title} className="w-full h-full object-cover" />
+                                  <img src={m.bannerUrl || m.posterUrl || '/static/uploads/default_poster.jpg'} alt={m.title} className="w-full h-full object-cover" />
                                 </div>
                                 <div className="flex flex-col overflow-hidden">
                                   <span className="text-xs font-bold text-zinc-200 group-hover:text-violet-400 truncate">{m.title}</span>
