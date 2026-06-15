@@ -329,8 +329,6 @@ function CustomControls({
   onNextEpisode,
   isCinemaMode,
   setIsCinemaMode,
-  movieId,
-  episodeId,
   episodes,
   currentEpisodeNumber,
   movieSlug,

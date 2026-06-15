@@ -129,7 +129,7 @@ export const authApi = {
 // ANALYTICS & BEHAVIOR TRACKING
 // ==============================================================================
 export const analyticsApi = {
-  async trackBehavior(action: string, metadata?: Record<string, any>): Promise<void> {
+  async trackBehavior(action: string, metadata?: Record<string, unknown>): Promise<void> {
     try {
       await apiFetch('/analytics/track', {
         method: 'POST',

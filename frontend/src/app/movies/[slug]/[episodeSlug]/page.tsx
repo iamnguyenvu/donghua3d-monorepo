@@ -1,4 +1,4 @@
-import { Metadata, ResolvingMetadata } from 'next';
+import { Metadata } from 'next';
 import { catalogApi } from '@/lib/api';
 import EpisodeClient from './EpisodeClient';
 
@@ -7,8 +7,7 @@ type Props = {
 };
 
 export async function generateMetadata(
-  { params }: Props,
-  parent: ResolvingMetadata
+  { params }: Props
 ): Promise<Metadata> {
   const { slug, episodeSlug } = await params;
   const episodeNumber = episodeSlug.replace('tap-', '');
