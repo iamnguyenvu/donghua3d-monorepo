@@ -132,7 +132,7 @@ export default function MovieClientPage({
           <div className="absolute inset-0 bg-gradient-to-r from-[#050508] via-[#050508]/40 to-transparent" />
         </div>
 
-        <div className="relative z-10 w-full px-6 md:px-12 lg:px-16 flex flex-col md:flex-row items-end gap-6 animate-fade-in-up">
+        <div className="relative z-10 w-full max-w-[1440px] mx-auto px-4 sm:px-6 md:px-12 lg:px-16 flex flex-col md:flex-row items-end gap-6 animate-fade-in-up">
           {/* Flat Poster Artwork card */}
           <div className="w-40 aspect-[2/3] rounded-[4px] overflow-hidden border border-zinc-900/60 shadow-2xl flex-shrink-0 hidden md:block relative">
             <Image
@@ -244,7 +244,7 @@ export default function MovieClientPage({
       {/* ==============================================================================
          EPISODES AND REVIEWS INFORMATION SECTIONS
          ============================================================================== */}
-      <main className="w-full px-6 md:px-12 lg:px-16 mt-12 grid grid-cols-1 lg:grid-cols-3 gap-12">
+      <main className="w-full max-w-[1440px] mx-auto px-4 sm:px-6 md:px-12 lg:px-16 mt-12 grid grid-cols-1 lg:grid-cols-3 gap-12">
         
         {/* LEFT COLUMN: LIST OF EPISODES (2/3 Grid) */}
         <div className="lg:col-span-2 flex flex-col gap-6">

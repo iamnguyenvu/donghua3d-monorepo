@@ -250,7 +250,7 @@ export default function HomeClient({ initialMovies = [] }: { initialMovies: Movi
         </div>
 
         {/* Hero Content text */}
-        <div className="relative z-10 w-full px-6 md:px-12 lg:px-16 flex flex-col items-start gap-5 mt-20 animate-fade-in-up">
+        <div className="relative z-10 w-full max-w-[1440px] mx-auto px-4 sm:px-6 md:px-12 lg:px-16 flex flex-col items-start gap-5 mt-20 animate-fade-in-up">
           <div className="flex items-center gap-2.5">
             <span className="bg-violet-600/25 border border-violet-500/35 text-violet-300 font-extrabold px-2.5 py-1 rounded-[4px] text-[10px] uppercase tracking-widest flex items-center gap-1.5 shadow-sm">
               <Sparkles className="w-3 h-3 text-violet-400" />
@@ -367,7 +367,7 @@ export default function HomeClient({ initialMovies = [] }: { initialMovies: Movi
          S-TIER TRENDING ROW (Layout 02 Netflix Style - Aspect 3/4)
          ============================================================================== */}
       {movies.some(m => m.leaderboard?.globalTier === 'S') && (
-        <section className="w-full px-6 md:px-12 lg:px-16 mt-14 select-none animate-fade-in-up">
+        <section className="w-full max-w-[1440px] mx-auto px-4 sm:px-6 md:px-12 lg:px-16 mt-14 select-none animate-fade-in-up">
           <div className="flex items-center gap-2 mb-6 border-b border-zinc-900/60 pb-4">
             <h2 className="text-lg font-black text-white tracking-wider uppercase border-l-2 border-violet-500 pl-3 flex items-center gap-1.5">
               <Sparkles className="w-3.5 h-3.5 text-violet-400" />
@@ -442,7 +442,7 @@ export default function HomeClient({ initialMovies = [] }: { initialMovies: Movi
       {/* ==============================================================================
          WEEKLY SCHEDULE TABS BAR
          ============================================================================== */}
-      <section className="w-full px-6 md:px-12 lg:px-16 mt-12 select-none">
+      <section className="w-full max-w-[1440px] mx-auto px-4 sm:px-6 md:px-12 lg:px-16 mt-12 select-none">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
           <div className="flex items-center gap-2">
             <h2 className="text-lg font-black text-white tracking-wider uppercase border-l-2 border-violet-500 pl-3">
@@ -485,7 +485,7 @@ export default function HomeClient({ initialMovies = [] }: { initialMovies: Movi
 
         {/* Horizontal scroll list for weekly movies */}
         {selectedDay !== 'all' && weeklyScheduleMovies.length > 0 && (
-          <div className="mt-6 overflow-x-auto hide-scrollbar pb-4 -mx-6 px-6 md:-mx-12 md:px-12 lg:-mx-16 lg:px-16 flex items-start gap-4">
+          <div className="mt-6 overflow-x-auto hide-scrollbar pb-4 -mx-4 px-4 sm:-mx-6 sm:px-6 md:-mx-12 md:px-12 lg:-mx-16 lg:px-16 flex items-start gap-4">
             {weeklyScheduleMovies.map(movie => (
               <Link href={`/movies/${movie.slug || movie.id}`} key={`weekly-${movie.id}`} className="no-underline group flex-shrink-0 w-32 md:w-36 flex flex-col gap-2">
                 <div className="relative overflow-hidden rounded-[6px] border border-zinc-900/60 aspect-[2/3] cursor-pointer transition-all duration-300 group-hover:border-violet-500/50 bg-zinc-950">
@@ -518,7 +518,7 @@ export default function HomeClient({ initialMovies = [] }: { initialMovies: Movi
          RECENTLY UPDATED ROW
          ============================================================================== */}
       {recentlyUpdatedMovies.length > 0 && (
-        <section className="w-full px-6 md:px-12 lg:px-16 mt-14 select-none animate-fade-in-up">
+        <section className="w-full max-w-[1440px] mx-auto px-4 sm:px-6 md:px-12 lg:px-16 mt-14 select-none animate-fade-in-up">
           <div className="flex items-center gap-2 mb-6 border-b border-zinc-900/60 pb-4">
             <h2 className="text-lg font-black text-white tracking-wider uppercase border-l-2 border-violet-500 pl-3 flex items-center gap-1.5">
               🚀 Phim Mới Cập Nhật
@@ -620,7 +620,7 @@ export default function HomeClient({ initialMovies = [] }: { initialMovies: Movi
       {/* ==============================================================================
          GRID CATALOG & SEARCH FILTERS
          ============================================================================== */}
-      <main className="w-full px-6 md:px-12 lg:px-16 mt-10">
+      <main className="w-full max-w-[1440px] mx-auto px-4 sm:px-6 md:px-12 lg:px-16 mt-10">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 border-b border-zinc-900/60 pb-5 mb-8">
           <div className="flex items-center gap-2">
             <h2 className="text-lg font-black text-white tracking-wider uppercase border-l-2 border-violet-500 pl-3">

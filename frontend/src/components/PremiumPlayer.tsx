@@ -95,6 +95,10 @@ export default function PremiumPlayer({
   const localPlayerRef = useRef<any>(null);
   const activePlayerRef = playerRef || localPlayerRef;
 
+  const lastSrcRef = useRef<string>('');
+  const pendingSeekRef = useRef<number | null>(null);
+  const pendingPlayRef = useRef<boolean>(false);
+
   // Load selected quality from localStorage on mount (hydration-safe)
   useEffect(() => {
     const saved = localStorage.getItem('donghua3d_selected_quality');
@@ -140,6 +144,41 @@ export default function PremiumPlayer({
   // Compute active source dynamically
   const activeSrc = selectedQuality === '4K' && videoUrl4k ? videoUrl4k : src;
 
+  // Monitor activeSrc changes to capture playhead state before reload
+  useEffect(() => {
+    if (lastSrcRef.current && activeSrc !== lastSrcRef.current) {
+      if (activePlayerRef.current) {
+        const time = activePlayerRef.current.currentTime;
+        const isPlaying = !activePlayerRef.current.paused;
+        if (time > 2) {
+          pendingSeekRef.current = time;
+          pendingPlayRef.current = isPlaying;
+        }
+      }
+    }
+    lastSrcRef.current = activeSrc;
+  }, [activeSrc, activePlayerRef]);
+
+  const handleLoadedMetadata = () => {
+    if (pendingSeekRef.current !== null && activePlayerRef.current) {
+      const targetTime = pendingSeekRef.current;
+      const shouldPlay = pendingPlayRef.current;
+      pendingSeekRef.current = null;
+      
+      // Delay slightly to ensure HLS engine is fully attached and seek is stable
+      setTimeout(() => {
+        if (activePlayerRef.current) {
+          activePlayerRef.current.currentTime = targetTime;
+          if (shouldPlay) {
+            activePlayerRef.current.play().catch((err: unknown) => {
+              console.warn('Playback resume failed:', err);
+            });
+          }
+        }
+      }, 150);
+    }
+  };
+
   // Determine if paywall should be shown
   const showVipOverlay = selectedQuality === '4K' && !videoUrl4k;
 
@@ -172,6 +211,7 @@ export default function PremiumPlayer({
               onSeek(activePlayerRef.current.currentTime);
             }
           }}
+          onLoadedMetadata={handleLoadedMetadata}
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           onProviderSetup={(provider: any) => {
             if (provider.type === 'hls') {
@@ -184,6 +224,43 @@ export default function PremiumPlayer({
                 maxMaxBufferLength: 60,
                 maxBufferSize: 60 * 1000 * 1000,
               };
+
+              let networkRetryCount = 0;
+              let mediaRetryCount = 0;
+
+              provider.onInstance((hlsInstance: Hls) => {
+                networkRetryCount = 0;
+                mediaRetryCount = 0;
+
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                hlsInstance.on(Hls.Events.ERROR, (event: any, data: any) => {
+                  if (data.fatal) {
+                    switch (data.type) {
+                      case Hls.ErrorTypes.NETWORK_ERROR:
+                        if (networkRetryCount < 3) {
+                          networkRetryCount++;
+                          console.warn(`Fatal network error (${networkRetryCount}/3), recovering HLS...`, data);
+                          hlsInstance.startLoad();
+                        } else {
+                          console.error('Fatal network error recovery exhausted 3 retries.', data);
+                        }
+                        break;
+                      case Hls.ErrorTypes.MEDIA_ERROR:
+                        if (mediaRetryCount < 3) {
+                          mediaRetryCount++;
+                          console.warn(`Fatal media error (${mediaRetryCount}/3), recovering HLS media...`, data);
+                          hlsInstance.recoverMediaError();
+                        } else {
+                          console.error('Fatal media error recovery exhausted 3 retries.', data);
+                        }
+                        break;
+                      default:
+                        console.error('Fatal HLS error cannot be recovered:', data);
+                        break;
+                    }
+                  }
+                });
+              });
             }
           }}
           className="w-full h-full"
@@ -357,6 +434,38 @@ function CustomControls({
   const [showSettings, setShowSettings] = useState(false);
   const [showEpisodes, setShowEpisodes] = useState(false);
   const [playbackSpeed, setPlaybackSpeed] = useState(1);
+
+  // Mobile Double-Tap to Seek states
+  const [showSeekVisual, setShowSeekVisual] = useState<'back' | 'forward' | null>(null);
+  const lastTapRef = useRef<{ time: number; side: 'back' | 'forward' } | null>(null);
+
+  const handleMobileTouch = (e: React.TouchEvent, side: 'back' | 'forward') => {
+    const now = Date.now();
+    if (lastTapRef.current && lastTapRef.current.side === side && now - lastTapRef.current.time < 320) {
+      e.stopPropagation();
+      e.preventDefault();
+      // Double tap registered
+      if (remote) {
+        if (side === 'back') {
+          remote.seek(Math.max(0, currentTime - 10));
+        } else {
+          remote.seek(Math.min(duration, currentTime + 10));
+        }
+        setShowSeekVisual(side);
+        setTimeout(() => {
+          setShowSeekVisual(null);
+        }, 650);
+      }
+      lastTapRef.current = null;
+    } else {
+      lastTapRef.current = { time: now, side };
+      setTimeout(() => {
+        if (lastTapRef.current && lastTapRef.current.time === now) {
+          lastTapRef.current = null;
+        }
+      }, 320);
+    }
+  };
 
   // Monitor mouse activity to auto-hide cursor in fullscreen mode
   useEffect(() => {
@@ -623,6 +732,33 @@ function CustomControls({
 
   return (
     <>
+      {/* Mobile Double Tap Seek Zones (Touch Only) */}
+      <div className="absolute inset-x-0 top-0 bottom-16 z-20 flex pointer-events-none md:hidden">
+        <div 
+          onTouchStart={(e) => handleMobileTouch(e, 'back')}
+          className="w-1/3 h-full pointer-events-auto select-none"
+        />
+        <div className="w-1/3 h-full" />
+        <div 
+          onTouchStart={(e) => handleMobileTouch(e, 'forward')}
+          className="w-1/3 h-full pointer-events-auto select-none"
+        />
+      </div>
+
+      {/* Seek ripples indicators */}
+      {showSeekVisual === 'back' && (
+        <div className="absolute left-1/4 top-1/2 -translate-x-1/2 -translate-y-1/2 z-30 pointer-events-none bg-violet-600/25 border border-violet-500/35 text-white text-[10px] font-black tracking-widest px-4 py-2.5 rounded-full flex flex-col items-center gap-1 shadow-[0_0_20px_rgba(139,92,246,0.3)] animate-ping">
+          <span className="uppercase">Tua lùi</span>
+          <span>-10s</span>
+        </div>
+      )}
+      {showSeekVisual === 'forward' && (
+        <div className="absolute right-1/4 top-1/2 translate-x-1/2 -translate-y-1/2 z-30 pointer-events-none bg-violet-600/25 border border-violet-500/35 text-white text-[10px] font-black tracking-widest px-4 py-2.5 rounded-full flex flex-col items-center gap-1 shadow-[0_0_20px_rgba(139,92,246,0.3)] animate-ping">
+          <span className="uppercase">Tua tiếp</span>
+          <span>+10s</span>
+        </div>
+      )}
+
       {/* 1. Large Hover Central Play/Pause Trigger Zone */}
       <div 
         onClick={togglePlay}
