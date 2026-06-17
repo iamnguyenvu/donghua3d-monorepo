@@ -7,6 +7,7 @@ import {
   Tv, MessageSquare, Send, Users, Loader2, ArrowLeft, Info, Copy, Check 
 } from 'lucide-react';
 import Header from '@/components/Header';
+import Footer from '@/components/Footer';
 import PremiumPlayer from '@/components/PremiumPlayer';
 import { catalogApi, authApi, EpisodePayload, MoviePayload } from '@/lib/api';
 
@@ -518,6 +519,7 @@ export default function WatchPartyRoom() {
           </form>
         </div>
       )}
+      <Footer />
     </div>
   );
 }

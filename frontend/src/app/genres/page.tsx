@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Loader2, Tag, ChevronRight } from 'lucide-react';
 import Header from '../../components/Header';
+import Footer from '../../components/Footer';
 import { genreApi, GenrePayload } from '../../lib/api';
 
 export default function GenresListPage() {
@@ -24,7 +25,7 @@ export default function GenresListPage() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-[#050508] text-zinc-100 flex flex-col font-sans pb-24">
+    <div className="min-h-screen bg-[#050508] text-zinc-100 flex flex-col font-sans">
       <Header />
 
       <main className="w-full px-6 md:px-12 lg:px-16 mt-10">
@@ -74,6 +75,7 @@ export default function GenresListPage() {
           </div>
         )}
       </main>
+      <Footer />
     </div>
   );
 }

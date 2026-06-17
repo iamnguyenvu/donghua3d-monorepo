@@ -90,6 +90,18 @@ export default function PremiumPlayer({
   const [showResumePrompt, setShowResumePrompt] = useState(false);
   const [isCinemaMode, setIsCinemaMode] = useState(false);
 
+  // Prevent page scroll when cinema mode is active
+  useEffect(() => {
+    if (isCinemaMode) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [isCinemaMode]);
+
   // Consolidate player refs to support both external forwarding and local control
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const localPlayerRef = useRef<any>(null);

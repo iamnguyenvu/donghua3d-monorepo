@@ -192,6 +192,15 @@ export default function Header({ onSearchChange }: HeaderProps) {
     router.refresh();
   };
 
+  const handleSearchSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (searchVal.trim() !== '') {
+      setMobileMenuOpen(false);
+      setIsSearchFocused(false);
+      router.push(`/?search=${encodeURIComponent(searchVal.trim())}`);
+    }
+  };
+
   return (
     <>
 
@@ -295,76 +304,78 @@ export default function Header({ onSearchChange }: HeaderProps) {
           {/* Right Side: Search + Actions clustered together */}
           <div className="flex items-center gap-4 sm:gap-6 flex-shrink-0">
             {/* Search Bar Input Container (Always Visible) */}
-            <div className="relative flex items-center gap-3 px-4 py-2.5 rounded-[4px] bg-black/50 border border-zinc-800/80 focus-within:border-violet-500/80 focus-within:bg-black/85 transition-all duration-300 w-40 sm:w-48 lg:w-64 hidden md:flex shadow-inner">
-              <Search className="w-4 h-4 text-zinc-400 flex-shrink-0 transition-colors" />
-              <input
-                type="text"
-                placeholder="Tìm kiếm phim..."
-                value={searchVal}
-                onChange={handleSearch}
-                onFocus={handleSearchFocus}
-                onBlur={handleSearchBlur}
-                className="w-full bg-transparent text-zinc-100 placeholder-zinc-500 text-xs outline-none border-0 p-0 focus:ring-0 focus:outline-none"
-              />
-              
-              {/* Search Suggestions Dropdown */}
-              {isSearchFocused && (
-                <div className="absolute top-full left-0 right-0 mt-2 bg-[#0c0c10]/95 backdrop-blur-xl border border-zinc-900 rounded-[4px] shadow-2xl z-50 overflow-hidden flex flex-col">
-                  {searchLoading ? (
-                    <div className="p-4 flex justify-center"><Loader2 className="w-4 h-4 animate-spin text-violet-500" /></div>
-                  ) : (
-                    <div className="max-h-[300px] overflow-y-auto custom-scrollbar flex flex-col">
-                      {searchVal.trim() === '' ? (
-                        <>
-                          <div className="px-3 py-2 text-[9px] font-black uppercase tracking-wider text-zinc-500 border-b border-zinc-900">
-                            Phim Trending
-                          </div>
-                          {moviesCache
-                            .sort((a, b) => (b.viewsCount || 0) - (a.viewsCount || 0))
-                            .slice(0, 5)
-                            .map((m) => (
-                              <Link key={m.id} href={`/movies/${m.slug || m.id}`} className="flex items-center gap-2.5 px-3 py-2 hover:bg-zinc-900/80 border-b border-zinc-900/50 no-underline group last:border-0">
-                                <div className="w-8 h-10 bg-zinc-800 rounded-[2px] overflow-hidden flex-shrink-0 border border-zinc-800 group-hover:border-violet-500/40">
-                                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                                  <img src={m.bannerUrl || m.posterUrl || '/static/uploads/default_poster.jpg'} alt={m.title} className="w-full h-full object-cover" />
-                                </div>
-                                <div className="flex flex-col overflow-hidden">
-                                  <span className="text-xs font-bold text-zinc-200 group-hover:text-violet-400 truncate">{m.title}</span>
-                                  <span className="text-[9px] text-zinc-500 truncate">{m.altTitles[0] || m.releaseYear}</span>
-                                </div>
-                              </Link>
-                            ))}
-                        </>
-                      ) : (
-                        <>
-                          <div className="px-3 py-2 text-[9px] font-black uppercase tracking-wider text-zinc-500 border-b border-zinc-900">
-                            Kết Quả Tìm Kiếm
-                          </div>
-                          {moviesCache
-                            .filter(m => 
-                              m.title.toLowerCase().includes(searchVal.toLowerCase()) || 
-                              m.altTitles.some(a => a.toLowerCase().includes(searchVal.toLowerCase()))
-                            )
-                            .slice(0, 5)
-                            .map((m) => (
-                              <Link key={m.id} href={`/movies/${m.slug || m.id}`} className="flex items-center gap-2.5 px-3 py-2 hover:bg-zinc-900/80 border-b border-zinc-900/50 no-underline group last:border-0">
-                                <div className="w-8 h-10 bg-zinc-800 rounded-[2px] overflow-hidden flex-shrink-0 border border-zinc-800 group-hover:border-violet-500/40">
-                                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                                  <img src={m.bannerUrl || m.posterUrl || '/static/uploads/default_poster.jpg'} alt={m.title} className="w-full h-full object-cover" />
-                                </div>
-                                <div className="flex flex-col overflow-hidden">
-                                  <span className="text-xs font-bold text-zinc-200 group-hover:text-violet-400 truncate">{m.title}</span>
-                                  <span className="text-[9px] text-zinc-500 truncate">{m.altTitles[0] || m.releaseYear}</span>
-                                </div>
-                              </Link>
-                            ))}
-                        </>
-                      )}
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
+            <form onSubmit={handleSearchSubmit} className="relative w-40 sm:w-48 lg:w-64 hidden md:block z-50">
+              <div className="relative flex items-center gap-3 px-4 py-2.5 rounded-[4px] bg-black/50 border border-zinc-800/80 focus-within:border-violet-500/80 focus-within:bg-black/85 transition-all duration-300 shadow-inner">
+                <Search className="w-4 h-4 text-zinc-400 flex-shrink-0 transition-colors" />
+                <input
+                  type="text"
+                  placeholder="Tìm kiếm phim..."
+                  value={searchVal}
+                  onChange={handleSearch}
+                  onFocus={handleSearchFocus}
+                  onBlur={handleSearchBlur}
+                  className="w-full bg-transparent text-zinc-100 placeholder-zinc-500 text-xs outline-none border-0 p-0 focus:ring-0 focus:outline-none"
+                />
+                
+                {/* Search Suggestions Dropdown */}
+                {isSearchFocused && (
+                  <div className="absolute top-full left-0 right-0 mt-2 bg-[#0c0c10]/95 backdrop-blur-xl border border-zinc-900 rounded-[4px] shadow-2xl z-50 overflow-hidden flex flex-col">
+                    {searchLoading ? (
+                      <div className="p-4 flex justify-center"><Loader2 className="w-4 h-4 animate-spin text-violet-500" /></div>
+                    ) : (
+                      <div className="max-h-[300px] overflow-y-auto custom-scrollbar flex flex-col">
+                        {searchVal.trim() === '' ? (
+                          <>
+                            <div className="px-3 py-2 text-[9px] font-black uppercase tracking-wider text-zinc-500 border-b border-zinc-900">
+                              Phim Trending
+                            </div>
+                            {moviesCache
+                              .sort((a, b) => (b.viewsCount || 0) - (a.viewsCount || 0))
+                              .slice(0, 5)
+                              .map((m) => (
+                                <Link key={m.id} href={`/movies/${m.slug || m.id}`} className="flex items-center gap-2.5 px-3 py-2 hover:bg-zinc-900/80 border-b border-zinc-900/50 no-underline group last:border-0">
+                                  <div className="w-8 h-10 bg-zinc-800 rounded-[2px] overflow-hidden flex-shrink-0 border border-zinc-800 group-hover:border-violet-500/40">
+                                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                                    <img src={m.bannerUrl || m.posterUrl || '/static/uploads/default_poster.jpg'} alt={m.title} className="w-full h-full object-cover" />
+                                  </div>
+                                  <div className="flex flex-col overflow-hidden">
+                                    <span className="text-xs font-bold text-zinc-200 group-hover:text-violet-400 truncate">{m.title}</span>
+                                    <span className="text-[9px] text-zinc-500 truncate">{m.altTitles[0] || m.releaseYear}</span>
+                                  </div>
+                                </Link>
+                              ))}
+                          </>
+                        ) : (
+                          <>
+                            <div className="px-3 py-2 text-[9px] font-black uppercase tracking-wider text-zinc-500 border-b border-zinc-900">
+                              Kết Quả Tìm Kiếm
+                            </div>
+                            {moviesCache
+                              .filter(m => 
+                                m.title.toLowerCase().includes(searchVal.toLowerCase()) || 
+                                m.altTitles.some(a => a.toLowerCase().includes(searchVal.toLowerCase()))
+                              )
+                              .slice(0, 5)
+                              .map((m) => (
+                                <Link key={m.id} href={`/movies/${m.slug || m.id}`} className="flex items-center gap-2.5 px-3 py-2 hover:bg-zinc-900/80 border-b border-zinc-900/50 no-underline group last:border-0">
+                                  <div className="w-8 h-10 bg-zinc-800 rounded-[2px] overflow-hidden flex-shrink-0 border border-zinc-800 group-hover:border-violet-500/40">
+                                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                                    <img src={m.bannerUrl || m.posterUrl || '/static/uploads/default_poster.jpg'} alt={m.title} className="w-full h-full object-cover" />
+                                  </div>
+                                  <div className="flex flex-col overflow-hidden">
+                                    <span className="text-xs font-bold text-zinc-200 group-hover:text-violet-400 truncate">{m.title}</span>
+                                    <span className="text-[9px] text-zinc-500 truncate">{m.altTitles[0] || m.releaseYear}</span>
+                                  </div>
+                                </Link>
+                              ))}
+                          </>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            </form>
 
             {/* Right action area */}
             <div className="flex items-center gap-4">
@@ -518,7 +529,7 @@ export default function Header({ onSearchChange }: HeaderProps) {
             className="absolute inset-0 bg-black/85 backdrop-blur-md transition-opacity duration-300"
           />
           {/* Sidebar Panel */}
-          <div className="absolute top-20 left-0 bottom-0 w-72 bg-[#050508]/98 border-r border-zinc-900/80 p-6 flex flex-col gap-6 shadow-2xl transition-transform duration-300 ease-out">
+          <div className="absolute top-20 left-0 bottom-0 w-72 bg-[#050508]/98 border-r border-zinc-900/80 p-6 flex flex-col gap-6 shadow-2xl transition-transform duration-300 ease-out overflow-y-auto max-h-[calc(100vh-80px)]">
             {/* Quick Profile stats on Mobile Sidebar */}
             {user && (
               <div className="flex items-center gap-3.5 border-b border-zinc-900/80 pb-5 mb-1">
@@ -563,19 +574,87 @@ export default function Header({ onSearchChange }: HeaderProps) {
               </Link>
             </nav>
 
-            {/* Mobile Search Bar inside Sidebar (if handler provided) */}
-            {onSearchChange && (
-              <div className="flex items-center gap-3 px-4 py-3 rounded-[4px] bg-black/60 border border-zinc-900 focus-within:border-violet-500/80 transition-all duration-300 mt-auto shadow-inner">
+            {/* Mobile Search Bar inside Sidebar (Unconditional & Autocomplete) */}
+            <form onSubmit={handleSearchSubmit} className="relative flex flex-col mt-auto w-full">
+              <div className="relative flex items-center gap-3 px-4 py-3 rounded-[4px] bg-black/60 border border-zinc-900 focus-within:border-violet-500/80 transition-all duration-300 shadow-inner">
                 <Search className="w-4 h-4 text-zinc-500 flex-shrink-0" />
                 <input
                   type="text"
                   placeholder="Tìm kiếm phim..."
                   value={searchVal}
                   onChange={handleSearch}
-                  className="w-full bg-transparent text-zinc-100 placeholder-zinc-600 text-xs outline-none border-0 p-0 focus:ring-0 focus:outline-none"
+                  onFocus={handleSearchFocus}
+                  onBlur={handleSearchBlur}
+                  className="w-full bg-transparent text-zinc-100 placeholder-zinc-650 text-xs outline-none border-0 p-0 focus:ring-0 focus:outline-none"
                 />
               </div>
-            )}
+
+              {/* Mobile Search Suggestions Dropdown (Opens upwards) */}
+              {isSearchFocused && (
+                <div className="absolute bottom-full left-0 right-0 mb-2 bg-[#0c0c10]/95 backdrop-blur-xl border border-zinc-900 rounded-[4px] shadow-2xl z-50 overflow-hidden flex flex-col">
+                  {searchLoading ? (
+                    <div className="p-4 flex justify-center"><Loader2 className="w-4 h-4 animate-spin text-violet-500" /></div>
+                  ) : (
+                    <div className="max-h-[220px] overflow-y-auto custom-scrollbar flex flex-col">
+                      {searchVal.trim() === '' ? (
+                        <>
+                          <div className="px-3 py-2 text-[9px] font-black uppercase tracking-wider text-zinc-500 border-b border-zinc-900">
+                            Phim Trending
+                          </div>
+                          {moviesCache
+                            .sort((a, b) => (b.viewsCount || 0) - (a.viewsCount || 0))
+                            .slice(0, 4)
+                            .map((m) => (
+                              <Link 
+                                key={m.id} 
+                                href={`/movies/${m.slug || m.id}`} 
+                                onClick={() => { setMobileMenuOpen(false); setIsSearchFocused(false); }}
+                                className="flex items-center gap-2.5 px-3 py-2 hover:bg-zinc-900/80 border-b border-zinc-900/50 no-underline group last:border-0"
+                              >
+                                <div className="w-6 h-8 bg-zinc-800 rounded-[2px] overflow-hidden flex-shrink-0 border border-zinc-850">
+                                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                                  <img src={m.bannerUrl || m.posterUrl || '/static/uploads/default_poster.jpg'} alt={m.title} className="w-full h-full object-cover" />
+                                </div>
+                                <div className="flex flex-col overflow-hidden text-left">
+                                  <span className="text-[11px] font-bold text-zinc-200 group-hover:text-violet-400 truncate max-w-[180px]">{m.title}</span>
+                                </div>
+                              </Link>
+                            ))}
+                        </>
+                      ) : (
+                        <>
+                          <div className="px-3 py-2 text-[9px] font-black uppercase tracking-wider text-zinc-550 border-b border-zinc-900">
+                            Kết Quả Tìm Kiếm
+                          </div>
+                          {moviesCache
+                            .filter(m => 
+                              m.title.toLowerCase().includes(searchVal.toLowerCase()) || 
+                              m.altTitles.some(a => a.toLowerCase().includes(searchVal.toLowerCase()))
+                            )
+                            .slice(0, 4)
+                            .map((m) => (
+                              <Link 
+                                key={m.id} 
+                                href={`/movies/${m.slug || m.id}`} 
+                                onClick={() => { setMobileMenuOpen(false); setIsSearchFocused(false); }}
+                                className="flex items-center gap-2.5 px-3 py-2 hover:bg-zinc-900/80 border-b border-zinc-900/50 no-underline group last:border-0"
+                              >
+                                <div className="w-6 h-8 bg-zinc-800 rounded-[2px] overflow-hidden flex-shrink-0 border border-zinc-850">
+                                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                                  <img src={m.bannerUrl || m.posterUrl || '/static/uploads/default_poster.jpg'} alt={m.title} className="w-full h-full object-cover" />
+                                </div>
+                                <div className="flex flex-col overflow-hidden text-left">
+                                  <span className="text-[11px] font-bold text-zinc-200 group-hover:text-violet-400 truncate max-w-[180px]">{m.title}</span>
+                                </div>
+                              </Link>
+                            ))}
+                        </>
+                      )}
+                    </div>
+                  )}
+                </div>
+              )}
+            </form>
           </div>
         </div>
       )}

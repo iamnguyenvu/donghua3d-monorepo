@@ -7,6 +7,7 @@ import {
   Star, MessageSquare, Loader2, Send, Flag, Bookmark
 } from 'lucide-react';
 import Header from '@/components/Header';
+import Footer from '@/components/Footer';
 import PremiumPlayer from '@/components/PremiumPlayer';
 import { 
   catalogApi, ratingApi, commentApi, 
@@ -273,7 +274,7 @@ export default function EpisodePage({ slug, episodeNumber }: { slug: string; epi
   }
 
   return (
-    <div className="min-h-screen bg-[#050508] text-zinc-100 flex flex-col font-sans pb-24">
+    <div className="min-h-screen bg-[#050508] text-zinc-100 flex flex-col font-sans">
       <Header />
 
       {/* Autoplay Next Episode Glassmorphic Overlay */}
@@ -456,7 +457,7 @@ export default function EpisodePage({ slug, episodeNumber }: { slug: string; epi
           )}
 
           {/* Episode Grid Buttons - Dense Layout */}
-          <div className="grid grid-cols-5 sm:grid-cols-8 md:grid-cols-10 lg:grid-cols-12 xl:grid-cols-16 gap-2 mt-5 max-h-[320px] overflow-y-auto pr-2 custom-scrollbar">
+          <div className="grid grid-cols-5 sm:grid-cols-8 md:grid-cols-10 lg:grid-cols-12 xl:grid-cols-16 gap-2 mt-5 pr-2 custom-scrollbar">
             {(() => {
               const filtered = (movie.episodes || [])
                 .filter(ep => ep.episodeNumber.toString().includes(episodeSearch));
@@ -551,7 +552,7 @@ export default function EpisodePage({ slug, episodeNumber }: { slug: string; epi
             )}
 
             {/* List reviews feed */}
-            <div className="flex flex-col gap-4 max-h-[400px] overflow-y-auto pr-2 select-none">
+            <div className="flex flex-col gap-4 pr-2 select-none">
               {reviews.length > 0 ? (
                 reviews.map((rev) => (
                   <div key={rev.id} className="p-3.5 bg-zinc-950/40 border border-zinc-900 rounded-[4px] flex flex-col gap-2 shadow-sm">
@@ -680,6 +681,7 @@ export default function EpisodePage({ slug, episodeNumber }: { slug: string; epi
 
         </div>
       </main>
+      <Footer />
     </div>
   );
 }

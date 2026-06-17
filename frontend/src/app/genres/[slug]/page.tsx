@@ -6,6 +6,7 @@ import Image from 'next/image';
 import { useParams } from 'next/navigation';
 import { Play, Star, Film, Loader2 } from 'lucide-react';
 import Header from '../../../components/Header';
+import Footer from '../../../components/Footer';
 import { genreApi, MoviePayload, GenrePayload } from '../../../lib/api';
 
 export default function GenrePage() {
@@ -33,7 +34,7 @@ export default function GenrePage() {
   }, [params.slug]);
 
   return (
-    <div className="min-h-screen bg-[#050508] text-zinc-100 flex flex-col font-sans pb-24">
+    <div className="min-h-screen bg-[#050508] text-zinc-100 flex flex-col font-sans">
       <Header />
 
       <main className="w-full px-6 md:px-12 lg:px-16 mt-10">
@@ -78,7 +79,7 @@ export default function GenrePage() {
                     <span className="text-[10px] font-extrabold text-zinc-300 text-center block mt-0.5">{movie.releaseYear}</span>
                   </div>
 
-                  <div className="absolute top-2.5 right-2.5 bg-black/80 backdrop-blur-md border border-amber-400/25 text-amber-400 px-1.5 py-1 rounded-[4px] text-[9px] font-extrabold flex items-center gap-0.5 z-10 shadow-md">
+                  <div className="absolute top-1.5 right-1.5 bg-black/80 backdrop-blur-md border border-amber-400/25 text-amber-400 px-1.5 py-1 rounded-[4px] text-[9px] font-extrabold flex items-center gap-0.5 z-10 shadow-md">
                     {movie.rating > 0 ? (
                       <>
                         <Star className="w-2.5 h-2.5 fill-amber-400 text-amber-400" />
@@ -112,6 +113,7 @@ export default function GenrePage() {
           </div>
         )}
       </main>
+      <Footer />
     </div>
   );
 }

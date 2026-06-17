@@ -3,8 +3,10 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { useSearchParams } from 'next/navigation';
 import { Star, Play, Film, ArrowRight, Sparkles, Plus, Check, Loader2, ChevronLeft, ChevronRight } from 'lucide-react';
 import Header from '../components/Header';
+import Footer from '../components/Footer';
 import { MoviePayload, watchlistApi, Tier, analyticsApi, catalogApi } from '../lib/api';
 
 // Helper to strip diacritics / accents for seamless Vietnamese unaccented search
@@ -84,6 +86,9 @@ const fallbacks: MoviePayload[] = [
 ];
 
 export default function HomeClient({ initialMovies = [] }: { initialMovies: MoviePayload[] }) {
+  const searchParams = useSearchParams();
+  const queryParam = searchParams.get('search') || searchParams.get('q') || '';
+
   const [movies, setMovies] = useState<MoviePayload[]>(initialMovies.length > 0 ? initialMovies : fallbacks);
   const loading = false;
   const [activeHeroIdx, setActiveHeroIdx] = useState(0);
@@ -103,9 +108,14 @@ export default function HomeClient({ initialMovies = [] }: { initialMovies: Movi
   }, []);
   
   // Filtering & Sorting values
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState(queryParam);
   const [selectedYear, setSelectedYear] = useState<string>('all');
   const [sortBy, setSortBy] = useState<string>('updated');
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setSearchQuery(queryParam);
+  }, [queryParam]);
 
   // Watchlist states
   const [watchlistIds, setWatchlistIds] = useState<Set<string>>(new Set());
@@ -115,6 +125,22 @@ export default function HomeClient({ initialMovies = [] }: { initialMovies: Movi
   const DAYS = ['Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6', 'Thứ 7', 'CN'] as const;
   type DayKey = typeof DAYS[number];
   const [selectedDay, setSelectedDay] = useState<DayKey | 'all'>('all');
+
+  useEffect(() => {
+    // Default to the current day of the week on client mount to avoid empty section display
+    const day = new Date().getDay(); // 0 = Sunday, 1 = Monday, ..., 6 = Saturday
+    const mapDay: Record<number, DayKey> = {
+      1: 'Thứ 2',
+      2: 'Thứ 3',
+      3: 'Thứ 4',
+      4: 'Thứ 5',
+      5: 'Thứ 6',
+      6: 'Thứ 7',
+      0: 'CN'
+    };
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setSelectedDay(mapDay[day] || 'Thứ 2');
+  }, []);
 
   useEffect(() => {
     analyticsApi.trackBehavior('PAGE_VIEW', { path: '/' });
@@ -203,7 +229,10 @@ export default function HomeClient({ initialMovies = [] }: { initialMovies: Movi
 
   // Independent list for Weekly Schedule
   const weeklyScheduleMovies = useMemo(() => {
-    if (selectedDay === 'all') return [];
+    if (selectedDay === 'all') {
+      return movies.filter(m => m.airingDay !== null && m.airingDay !== undefined)
+                   .sort((a, b) => Number(a.airingDay || 0) - Number(b.airingDay || 0));
+    }
     return movies.filter(m => m.airingDay === DAY_MAP[selectedDay as DayKey]);
   }, [movies, selectedDay]);
 
@@ -228,7 +257,7 @@ export default function HomeClient({ initialMovies = [] }: { initialMovies: Movi
   const heroMovie = movies[activeHeroIdx] || fallbacks[0];
 
   return (
-    <div className="min-h-screen bg-[#050508] text-zinc-100 flex flex-col font-sans pb-24">
+    <div className="min-h-screen bg-[#050508] text-zinc-100 flex flex-col font-sans">
       <Header onSearchChange={setSearchQuery} />
 
       {/* ==============================================================================
@@ -406,20 +435,20 @@ export default function HomeClient({ initialMovies = [] }: { initialMovies: Movi
                     </div>
 
                     {/* Rating star badge in bottom-right with amber star */}
-                    <div className="absolute bottom-2.5 right-2.5 bg-black/80 backdrop-blur-md border border-amber-400/25 text-amber-400 px-1.5 py-1 rounded-[4px] text-[9px] font-extrabold flex items-center gap-0.5 z-10 shadow-md">
+                    <div className="absolute bottom-1.5 right-1.5 bg-black/80 backdrop-blur-md border border-amber-400/25 text-amber-400 px-1.5 py-1 rounded-[4px] text-[9px] font-extrabold flex items-center gap-0.5 z-10 shadow-md">
                       <Star className="w-2.5 h-2.5 fill-amber-400 text-amber-400" />
                       {movie.rating > 0 ? movie.rating.toFixed(1) : '9.0'}
                     </div>
 
                     {/* Episode Badge on top-right (High CTR Bright Red/Orange like competitors) */}
                     {movie.episodeCount !== undefined && movie.episodeCount > 0 && (
-                      <div className="absolute top-2.5 right-2.5 bg-gradient-to-r from-orange-500 to-red-600 border border-red-400/50 text-white font-black px-2 py-0.5 rounded-[3px] text-[10px] uppercase tracking-wider shadow-[0_0_10px_rgba(239,68,68,0.5)] z-10 select-none">
+                      <div className="absolute top-1.5 right-1.5 bg-gradient-to-r from-orange-500 to-red-600 border border-red-400/50 text-white font-black px-2 py-0.5 rounded-[3px] text-[10px] uppercase tracking-wider shadow-[0_0_10px_rgba(239,68,68,0.5)] z-10 select-none">
                         Tập {movie.episodeCount}
                       </div>
                     )}
 
                     {/* Trending label in top-left */}
-                    <div className="absolute top-2.5 left-2.5 bg-gradient-to-r from-violet-600 to-indigo-600 text-white text-[8px] font-extrabold tracking-widest px-2 py-1.5 rounded-[4px] z-10 shadow-md">
+                    <div className="absolute top-1.5 left-1.5 bg-gradient-to-r from-violet-600 to-indigo-650 text-white text-[8px] font-extrabold tracking-widest px-2 py-1.5 rounded-[4px] z-10 shadow-md">
                       HOT S-TIER
                     </div>
                   </div>
@@ -477,14 +506,14 @@ export default function HomeClient({ initialMovies = [] }: { initialMovies: Movi
         </div>
 
         {/* Show empty state if no movies airing today */}
-        {selectedDay !== 'all' && weeklyScheduleMovies.length === 0 && (
+        {weeklyScheduleMovies.length === 0 && (
           <div className="text-center py-8 text-[11px] text-zinc-600 italic border border-zinc-900/50 rounded-[4px] bg-zinc-950/30">
-            Chưa có phim nào lên sóng vào {selectedDay} tuần này.
+            {selectedDay === 'all' ? 'Chưa có phim nào có lịch chiếu được thiết lập.' : `Chưa có phim nào lên sóng vào ${selectedDay} tuần này.`}
           </div>
         )}
 
         {/* Horizontal scroll list for weekly movies */}
-        {selectedDay !== 'all' && weeklyScheduleMovies.length > 0 && (
+        {weeklyScheduleMovies.length > 0 && (
           <div className="mt-6 overflow-x-auto hide-scrollbar pb-4 -mx-4 px-4 sm:-mx-6 sm:px-6 md:-mx-12 md:px-12 lg:-mx-16 lg:px-16 flex items-start gap-4">
             {weeklyScheduleMovies.map(movie => (
               <Link href={`/movies/${movie.slug || movie.id}`} key={`weekly-${movie.id}`} className="no-underline group flex-shrink-0 w-32 md:w-36 flex flex-col gap-2">
@@ -496,9 +525,16 @@ export default function HomeClient({ initialMovies = [] }: { initialMovies: Movi
                     sizes="(max-width: 768px) 150px, 200px"
                     className="object-cover object-center transition-transform duration-500 group-hover:scale-105"
                   />
+                  {/* Episode Badge on top-right */}
                   {movie.episodeCount !== undefined && movie.episodeCount > 0 && (
                     <div className="absolute top-1.5 right-1.5 bg-rose-600 border border-rose-400 text-white font-black px-1.5 py-0.5 rounded-[2px] text-[8px] uppercase tracking-wider z-10">
                       Tập {movie.episodeCount}
+                    </div>
+                  )}
+                  {/* Day Badge on top-left (shown only when selectedDay is 'all' to help user identify which day it airs on) */}
+                  {selectedDay === 'all' && movie.airingDay && (
+                    <div className="absolute top-1.5 left-1.5 bg-violet-650/90 border border-violet-500 text-white font-black px-1.5 py-0.5 rounded-[2px] text-[8px] uppercase tracking-wider z-10 shadow-sm">
+                      {Object.keys(DAY_MAP).find(k => DAY_MAP[k] === movie.airingDay) || ''}
                     </div>
                   )}
                   <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -553,7 +589,7 @@ export default function HomeClient({ initialMovies = [] }: { initialMovies: Movi
                   </div>
 
                   {/* Rating Badge in bottom-right */}
-                  <div className="absolute bottom-2.5 right-2.5 bg-black/80 backdrop-blur-md border border-amber-400/25 text-amber-400 px-1.5 py-1 rounded-[4px] text-[9px] font-extrabold flex items-center gap-0.5 z-10 shadow-md select-none">
+                  <div className="absolute bottom-1.5 right-1.5 bg-black/80 backdrop-blur-md border border-amber-400/25 text-amber-400 px-1.5 py-1 rounded-[4px] text-[9px] font-extrabold flex items-center gap-0.5 z-10 shadow-md select-none">
                     {movie.rating > 0 ? (
                       <>
                         <Star className="w-2.5 h-2.5 fill-amber-400 text-amber-400" />
@@ -565,8 +601,7 @@ export default function HomeClient({ initialMovies = [] }: { initialMovies: Movi
                   </div>
 
                   {/* Global Tier Badge */}
-                  {movie.leaderboard && (
-                    movie.leaderboard.globalTier === 'S' ||
+                  {movie.leaderboard?.globalTier && (
                     (movie.leaderboard.s_tier_count || 0) +
                     (movie.leaderboard.a_tier_count || 0) +
                     (movie.leaderboard.b_tier_count || 0) +
@@ -574,7 +609,7 @@ export default function HomeClient({ initialMovies = [] }: { initialMovies: Movi
                     (movie.leaderboard.d_tier_count || 0) +
                     (movie.leaderboard.f_tier_count || 0) > 0
                   ) && (
-                    <div className="absolute top-2.5 left-2.5 bg-black/80 backdrop-blur-md px-2 py-1 rounded-[4px] border border-zinc-800 text-[8px] font-extrabold tracking-wider z-10 shadow-md" style={{
+                    <div className="absolute top-1.5 left-1.5 bg-black/80 backdrop-blur-md px-2 py-1 rounded-[4px] border border-zinc-800 text-[8px] font-extrabold tracking-wider z-10 shadow-md" style={{
                       color: movie.leaderboard.globalTier === 'S' ? '#ff7f7f' : movie.leaderboard.globalTier === 'A' ? '#ffbf7f' : '#bfff7f'
                     }}>
                       {movie.leaderboard.globalTier}-TIER
@@ -583,13 +618,13 @@ export default function HomeClient({ initialMovies = [] }: { initialMovies: Movi
 
                   {/* Episode Badge on Poster (High CTR Bright Red/Orange like competitors) */}
                   {movie.episodeCount !== undefined && movie.episodeCount > 0 && (
-                    <div className="absolute top-2.5 right-2.5 bg-gradient-to-r from-orange-500 to-red-600 border border-red-400/50 text-white font-black px-2 py-0.5 rounded-[3px] text-[10px] uppercase tracking-wider shadow-[0_0_10px_rgba(239,68,68,0.5)] z-10 select-none">
+                    <div className="absolute top-1.5 right-1.5 bg-gradient-to-r from-orange-500 to-red-600 border border-red-400/50 text-white font-black px-2 py-0.5 rounded-[3px] text-[10px] uppercase tracking-wider shadow-[0_0_10px_rgba(239,68,68,0.5)] z-10 select-none">
                       Tập {movie.episodeCount}
                     </div>
                   )}
 
                   {/* Updated Time Overlay */}
-                  <div className="absolute bottom-2.5 left-2.5 bg-violet-950/90 backdrop-blur-md border border-violet-500/30 text-violet-350 px-1.5 py-0.5 rounded-[3px] text-[8px] font-extrabold tracking-wider z-10 select-none">
+                  <div className="absolute bottom-1.5 left-1.5 bg-violet-950/90 backdrop-blur-md border border-violet-500/30 text-violet-350 px-1.5 py-0.5 rounded-[3px] text-[8px] font-extrabold tracking-wider z-10 select-none">
                     {movie.updatedAt ? new Date(movie.updatedAt).toLocaleDateString('vi-VN') : 'MỚI'}
                   </div>
                 </div>
@@ -699,7 +734,7 @@ export default function HomeClient({ initialMovies = [] }: { initialMovies: Movi
                   </div>
 
                   {/* Rating Badge in bottom-right */}
-                  <div className="absolute bottom-2.5 right-2.5 bg-black/80 backdrop-blur-md border border-amber-400/25 text-amber-400 px-1.5 py-1 rounded-[4px] text-[9px] font-extrabold flex items-center gap-0.5 z-10 shadow-md select-none">
+                  <div className="absolute bottom-1.5 right-1.5 bg-black/80 backdrop-blur-md border border-amber-400/25 text-amber-400 px-1.5 py-1 rounded-[4px] text-[9px] font-extrabold flex items-center gap-0.5 z-10 shadow-md select-none">
                     {movie.rating > 0 ? (
                       <>
                         <Star className="w-2.5 h-2.5 fill-amber-400 text-amber-400" />
@@ -720,7 +755,7 @@ export default function HomeClient({ initialMovies = [] }: { initialMovies: Movi
                     (movie.leaderboard.d_tier_count || 0) +
                     (movie.leaderboard.f_tier_count || 0) > 0
                   ) && (
-                    <div className="absolute top-2.5 left-2.5 bg-black/80 backdrop-blur-md px-2 py-1 rounded-[4px] border border-zinc-800 text-[8px] font-extrabold tracking-wider z-10 shadow-md" style={{
+                    <div className="absolute top-1.5 left-1.5 bg-black/80 backdrop-blur-md px-2 py-1 rounded-[4px] border border-zinc-800 text-[8px] font-extrabold tracking-wider z-10 shadow-md" style={{
                       color: movie.leaderboard.globalTier === 'S' ? '#ff7f7f' : movie.leaderboard.globalTier === 'A' ? '#ffbf7f' : '#bfff7f'
                     }}>
                       {movie.leaderboard.globalTier}-TIER
@@ -729,7 +764,7 @@ export default function HomeClient({ initialMovies = [] }: { initialMovies: Movi
 
                   {/* Episode Badge on Poster (High CTR Bright Red/Orange like competitors) */}
                   {movie.episodeCount !== undefined && movie.episodeCount > 0 && (
-                    <div className="absolute top-2.5 right-2.5 bg-gradient-to-r from-orange-500 to-red-600 border border-red-400/50 text-white font-black px-2 py-0.5 rounded-[3px] text-[10px] uppercase tracking-wider shadow-[0_0_10px_rgba(239,68,68,0.5)] z-10 select-none">
+                    <div className="absolute top-1.5 right-1.5 bg-gradient-to-r from-orange-500 to-red-600 border border-red-400/50 text-white font-black px-2 py-0.5 rounded-[3px] text-[10px] uppercase tracking-wider shadow-[0_0_10px_rgba(239,68,68,0.5)] z-10 select-none">
                       Tập {movie.episodeCount}
                     </div>
                   )}
@@ -771,6 +806,7 @@ export default function HomeClient({ initialMovies = [] }: { initialMovies: Movi
           </div>
         )}
       </main>
+      <Footer />
     </div>
   );
 }

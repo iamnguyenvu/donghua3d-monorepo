@@ -7,6 +7,7 @@ import {
   PlusCircle, Film 
 } from 'lucide-react';
 import Header from '@/components/Header';
+import Footer from '@/components/Footer';
 import { 
   tierApi, 
   LeaderboardRowPayload, MoviePayload, PersonalTierPayload, Tier 
@@ -113,7 +114,7 @@ export default function LeaderboardClient({
   };
 
   return (
-    <div className="min-h-screen bg-[#050508] text-zinc-100 flex flex-col font-sans pb-24">
+    <div className="min-h-screen bg-[#050508] text-zinc-100 flex flex-col font-sans">
       <Header />
 
       {loading ? (
@@ -422,6 +423,7 @@ export default function LeaderboardClient({
         </div>
       </main>
       )}
+      <Footer />
     </div>
   );
 }

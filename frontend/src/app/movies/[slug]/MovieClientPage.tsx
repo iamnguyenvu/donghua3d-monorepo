@@ -8,6 +8,7 @@ import {
   Info, Plus, Check, Search, Book
 } from 'lucide-react';
 import Header from '@/components/Header';
+import Footer from '@/components/Footer';
 import { MovieWithEpisodes, ReviewPayload, watchlistApi, MoviePayload, cleanEpisodeTitle } from '@/lib/api';
 
 // Helper to strip diacritics / accents for seamless Vietnamese unaccented search
@@ -113,7 +114,7 @@ export default function MovieClientPage({
   };
 
   return (
-    <div className="min-h-screen bg-[#050508] text-zinc-100 flex flex-col font-sans pb-24">
+    <div className="min-h-screen bg-[#050508] text-zinc-100 flex flex-col font-sans">
       <Header />
 
       {/* ==============================================================================
@@ -482,7 +483,7 @@ export default function MovieClientPage({
               </h2>
             </div>
 
-            <div className="flex flex-col gap-4 max-h-[450px] overflow-y-auto pr-2 select-none">
+            <div className="flex flex-col gap-4 pr-2 select-none">
               {reviews.length > 0 ? (
                 reviews.map((rev) => (
                   <div key={rev.id} className="p-3.5 bg-zinc-950/40 border border-zinc-900 rounded-[4px] flex flex-col gap-2 shadow-sm">
@@ -512,6 +513,7 @@ export default function MovieClientPage({
         </div>
 
       </main>
+      <Footer />
     </div>
   );
 }

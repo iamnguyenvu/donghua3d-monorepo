@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { 
   Users, Film, MessageSquare, AlertTriangle, Star, Shield, 
   Trash2, CheckCircle, Award, Ban, Check, ArrowLeft, Loader2, RefreshCw,
-  Database, PlayCircle, Plus, Server, Clock, Activity, Edit, HelpCircle, X, LogOut
+  Database, PlayCircle, Plus, Server, Clock, Activity, Edit, HelpCircle, X, LogOut, Menu
 } from 'lucide-react';
 import { 
   adminApi, authApi, catalogApi, Role, AdminStatsPayload, AdminUserPayload, FlaggedCommentPayload, ScrapingQueueItem, MoviePayload, ScrapingLogPayload
@@ -19,6 +19,7 @@ export default function AdminDashboard() {
   // Authentication check states
   const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
   const [authChecking, setAuthChecking] = useState(true);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   // Stats and list states
   const [stats, setStats] = useState<AdminStatsPayload | null>(null);
@@ -454,22 +455,39 @@ export default function AdminDashboard() {
 
   return (
     <div className="min-h-screen bg-[#050508] text-zinc-100 flex font-sans">
+      {/* Mobile Sidebar backdrop */}
+      {sidebarOpen && (
+        <div 
+          onClick={() => setSidebarOpen(false)} 
+          className="fixed inset-0 z-20 bg-black/60 lg:hidden"
+        />
+      )}
+
       {/* SIDEBAR NAVIGATION (YouTube Studio Style) */}
-      <aside className="w-64 bg-zinc-950 border-r border-zinc-900 flex-shrink-0 flex flex-col justify-between fixed top-0 bottom-0 left-0 z-30 select-none">
+      <aside className={`w-64 bg-zinc-950 border-r border-zinc-900 flex-shrink-0 flex flex-col justify-between fixed top-0 bottom-0 left-0 z-30 select-none transition-transform duration-300 overflow-y-auto lg:translate-x-0 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
         <div className="flex flex-col gap-6">
           {/* Logo brand */}
           <div className="p-6 border-b border-zinc-900/60">
-            <Link href="/" className="flex items-center gap-3 text-white no-underline group select-none">
-              <div className="p-2 rounded-[4px] bg-violet-600 flex items-center justify-center transition-all duration-300 group-hover:bg-violet-500 shadow-md">
-                <Film className="w-4.5 h-4.5 text-white" />
-              </div>
-              <div className="flex flex-col">
-                <span className="font-sans font-black text-sm tracking-wider text-white uppercase leading-none">
-                  DONGHUA<span className="text-violet-500">3D</span>
-                </span>
-                <span className="text-[8px] text-violet-400 font-extrabold tracking-widest uppercase mt-1">ADMIN STUDIO</span>
-              </div>
-            </Link>
+            <div className="flex items-center justify-between">
+              <Link href="/" className="flex items-center gap-3 text-white no-underline group select-none">
+                <div className="p-2 rounded-[4px] bg-violet-600 flex items-center justify-center transition-all duration-300 group-hover:bg-violet-500 shadow-md">
+                  <Film className="w-4.5 h-4.5 text-white" />
+                </div>
+                <div className="flex flex-col">
+                  <span className="font-sans font-black text-sm tracking-wider text-white uppercase leading-none">
+                    DONGHUA<span className="text-violet-500">3D</span>
+                  </span>
+                  <span className="text-[8px] text-violet-400 font-extrabold tracking-widest uppercase mt-1">ADMIN STUDIO</span>
+                </div>
+              </Link>
+              {/* Mobile Close Button */}
+              <button 
+                onClick={() => setSidebarOpen(false)}
+                className="lg:hidden p-1.5 text-zinc-500 hover:text-white bg-transparent border-0 cursor-pointer outline-none"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
           </div>
 
           {/* User Profile Info */}
@@ -488,7 +506,7 @@ export default function AdminDashboard() {
           {/* Navigation Links */}
           <nav className="flex flex-col gap-1 px-3">
             <button
-              onClick={() => setActiveTab('analytics')}
+              onClick={() => { setActiveTab('analytics'); setSidebarOpen(false); }}
               className={`w-full text-left px-4 py-3 rounded-[4px] text-xs font-black uppercase tracking-wider flex items-center gap-3 border-0 cursor-pointer outline-none transition-all ${
                 activeTab === 'analytics'
                   ? 'bg-violet-600/10 text-violet-400 border-l-2 border-violet-600'
@@ -500,7 +518,7 @@ export default function AdminDashboard() {
             </button>
 
             <button
-              onClick={() => setActiveTab('users')}
+              onClick={() => { setActiveTab('users'); setSidebarOpen(false); }}
               className={`w-full text-left px-4 py-3 rounded-[4px] text-xs font-black uppercase tracking-wider flex items-center gap-3 border-0 cursor-pointer outline-none transition-all ${
                 activeTab === 'users'
                   ? 'bg-violet-600/10 text-violet-400 border-l-2 border-violet-600'
@@ -512,7 +530,7 @@ export default function AdminDashboard() {
             </button>
 
             <button
-              onClick={() => setActiveTab('movies')}
+              onClick={() => { setActiveTab('movies'); setSidebarOpen(false); }}
               className={`w-full text-left px-4 py-3 rounded-[4px] text-xs font-black uppercase tracking-wider flex items-center gap-3 border-0 cursor-pointer outline-none transition-all ${
                 activeTab === 'movies'
                   ? 'bg-violet-600/10 text-violet-400 border-l-2 border-violet-600'
@@ -524,7 +542,7 @@ export default function AdminDashboard() {
             </button>
 
             <button
-              onClick={() => setActiveTab('scraper')}
+              onClick={() => { setActiveTab('scraper'); setSidebarOpen(false); }}
               className={`w-full text-left px-4 py-3 rounded-[4px] text-xs font-black uppercase tracking-wider flex items-center gap-3 border-0 cursor-pointer outline-none transition-all ${
                 activeTab === 'scraper'
                   ? 'bg-violet-600/10 text-violet-400 border-l-2 border-violet-600'
@@ -536,7 +554,7 @@ export default function AdminDashboard() {
             </button>
 
             <button
-              onClick={() => setActiveTab('logs')}
+              onClick={() => { setActiveTab('logs'); setSidebarOpen(false); }}
               className={`w-full text-left px-4 py-3 rounded-[4px] text-xs font-black uppercase tracking-wider flex items-center gap-3 border-0 cursor-pointer outline-none transition-all ${
                 activeTab === 'logs'
                   ? 'bg-violet-600/10 text-violet-400 border-l-2 border-violet-600'
@@ -548,7 +566,7 @@ export default function AdminDashboard() {
             </button>
 
             <button
-              onClick={() => setActiveTab('comments')}
+              onClick={() => { setActiveTab('comments'); setSidebarOpen(false); }}
               className={`w-full text-left px-4 py-3 rounded-[4px] text-xs font-black uppercase tracking-wider flex items-center justify-between border-0 cursor-pointer outline-none transition-all ${
                 activeTab === 'comments'
                   ? 'bg-violet-600/10 text-violet-400 border-l-2 border-violet-600'
@@ -588,17 +606,28 @@ export default function AdminDashboard() {
       </aside>
 
       {/* MAIN CONTAINER */}
-      <div className="flex-grow pl-64 flex flex-col min-h-screen">
+      <div className="flex-grow lg:pl-64 flex flex-col min-h-screen transition-all duration-300">
         {/* Top Header Panel */}
-        <header className="h-20 bg-zinc-950/45 border-b border-zinc-900/60 px-8 flex items-center justify-between sticky top-0 z-20 backdrop-blur-md">
-          <div className="flex items-center gap-2.5">
-            <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest select-none">
-              Hệ thống
-            </span>
-            <span className="text-zinc-650 text-sm">/</span>
-            <span className="text-xs font-black text-white uppercase tracking-wider select-none">
-              {activeTab === 'analytics' ? 'Thống kê Tổng quan' : activeTab === 'users' ? 'Thành Viên' : activeTab === 'movies' ? 'Quản lý Phim' : activeTab === 'scraper' ? 'Nguồn & Convert' : activeTab === 'logs' ? 'Nhật ký Scraper' : 'Báo cáo vi phạm'}
-            </span>
+        <header className="h-20 bg-zinc-950/45 border-b border-zinc-900/60 px-4 sm:px-8 flex items-center justify-between sticky top-0 z-20 backdrop-blur-md">
+          <div className="flex items-center gap-3">
+            {/* Mobile Hamburger Toggle */}
+            <button
+              onClick={() => setSidebarOpen(!sidebarOpen)}
+              className="lg:hidden p-2 text-zinc-400 hover:text-white bg-transparent border-0 cursor-pointer outline-none flex items-center justify-center transition-colors"
+              title="Menu"
+            >
+              <Menu className="w-5 h-5" />
+            </button>
+            
+            <div className="flex items-center gap-2.5">
+              <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest select-none hidden xxs:inline">
+                Hệ thống
+              </span>
+              <span className="text-zinc-650 text-sm hidden xxs:inline">/</span>
+              <span className="text-xs font-black text-white uppercase tracking-wider select-none">
+                {activeTab === 'analytics' ? 'Thống kê Tổng quan' : activeTab === 'users' ? 'Thành Viên' : activeTab === 'movies' ? 'Quản lý Phim' : activeTab === 'scraper' ? 'Nguồn & Convert' : activeTab === 'logs' ? 'Nhật ký Scraper' : 'Báo cáo vi phạm'}
+              </span>
+            </div>
           </div>
 
           <div className="flex items-center gap-3.5">

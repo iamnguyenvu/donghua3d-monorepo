@@ -5,6 +5,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { Heart, Star, Film, Loader2, ArrowLeft, Trash2, LayoutGrid, Play } from 'lucide-react';
 import Header from '../../components/Header';
+import Footer from '../../components/Footer';
 import { watchlistApi, authApi, MoviePayload, UserPayload } from '../../lib/api';
 
 export default function WatchlistPage() {
@@ -55,7 +56,7 @@ export default function WatchlistPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#050508] text-zinc-100 flex flex-col font-sans pb-24">
+    <div className="min-h-screen bg-[#050508] text-zinc-100 flex flex-col font-sans">
       <Header />
 
       <main className="w-full px-6 md:px-12 lg:px-16 mt-28 flex-grow flex flex-col">
@@ -131,7 +132,7 @@ export default function WatchlistPage() {
                     </div>
                     
                     {/* Rating Badge */}
-                    <div className="absolute top-2.5 right-2.5 bg-black/80 backdrop-blur-md border border-amber-400/25 text-amber-400 px-1.5 py-1 rounded-[4px] text-[9px] font-extrabold flex items-center gap-0.5 z-10 shadow-md select-none">
+                    <div className="absolute top-1.5 right-1.5 bg-black/80 backdrop-blur-md border border-amber-400/25 text-amber-400 px-1.5 py-1 rounded-[4px] text-[9px] font-extrabold flex items-center gap-0.5 z-10 shadow-md select-none">
                       {movie.rating > 0 ? (
                         <>
                           <Star className="w-2.5 h-2.5 fill-amber-400 text-amber-400" />
@@ -143,11 +144,11 @@ export default function WatchlistPage() {
                     </div>
                   </Link>
 
-                  {/* Quick Action Overlay (Trash Button to remove item) */}
+                  {/* Remove from watchlist action overlay button (Touch friendly larger tap targets) */}
                   <button
                     onClick={(e) => handleRemove(movie.id, e)}
                     disabled={removingId === movie.id}
-                    className="absolute bottom-2.5 right-2.5 p-1.5 rounded-[2px] bg-black/80 hover:bg-violet-600 border border-zinc-800/80 text-zinc-400 hover:text-white transition-all z-20 shadow-md cursor-pointer outline-none"
+                    className="absolute bottom-1.5 right-1.5 p-1.5 rounded-[2px] bg-black/80 hover:bg-violet-600 border border-zinc-800/80 text-zinc-400 hover:text-white transition-all z-20 shadow-md cursor-pointer outline-none"
                     title="Xóa khỏi danh sách"
                   >
                     {removingId === movie.id ? (
@@ -191,6 +192,7 @@ export default function WatchlistPage() {
           </div>
         )}
       </main>
+      <Footer />
     </div>
   );
 }
