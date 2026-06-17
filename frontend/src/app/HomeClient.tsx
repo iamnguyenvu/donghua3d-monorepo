@@ -404,7 +404,7 @@ export default function HomeClient({ initialMovies = [] }: { initialMovies: Movi
             </h2>
           </div>
 
-          <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-8 2xl:grid-cols-10 gap-3">
+          <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-7 2xl:grid-cols-7 gap-4">
             {movies
               .filter(m => m.leaderboard?.globalTier === 'S')
               .slice(0, 10)
@@ -561,7 +561,7 @@ export default function HomeClient({ initialMovies = [] }: { initialMovies: Movi
             </h2>
           </div>
           
-          <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-8 2xl:grid-cols-10 gap-x-3 gap-y-6">
+          <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-7 2xl:grid-cols-7 gap-x-4 gap-y-8">
             {recentlyUpdatedMovies.map(movie => (
               <Link href={`/movies/${movie.slug || movie.id}`} key={`recent-${movie.id}`} className="no-underline group flex flex-col gap-2">
                 {/* Poster Frame */}
@@ -706,7 +706,7 @@ export default function HomeClient({ initialMovies = [] }: { initialMovies: Movi
             ))}
           </div>
         ) : filteredMovies.length > 0 ? (
-          <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-8 2xl:grid-cols-10 gap-x-3 gap-y-6">
+          <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-7 2xl:grid-cols-7 gap-x-4 gap-y-8">
             {filteredMovies.map((movie) => (
               <Link href={`/movies/${movie.slug || movie.id}`} key={movie.id} className="no-underline group flex flex-col gap-2">
                 {/* Poster Frame */}
