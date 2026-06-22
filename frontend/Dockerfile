@@ -11,6 +11,7 @@ COPY . .
 
 # Pass build environment variables if needed
 ENV NEXT_TELEMETRY_DISABLED=1
+ENV NODE_OPTIONS="--max-old-space-size=1024"
 RUN npm run build
 
 EXPOSE 3000

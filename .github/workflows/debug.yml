@@ -1,0 +1,35 @@
+name: Debug VPS Docker Logs
+
+on:
+  workflow_dispatch:
+    inputs:
+      lines:
+        description: 'Number of log lines to tail'
+        required: true
+        default: '200'
+
+jobs:
+  debug:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Fetch Docker Logs from VPS
+        uses: appleboy/ssh-action@v0.1.10
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          script: |
+            cd /app/donghua3d-monorepo
+            echo "=== SYSTEM STATUS ==="
+            free -m
+            df -h
+            echo "=== DOCKER CONTAINERS ==="
+            docker ps -a
+            echo "=== NGINX LOGS ==="
+            docker compose logs --tail=${{ github.event.inputs.lines }} nginx
+            echo "=== FRONTEND LOGS ==="
+            docker compose logs --tail=${{ github.event.inputs.lines }} frontend
+            echo "=== BACKEND LOGS ==="
+            docker compose logs --tail=${{ github.event.inputs.lines }} backend
+            echo "=== DATABASE LOGS ==="
+            docker compose logs --tail=${{ github.event.inputs.lines }} db
