@@ -117,7 +117,14 @@ async function run() {
         'snow eagle lord',     // Tuyết Ưng Lĩnh Chủ người đóng
         'nhiên hồn chiến',     // Đấu La Đại Lục người đóng
         'đấu la đại lục: nhiên hồn chiến',
-        'the land of warriors' // Đấu La Đại Lục người đóng
+        'the land of warriors', // Đấu La Đại Lục người đóng
+        // === Bổ sung 22/06/2026 ===
+        'martial universe 2018', // Vũ Động Càn Khôn bản truyền hình (Dương Dương, 2018)
+        'wu dong qian kun 2018', // Vũ Động Càn Khôn live-action
+        'the immortal ascension', // Phàm Nhân Tu Tiên Truyện live-action (2025)
+        'pham nhan tu tien truyen', // Phàm Nhân Tu Tiên bản người đóng
+        'stellar transformation live', // Tinh Thần Biến bản người đóng (nếu có)
+        'tuyet-ung-linh-chu-2022'  // Slug live-action Tuyết Ưng Lĩnh Chủ (Hứa Khải, 40 tập)
       ];
 
       for (const pattern of LIVE_ACTION_PATTERNS) {

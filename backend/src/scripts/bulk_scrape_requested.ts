@@ -144,6 +144,128 @@ const SERIES_GROUPS: SeriesGroup[] = [
     items: [
       { slug: 'tien-nghich', label: 'Phần 1' }
     ]
+  },
+  // ====================================================================
+  // NHÓM BỔ SUNG MỚI — Đã xác minh slug OPhim API 22/06/2026
+  // ====================================================================
+  {
+    seriesName: 'Vũ Trụ Thôn Phệ Tinh Không',
+    items: [
+      { slug: 'thon-tinh-bau-troi', label: 'Bản TV (208 tập)' },
+      { slug: 'thon-phe-tinh-khong-huyet-lac-dai-luc', label: 'Movie: Huyết Lạc Đại Lục' },
+      { slug: 'thon-phe-tinh-khong-movie-quyet-chien-nguyen-thuy-tinh', label: 'Movie: Nguyên Thủy Tinh' }
+    ]
+  },
+  {
+    seriesName: 'Vũ Trụ Thần Ấn Vương Toạ',
+    items: [
+      { slug: 'than-an-vuong-toa', label: 'Bản TV (208+ tập)' }
+    ]
+  },
+  {
+    seriesName: 'Thương Nguyên Đồ',
+    items: [
+      { slug: 'thuong-nguyen-do', label: 'Phần 1' }
+    ]
+  },
+  {
+    seriesName: 'Vũ Trụ Vũ Động Càn Khôn',
+    items: [
+      { slug: 'vu-dong-can-khon', label: 'Phần 1' },
+      { slug: 'vu-dong-can-khon-phan-2', label: 'Phần 2' },
+      { slug: 'vu-dong-can-khon-phan-3', label: 'Phần 3' },
+      { slug: 'vu-dong-can-khon-phan-4', label: 'Phần 4' },
+      { slug: 'vu-dong-can-khon-phan-5', label: 'Phần 5' },
+      { slug: 'vu-dong-can-khon-niet-ban-than-thach', label: 'Movie: Niết Bàn Thần Thạch' }
+    ]
+  },
+  {
+    seriesName: 'Vũ Trụ Tinh Thần Biến',
+    items: [
+      { slug: 'tinh-than-bien-phan-1', label: 'Phần 1' },
+      { slug: 'tinh-than-bien-phan-2', label: 'Phần 2' },
+      { slug: 'tinh-than-bien-phan-3', label: 'Phần 3' },
+      { slug: 'tinh-than-bien-phan-4', label: 'Phần 4' },
+      { slug: 'tinh-than-bien-phan-5', label: 'Phần 5' },
+      { slug: 'tinh-than-bien-phan-6', label: 'Phần 6' }
+    ]
+  },
+  {
+    seriesName: 'Tuyết Ưng Lĩnh Chủ',
+    items: [
+      { slug: 'tuyet-ung-linh-chu', label: 'Bản Hoạt Hình (78 tập)' }
+    ]
+  },
+  {
+    seriesName: 'Vũ Trụ Tây Hành Kỷ',
+    items: [
+      { slug: 'tay-hanh-ky-phan-1', label: 'Phần 1' },
+      { slug: 'tay-hanh-ky-phan-2', label: 'Phần 2' },
+      { slug: 'tay-hanh-ky-phan-3', label: 'Phần 3' },
+      { slug: 'tay-hanh-ky-phan-4', label: 'Phần 4' },
+      { slug: 'tay-hanh-ky-phan-5-ngoai-truyen', label: 'Phần 5 - Ngoại Truyện' },
+      { slug: 'the-westward-the-kingdom-of-shadow', label: 'Movie: Kingdom of Shadow' }
+    ]
+  },
+  // ====================================================================
+  // PHIM SEED-ONLY — Cần tích hợp vào crawler tự động cập nhật
+  // ====================================================================
+  {
+    seriesName: 'Thế Giới Hoàn Mỹ',
+    items: [
+      { slug: 'the-gioi-hoan-my', label: 'Bản TV (274+ tập)' }
+    ]
+  },
+  {
+    seriesName: 'Phàm Nhân Tu Tiên',
+    items: [
+      { slug: 'pham-nhan-tu-tien', label: 'Bản Hoạt Hình (176 tập)' }
+    ]
+  },
+  // ====================================================================
+  // NHÓM BỔ SUNG PHASE 2 — "Siêu phẩm cày cuốc" (Mì ăn liền nhưng cực Hot)
+  // ====================================================================
+  {
+    seriesName: 'Võ Thần Chúa Tể',
+    items: [
+      { slug: 'vo-than-chua-te', label: 'Bản TV (656+ tập)' }
+    ]
+  },
+  {
+    seriesName: 'Linh Kiếm Tôn',
+    items: [
+      { slug: 'linh-kiem-ton', label: 'Bản TV (660+ tập)' }
+    ]
+  },
+  {
+    seriesName: 'Vô Thượng Thần Đế',
+    items: [
+      { slug: 'vo-thuong-than-de', label: 'Bản TV (595+ tập)' }
+    ]
+  },
+  {
+    seriesName: 'Nghịch Thiên Chí Tôn',
+    items: [
+      { slug: 'nghich-thien-chi-ton', label: 'Bản TV (513+ tập)' }
+    ]
+  },
+  {
+    seriesName: 'Yêu Thần Ký',
+    items: [
+      { slug: 'yeu-than-ky', label: 'Bản TV (432+ tập)' }
+    ]
+  },
+  {
+    seriesName: 'Luyện Khí Mười Vạn Năm',
+    items: [
+      { slug: 'luyen-khi-muoi-van-nam', label: 'Bản TV (349+ tập)' }
+    ]
+  },
+  {
+    seriesName: 'Tiên Võ Đế Tôn',
+    items: [
+      { slug: 'tien-vo-de-ton-3d', label: 'Bản TV (3D)' }
+    ]
   }
 ];
 
