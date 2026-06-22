@@ -266,6 +266,12 @@ const SERIES_GROUPS: SeriesGroup[] = [
     items: [
       { slug: 'tien-vo-de-ton-3d', label: 'Bản TV (3D)' }
     ]
+  },
+  {
+    seriesName: 'Nhất Niệm Vĩnh Hằng',
+    items: [
+      { slug: 'nhat-niem-vinh-hang-2020', label: 'Bản TV (165+ tập)' }
+    ]
   }
 ];
 

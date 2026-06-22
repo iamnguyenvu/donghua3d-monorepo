@@ -167,6 +167,7 @@ export interface MoviePayload {
   releaseYear: number;
   posterUrl?: string;
   bannerUrl?: string;
+  trailerUrl?: string;
   rating: number;
   expertRating: number;
   audienceRating: number;

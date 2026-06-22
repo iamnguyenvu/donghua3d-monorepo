@@ -266,13 +266,25 @@ export default function HomeClient({ initialMovies = [] }: { initialMovies: Movi
       <section className="relative w-full h-[80vh] flex items-center overflow-hidden border-b border-zinc-900/40 group/hero">
         {/* Background Overlay Backdrop */}
         <div className="absolute inset-0 z-0">
-          <Image
-            src={heroMovie.posterUrl || heroMovie.bannerUrl || ''}
-            alt={heroMovie.title}
-            fill
-            priority
-            className="object-cover opacity-45 scale-100 transition-all duration-1000 ease-out"
-          />
+          {heroMovie.trailerUrl ? (
+            <video
+              src={heroMovie.trailerUrl}
+              autoPlay
+              muted
+              loop
+              playsInline
+              className="object-cover w-full h-full opacity-45 scale-105 transition-all duration-1000 ease-out"
+              poster={heroMovie.bannerUrl || heroMovie.posterUrl}
+            />
+          ) : (
+            <Image
+              src={heroMovie.bannerUrl || heroMovie.posterUrl || ''}
+              alt={heroMovie.title}
+              fill
+              priority
+              className="object-cover opacity-45 scale-105 transition-all duration-1000 ease-out"
+            />
+          )}
           {/* Edge vignettes & smooth gradients */}
           <div className="absolute inset-0 bg-gradient-to-t from-[#050508] via-[#050508]/70 to-transparent" />
           <div className="absolute inset-0 bg-gradient-to-r from-[#050508] via-[#050508]/40 to-transparent" />
