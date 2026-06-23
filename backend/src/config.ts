@@ -12,6 +12,7 @@ export const config = {
   uploadDir: process.env.UPLOAD_DIR || path.join(__dirname, '../uploads'),
   clientUrl: process.env.CLIENT_URL || 'http://localhost',
   nodeEnv: process.env.NODE_ENV || 'development',
+  redisUrl: process.env.REDIS_URL || '',
   s3: {
     endpoint: process.env.S3_ENDPOINT || '',
     accessKeyId: process.env.S3_ACCESS_KEY_ID || '',

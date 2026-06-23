@@ -4,6 +4,7 @@ import { AuthenticatedRequest, requireAuth, requireRole } from '../middleware/au
 import { encodingService } from '../services/encoding.service';
 import { storageService } from '../services/storage.service';
 import { Role } from '@prisma/client';
+import redis from '../redis';
 
 const router = Router();
 
@@ -11,6 +12,17 @@ const router = Router();
 router.get('/movies', async (req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> => {
   try {
     const { year, search, sort } = req.query;
+
+    const cacheKey = `movies_list:${year || 'all'}:${search || 'none'}:${sort || 'default'}`;
+    const cachedData = await redis.get(cacheKey);
+
+    if (cachedData) {
+      res.status(200).json({
+        success: true,
+        data: JSON.parse(cachedData),
+      });
+      return;
+    }
 
     const whereClause: any = {};
     if (year) {
@@ -55,6 +67,8 @@ router.get('/movies', async (req: AuthenticatedRequest, res: Response, next: Nex
         episodeCount: m._count?.episodes ?? 0
       };
     });
+
+    await redis.set(cacheKey, JSON.stringify(mappedMovies), 'EX', 300); // Cache for 5 minutes
 
     res.status(200).json({
       success: true,

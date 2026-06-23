@@ -49,6 +49,10 @@ model User {
   role            Role               @default(USER)
   reputationScore Int                @default(100)
   veteranSince    DateTime?          @db.Timestamptz
+  level           Int                @default(1)
+  exp             Int                @default(0)
+  donghuaCoins    Int                @default(0)
+  cultivationRank String             @default("Luyện Khí Kỳ")
   createdAt       DateTime           @default(now()) @db.Timestamptz
   ratings         Rating[]
   comments        Comment[]

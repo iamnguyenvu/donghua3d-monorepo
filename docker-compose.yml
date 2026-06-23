@@ -18,6 +18,16 @@ services:
       timeout: 5s
       retries: 5
 
+  redis:
+    image: redis:7-alpine
+    container_name: donghua3d_redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --save 60 1 --loglevel warning
+
   backend:
     build:
       context: ./backend
@@ -29,6 +39,7 @@ services:
     environment:
       PORT: 5000
       DATABASE_URL: postgresql://${POSTGRES_USER:-donghua_db_admin}:${POSTGRES_PASSWORD:-production_secure_db_password_hash_2026}@db:5432/${POSTGRES_DB:-donghua_prod_db}?schema=public&connection_limit=10
+      REDIS_URL: "redis://redis:6379"
       JWT_SECRET: ${JWT_SECRET:-production_secure_jwt_secret_key_2026_donghua}
       STORAGE_PROVIDER: "LOCAL"
       UPLOAD_DIR: "/app/uploads"
@@ -71,4 +82,6 @@ volumes:
   postgres_data:
     driver: local
   shared_uploads:
+    driver: local
+  redis_data:
     driver: local
