@@ -147,12 +147,33 @@ jobs:
             NEXT_PUBLIC_API_URL="https://donghua3d.me/api"
             EOF
             
-            # Deploy optimized multi-container cluster using rolling updates
-            docker compose build
+            # === OOM Prevention: Create swap file if not exists ===
+            if [ ! -f /swapfile ]; then
+              sudo fallocate -l 2G /swapfile
+              sudo chmod 600 /swapfile
+              sudo mkswap /swapfile
+              sudo swapon /swapfile
+              echo '/swapfile none swap sw 0 0' | sudo tee -a /etc/fstab
+            fi
+            sudo swapon /swapfile 2>/dev/null || true
+            
+            # === Stop existing containers to free RAM for build ===
+            docker compose down || true
+            
+            # === Prune old images/cache first to free disk ===
+            docker image prune -f
+            docker builder prune -f 2>/dev/null || true
+            
+            # === Build containers ONE BY ONE to avoid OOM ===
+            docker compose build db redis nginx
+            docker compose build backend
+            docker compose build frontend
+            
+            # === Start everything ===
             docker compose up -d
             
             # Wait for database container to boot completely
-            sleep 5
+            sleep 8
             
             # Force schema sync in the backend container
             docker compose exec -T backend npx prisma db push --accept-data-loss

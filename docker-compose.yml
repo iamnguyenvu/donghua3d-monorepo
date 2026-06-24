@@ -12,6 +12,10 @@ services:
       POSTGRES_DB: ${POSTGRES_DB:-donghua_prod_db}
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    deploy:
+      resources:
+        limits:
+          memory: 256M
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-donghua_db_admin} -d ${POSTGRES_DB:-donghua_prod_db}"]
       interval: 5s
@@ -26,7 +30,11 @@ services:
       - "6379:6379"
     volumes:
       - redis_data:/data
-    command: redis-server --save 60 1 --loglevel warning
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+    command: redis-server --save 60 1 --loglevel warning --maxmemory 100mb --maxmemory-policy allkeys-lru
 
   backend:
     build:
@@ -44,11 +52,17 @@ services:
       STORAGE_PROVIDER: "LOCAL"
       UPLOAD_DIR: "/app/uploads"
       CLIENT_URL: "https://donghua3d.me"
+    deploy:
+      resources:
+        limits:
+          memory: 384M
     volumes:
       - shared_uploads:/app/uploads
     depends_on:
       db:
         condition: service_healthy
+      redis:
+        condition: service_started
 
   frontend:
     build:
@@ -61,6 +75,10 @@ services:
     environment:
       NEXT_PUBLIC_API_URL: "https://donghua3d.me/api"
       INTERNAL_API_URL: "http://backend:5000"
+    deploy:
+      resources:
+        limits:
+          memory: 512M
     depends_on:
       - backend
 
@@ -71,6 +89,10 @@ services:
     ports:
       - "80:80"
       - "443:443"
+    deploy:
+      resources:
+        limits:
+          memory: 64M
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
       - shared_uploads:/usr/share/nginx/html/static/uploads
