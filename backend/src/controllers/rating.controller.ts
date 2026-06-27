@@ -2,6 +2,7 @@ import { Router, Response, NextFunction } from 'express';
 import { prisma } from '../db';
 import { AuthenticatedRequest, requireAuth } from '../middleware/auth.middleware';
 import { RatingType, Role } from '@prisma/client';
+import { cultivationService } from '../services/cultivation.service';
 
 const router = Router();
 
@@ -173,6 +174,10 @@ router.post('/', requireAuth, async (req: AuthenticatedRequest, res: Response, n
     // Recalculate episode and movie statistics in background
     recalculateMovieAndEpisodeRatings(movieId, episodeId)
       .catch((err) => console.error('[Rating Engine Error] Failed background recalculation:', err.message));
+
+    // Award +30 EXP and +5 Linh Thạch in the background
+    cultivationService.awardCultivationRewards(userId, 30, 5)
+      .catch((err) => console.error('[Cultivation Reward Error] Failed to reward rating:', err.message));
 
     res.status(200).json({
       success: true,

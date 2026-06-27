@@ -5,6 +5,7 @@ import { prisma } from '../db';
 import { config } from '../config';
 import { AuthenticatedRequest, requireAuth } from '../middleware/auth.middleware';
 import { Role } from '@prisma/client';
+import { cultivationService } from '../services/cultivation.service';
 
 const router = Router();
 
@@ -145,50 +146,21 @@ router.get('/me', requireAuth, async (req: AuthenticatedRequest, res: Response, 
   }
 });
 
-// Helper function to calculate cultivation rank
-function getCultivationRank(level: number): string {
-  if (level < 10) return "Luyện Khí Kỳ";
-  if (level < 20) return "Trúc Cơ Kỳ";
-  if (level < 30) return "Kim Đan Kỳ";
-  if (level < 40) return "Nguyên Anh Kỳ";
-  if (level < 50) return "Hóa Thần Kỳ";
-  if (level < 60) return "Luyện Hư Kỳ";
-  if (level < 70) return "Hợp Thể Kỳ";
-  if (level < 80) return "Đại Thừa Kỳ";
-  if (level < 90) return "Độ Kiếp Kỳ";
-  return "Tiên Nhân";
-}
-
 // 4. POST /api/auth/checkin (Daily Gamification Check-in)
 router.post('/checkin', requireAuth, async (req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> => {
   try {
-    const user = await prisma.user.findUnique({ where: { id: req.user!.id } });
+    const userId = req.user!.id;
+    const user = await prisma.user.findUnique({ where: { id: userId } });
     if (!user) {
-      res.status(404).json({ success: false, error: { code: 'NOT_FOUND', message: 'User not found' } });
+      res.status(404).json({ success: false, error: { code: 'NOT_FOUND', message: 'Người dùng không tồn tại.' } });
       return;
     }
 
-    // Give 50 Exp and 10 Donghua Coins per check-in
-    const newExp = user.exp + 50;
-    const requiredExp = user.level * 100;
-    
-    let newLevel = user.level;
-    let newRank = user.cultivationRank;
+    // Award 50 EXP and 10 Linh Thạch
+    await cultivationService.awardCultivationRewards(userId, 50, 10);
 
-    // Level up logic
-    if (newExp >= requiredExp) {
-      newLevel += 1;
-      newRank = getCultivationRank(newLevel);
-    }
-
-    const updatedUser = await prisma.user.update({
-      where: { id: user.id },
-      data: {
-        exp: newExp >= requiredExp ? newExp - requiredExp : newExp,
-        level: newLevel,
-        cultivationRank: newRank,
-        donghuaCoins: { increment: 10 }
-      },
+    const updatedUser = await prisma.user.findUnique({
+      where: { id: userId },
       select: { level: true, exp: true, donghuaCoins: true, cultivationRank: true }
     });
 

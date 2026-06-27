@@ -28,6 +28,7 @@ const API_BASE_URL = typeof window !== 'undefined'
 export interface ApiResponse<T> {
   success: boolean;
   data?: T;
+  message?: string;
   meta?: Record<string, unknown>;
   error?: {
     code: string;
@@ -83,6 +84,10 @@ export interface UserPayload {
   role: Role;
   reputationScore: number;
   veteranSince?: string;
+  level: number;
+  exp: number;
+  donghuaCoins: number;
+  cultivationRank: string;
   createdAt?: string;
 }
 
@@ -116,6 +121,12 @@ export const authApi = {
 
   async getMe(): Promise<ApiResponse<UserPayload>> {
     return apiFetch<UserPayload>('/auth/me');
+  },
+
+  async checkin(): Promise<ApiResponse<{ level: number; exp: number; donghuaCoins: number; cultivationRank: string }>> {
+    return apiFetch<{ level: number; exp: number; donghuaCoins: number; cultivationRank: string }>('/auth/checkin', {
+      method: 'POST',
+    });
   },
 
   logout(): void {

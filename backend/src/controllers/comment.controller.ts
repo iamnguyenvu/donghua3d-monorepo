@@ -2,6 +2,7 @@ import { Router, Response, NextFunction } from 'express';
 import { prisma } from '../db';
 import { AuthenticatedRequest, requireAuth } from '../middleware/auth.middleware';
 import { Role } from '@prisma/client';
+import { cultivationService } from '../services/cultivation.service';
 
 const router = Router();
 
@@ -76,6 +77,10 @@ router.post('/', requireAuth, async (req: AuthenticatedRequest, res: Response, n
         },
       },
     });
+
+    // Award +10 EXP and +2 Linh Thạch in the background
+    cultivationService.awardCultivationRewards(userId, 10, 2)
+      .catch((err) => console.error('[Cultivation Reward Error] Failed to reward comment:', err.message));
 
     res.status(201).json({
       success: true,

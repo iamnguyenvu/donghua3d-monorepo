@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { Film, Search, User, LogOut, Loader2, ChevronDown, Bell, Menu, X, Clock } from 'lucide-react';
+import { Film, Search, User, LogOut, Loader2, ChevronDown, Bell, Menu, X, Clock, Sparkles } from 'lucide-react';
 import { authApi, catalogApi, UserPayload, MoviePayload } from '../lib/api';
 
 interface HeaderProps {
@@ -450,7 +450,7 @@ export default function Header({ onSearchChange }: HeaderProps) {
                     >
                       <div className="flex flex-col text-right hidden xs:flex">
                         <span className="text-[11px] sm:text-xs font-black text-white max-w-[80px] sm:max-w-[120px] truncate tracking-tight">{user.email.split('@')[0]}</span>
-                        <span className="text-[8px] sm:text-[9px] text-violet-400 font-black uppercase tracking-widest mt-0.5">Rep: {user.reputationScore}</span>
+                        <span className="text-[8px] sm:text-[9px] text-amber-400 font-black uppercase tracking-widest mt-0.5">✨ {user.cultivationRank || 'Phàm Nhân'}</span>
                       </div>
                       <div className="flex items-center gap-1">
                         <div className="w-8 sm:w-9 h-8 sm:h-9 rounded-[4px] bg-violet-600 text-white font-black flex items-center justify-center text-xs sm:text-sm shadow-md transition-all duration-300 group-hover:scale-105 group-hover:bg-violet-500 ring-1 ring-violet-500/30">
@@ -464,11 +464,21 @@ export default function Header({ onSearchChange }: HeaderProps) {
                     {profileMenuOpen && (
                       <div className="absolute right-0 top-full pt-2 w-56 animate-fade-in-up z-50">
                         <div className="bg-[#0c0c10]/95 backdrop-blur-xl border border-zinc-900 rounded-[4px] p-2.5 shadow-[0_10px_40px_rgba(0,0,0,0.8)] flex flex-col gap-1">
-                          {/* User info section inside dropdown for mobile/tablet where text is hidden */}
-                          <div className="px-3 py-2 border-b border-zinc-900/60 flex flex-col gap-0.5 xs:hidden">
+                          {/* User info section inside dropdown */}
+                          <div className="px-3 py-2 border-b border-zinc-900/60 flex flex-col gap-0.5">
                             <span className="text-xs font-black text-white truncate">{user.email}</span>
-                            <span className="text-[9px] text-violet-400 font-black uppercase tracking-widest">Rep: {user.reputationScore}</span>
+                            <span className="text-[9px] text-amber-400 font-black uppercase tracking-widest">✨ {user.cultivationRank || 'Phàm Nhân'} (Lv.{user.level || 1})</span>
+                            <span className="text-[9px] text-violet-400 font-black uppercase tracking-widest">💎 {user.donghuaCoins || 0} Linh Thạch</span>
                           </div>
+
+                          <Link
+                            href="/cultivation"
+                            onClick={() => setProfileMenuOpen(false)}
+                            className="flex items-center gap-2.5 px-3 py-2.5 rounded-[2px] text-xs font-bold text-amber-400 hover:text-amber-300 hover:bg-amber-500/10 transition-all no-underline"
+                          >
+                            <Sparkles className="w-4 h-4 text-amber-400 animate-pulse" />
+                            <span>Động Phủ Tu Luyện</span>
+                          </Link>
                           
                           {/* Admin Dashboard Option if role is ADMIN */}
                           {user.role === 'ADMIN' && (
