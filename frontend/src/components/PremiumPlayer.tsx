@@ -14,6 +14,8 @@ import {
   SkipForward, SkipBack, Settings, Loader2, Sparkles,
   Lightbulb, ToggleLeft, ToggleRight, List
 } from 'lucide-react';
+import { io } from 'socket.io-client';
+import { danmakuApi, DanmakuPayload, authApi } from '../lib/api';
 
 interface PremiumPlayerProps {
   src: string;
@@ -90,6 +92,54 @@ export default function PremiumPlayer({
   const [showResumePrompt, setShowResumePrompt] = useState(false);
   const [isCinemaMode, setIsCinemaMode] = useState(false);
 
+  // Real-time Danmaku States
+  const [danmakus, setDanmakus] = useState<DanmakuPayload[]>([]);
+  interface VisibleDanmaku extends DanmakuPayload {
+    top: number;
+    idStr: string;
+  }
+  const [visibleDanmakus, setVisibleDanmakus] = useState<VisibleDanmaku[]>([]);
+  const [isDanmakuEnabled, setIsDanmakuEnabled] = useState<boolean>(true);
+  const [danmakuInput, setDanmakuInput] = useState<string>('');
+  const [danmakuColor, setDanmakuColor] = useState<string>('#ffffff');
+  const socketRef = useRef<any>(null);
+  const lastCheckedTimeRef = useRef<number>(-1);
+
+  // Load Danmakus & Setup WebSocket Connection
+  useEffect(() => {
+    if (!episodeId) return;
+
+    // Fetch initial list of danmakus via REST API
+    async function loadDanmakus() {
+      const res = await danmakuApi.getDanmakus(episodeId!);
+      if (res.success && res.data) {
+        setDanmakus(res.data);
+      }
+    }
+    loadDanmakus();
+
+    // Connect to WebSocket Server for Real-time broadcasts
+    const socketUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+    const ioUrl = socketUrl.replace('/api', '');
+    const socket = io(ioUrl, {
+      transports: ['websocket'],
+      withCredentials: true
+    });
+    socketRef.current = socket;
+
+    socket.emit('join-episode', { episodeId });
+
+    socket.on('new-danmaku', (newDan: DanmakuPayload) => {
+      setDanmakus((prev) => [...prev, newDan]);
+      // If danmaku color/text matches, we can also push to visible in real-time if player is playing
+      // but adding to danmakus list ensures the next time update picks it up naturally.
+    });
+
+    return () => {
+      socket.disconnect();
+    };
+  }, [episodeId]);
+
   // Prevent page scroll when cinema mode is active
   useEffect(() => {
     if (isCinemaMode) {
@@ -146,6 +196,69 @@ export default function PremiumPlayer({
       });
     }
     setShowResumePrompt(false);
+  };
+
+  const handleSendDanmaku = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!danmakuInput.trim()) return;
+
+    const token = localStorage.getItem('donghua3d_token');
+    if (!token) {
+      alert('Vui lòng đăng nhập để gửi bình luận đạn bay (Danmaku)!');
+      return;
+    }
+
+    try {
+      const userRes = await authApi.getMe();
+      if (!userRes.success || !userRes.data) {
+        alert('Phiên đăng nhập hết hạn. Vui lòng đăng nhập lại!');
+        return;
+      }
+      
+      const user = userRes.data;
+      const player = activePlayerRef.current;
+      const playhead = player ? player.currentTime : 0;
+
+      const payload = {
+        movieId: movieId || '',
+        episodeId: episodeId || '',
+        text: danmakuInput.trim(),
+        time: playhead,
+        color: danmakuColor,
+        style: 'scroll'
+      };
+
+      if (socketRef.current && socketRef.current.connected) {
+        socketRef.current.emit('send-danmaku', {
+          ...payload,
+          userId: user.id
+        });
+        
+        // Optimistic local update
+        const localDan: DanmakuPayload = {
+          id: `local-${Date.now()}`,
+          text: payload.text,
+          time: payload.time,
+          color: payload.color,
+          style: payload.style,
+          createdAt: new Date().toISOString(),
+          user: {
+            id: user.id,
+            email: user.email
+          }
+        };
+        setDanmakus((prev) => [...prev, localDan]);
+      } else {
+        const res = await danmakuApi.postDanmaku(payload);
+        if (res.success && res.data) {
+          setDanmakus((prev) => [...prev, res.data!]);
+        }
+      }
+
+      setDanmakuInput('');
+    } catch (err: any) {
+      console.error('Error posting danmaku:', err);
+    }
   };
 
   const handleSetQuality = (q: '1080p' | '4K') => {
@@ -301,6 +414,9 @@ export default function PremiumPlayer({
             sources={sources}
             selectedServer={selectedServer}
             onSelectServer={onSelectServer}
+            isDanmakuEnabled={isDanmakuEnabled}
+            setIsDanmakuEnabled={setIsDanmakuEnabled}
+            danmakus={danmakus}
           />
         </MediaPlayer>
 
@@ -377,6 +493,38 @@ export default function PremiumPlayer({
             </div>
           </div>
         )}
+      {/* REAL-TIME DANMAKU INPUT BAR */}
+      {isDanmakuEnabled && !isWatchParty && (
+        <form onSubmit={handleSendDanmaku} className="w-full flex items-center gap-2.5 p-3.5 mt-3 bg-[#0c0c10]/40 border border-zinc-900/60 rounded-[4px] backdrop-blur-md select-none shadow-[0_4px_30px_rgba(0,0,0,0.4)]">
+          <div className="flex items-center gap-1.5 text-[10px] font-black text-zinc-400 uppercase tracking-widest pl-1">
+            <Sparkles className="w-3.5 h-3.5 text-violet-400 animate-pulse" />
+            <span className="hidden sm:inline">Bình luận đạn</span>
+          </div>
+          <input
+            type="text"
+            placeholder="Gửi bình luận đạn chạy ngang màn hình..."
+            value={danmakuInput}
+            onChange={(e) => setDanmakuInput(e.target.value)}
+            className="flex-grow px-3.5 py-2.5 bg-black/60 border border-zinc-850 hover:border-zinc-850 focus:border-violet-500/50 rounded-[4px] text-xs text-zinc-200 placeholder-zinc-600 outline-none transition-all"
+          />
+          {/* Color picker styled neatly */}
+          <div className="relative flex items-center bg-[#07070a] border border-zinc-850 rounded-[4px] p-1.5 hover:border-zinc-800 transition-colors">
+            <input
+              type="color"
+              value={danmakuColor}
+              onChange={(e) => setDanmakuColor(e.target.value)}
+              className="w-6 h-6 rounded-[2px] cursor-pointer bg-transparent border-0 p-0"
+              title="Chọn màu bình luận"
+            />
+          </div>
+          <button
+            type="submit"
+            className="px-5 py-2.5 bg-violet-600 hover:bg-violet-700 text-white font-extrabold text-[10px] uppercase tracking-wider rounded-[4px] border-0 cursor-pointer shadow-md shadow-violet-600/10 hover:shadow-violet-600/30 transition-all hover:scale-[1.02] active:scale-[0.98] flex items-center gap-1.5 outline-none"
+          >
+            <span>Bắn</span>
+          </button>
+        </form>
+      )}
       </div>
     </div>
   );
@@ -403,6 +551,9 @@ interface CustomControlsProps {
   sources?: { id: string; serverName: string; videoUrl: string }[];
   selectedServer?: string;
   onSelectServer?: (server: string) => void;
+  isDanmakuEnabled: boolean;
+  setIsDanmakuEnabled: (val: boolean) => void;
+  danmakus: DanmakuPayload[];
 }
 
 function CustomControls({
@@ -423,7 +574,10 @@ function CustomControls({
   movieSlug,
   sources,
   selectedServer,
-  onSelectServer
+  onSelectServer,
+  isDanmakuEnabled,
+  setIsDanmakuEnabled,
+  danmakus
 }: CustomControlsProps) {
   const remote = useMediaRemote();
 
@@ -437,6 +591,46 @@ function CustomControls({
     fullscreen = false, 
     waiting = false 
   } = useMediaStore();
+
+  // Real-time Danmaku States inside controls overlay
+  interface VisibleDanmaku extends DanmakuPayload {
+    top: number;
+    idStr: string;
+  }
+  const [visibleDanmakus, setVisibleDanmakus] = useState<VisibleDanmaku[]>([]);
+  const lastCheckedTimeRef = useRef<number>(-1);
+
+  // Trigger danmakus at correct currentTime playback points
+  useEffect(() => {
+    if (paused || !isDanmakuEnabled || danmakus.length === 0) return;
+
+    const currentSecond = Math.floor(currentTime);
+    if (currentSecond === lastCheckedTimeRef.current) return;
+    lastCheckedTimeRef.current = currentSecond;
+
+    // Find danmakus matching this exact second
+    const matches = danmakus.filter(
+      (d) => Math.floor(d.time) === currentSecond
+    );
+
+    if (matches.length > 0) {
+      setVisibleDanmakus((prev) => {
+        if (prev.length > 30) return prev; // Limit maximum concurrency to avoid overlay cluttering
+
+        const newItems = matches.map((d, idx) => {
+          // Assign track channel index (0 to 7) to avoid vertical text overlaps
+          const top = (prev.length + idx) % 8;
+          return {
+            ...d,
+            top,
+            idStr: `${d.id}-${Date.now()}-${idx}`,
+          };
+        });
+
+        return [...prev, ...newItems];
+      });
+    }
+  }, [currentTime, paused, danmakus, isDanmakuEnabled]);
 
   // Local State to track mouse inactivity for hiding cursor
   const [isMouseInactive, setIsMouseInactive] = useState(false);
@@ -744,6 +938,28 @@ function CustomControls({
 
   return (
     <>
+      {/* DANMAKU FLOATING OVERLAY LAYER */}
+      {isDanmakuEnabled && (
+        <div className="absolute inset-x-0 top-0 h-[70%] pointer-events-none overflow-hidden z-25">
+          {visibleDanmakus.map((d) => (
+            <div
+              key={d.idStr}
+              onAnimationEnd={() => {
+                setVisibleDanmakus((prev) => prev.filter((x) => x.idStr !== d.idStr));
+              }}
+              className="animate-danmaku-scroll select-none pointer-events-none text-xs md:text-sm font-extrabold"
+              style={{
+                top: `${d.top * 32 + 16}px`, // Distribute vertically across tracks
+                color: d.color,
+                textShadow: '1px 1px 2px #000, -1px -1px 2px #000, 1px -1px 2px #000, -1px 1px 2px #000'
+              }}
+            >
+              {d.text}
+            </div>
+          ))}
+        </div>
+      )}
+
       {/* Mobile Double Tap Seek Zones (Touch Only) */}
       <div className="absolute inset-x-0 top-0 bottom-16 z-20 flex pointer-events-none md:hidden">
         <div 
@@ -929,6 +1145,18 @@ function CustomControls({
               >
                 <Lightbulb className="w-3.5 h-3.5" />
                 <span>{isCinemaMode ? 'Bật đèn' : 'Tắt đèn'}</span>
+              </button>
+
+              <span className="text-zinc-700">|</span>
+
+              {/* Danmaku Toggle */}
+              <button
+                onClick={() => setIsDanmakuEnabled(!isDanmakuEnabled)}
+                className={`flex items-center gap-1.5 px-2.5 py-1 rounded-[2px] text-xs font-bold transition-all cursor-pointer outline-none border-0 ${isDanmakuEnabled ? 'text-violet-400 bg-violet-500/10 border border-violet-500/20' : 'text-zinc-400 hover:bg-white/5 hover:text-white'}`}
+                title="Bật/tắt bình luận đạn bay (Danmaku)"
+              >
+                <Sparkles className="w-3.5 h-3.5" />
+                <span>Danmaku</span>
               </button>
             </div>
           </div>

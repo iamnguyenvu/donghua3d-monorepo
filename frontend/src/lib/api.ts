@@ -336,6 +336,19 @@ export interface CommentPayload {
   };
 }
 
+export interface DanmakuPayload {
+  id: string;
+  text: string;
+  time: number;
+  color: string;
+  style: string;
+  createdAt: string;
+  user: {
+    id: string;
+    email: string;
+  };
+}
+
 export const commentApi = {
   async getComments(movieId: string, episodeId?: string): Promise<ApiResponse<CommentPayload[]>> {
     const query = episodeId ? `?episodeId=${episodeId}` : '';
@@ -365,6 +378,19 @@ export const commentApi = {
   async deleteComment(id: string): Promise<ApiResponse<unknown>> {
     return apiFetch<unknown>(`/comments/${id}`, {
       method: 'DELETE',
+    });
+  }
+};
+
+export const danmakuApi = {
+  async getDanmakus(episodeId: string): Promise<ApiResponse<DanmakuPayload[]>> {
+    return apiFetch<DanmakuPayload[]>(`/danmaku/episode/${episodeId}`);
+  },
+
+  async postDanmaku(payload: { movieId: string; episodeId: string; text: string; time: number; color?: string; style?: string }): Promise<ApiResponse<DanmakuPayload>> {
+    return apiFetch<DanmakuPayload>('/danmaku', {
+      method: 'POST',
+      body: JSON.stringify(payload),
     });
   }
 };

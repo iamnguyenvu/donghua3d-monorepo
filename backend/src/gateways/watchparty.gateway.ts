@@ -1,4 +1,5 @@
 import { Server, Socket } from 'socket.io';
+import { prisma } from '../db';
 
 interface RoomState {
   playing: boolean;
@@ -15,6 +16,69 @@ export function setupWatchPartyGateway(io: Server) {
 
   io.on('connection', (socket: Socket) => {
     console.log(`💬 [Socket.io] Client connected: ${socket.id}`);
+
+    // ==============================================================================
+    // REAL-TIME DANMAKU (BULLET COMMENTS) LOGIC
+    // ==============================================================================
+    
+    // Join Episode Room for Danmaku
+    socket.on('join-episode', (data: { episodeId: string }) => {
+      const { episodeId } = data;
+      socket.join(`episode-${episodeId}`);
+      console.log(`💬 [Socket.io] Client ${socket.id} joined episode room: episode-${episodeId}`);
+    });
+
+    // Send Danmaku via WebSocket
+    socket.on('send-danmaku', async (data: { 
+      userId: string; 
+      movieId: string; 
+      episodeId: string; 
+      text: string; 
+      time: number; 
+      color?: string; 
+      style?: string; 
+    }) => {
+      const { userId, movieId, episodeId, text, time, color, style } = data;
+      
+      try {
+        // Save to Database
+        const danmaku = await prisma.danmaku.create({
+          data: {
+            userId,
+            movieId,
+            episodeId,
+            text,
+            time: parseFloat(time as any),
+            color: color || '#ffffff',
+            style: style || 'scroll',
+          },
+          select: {
+            id: true,
+            text: true,
+            time: true,
+            color: true,
+            style: true,
+            createdAt: true,
+            user: {
+              select: {
+                id: true,
+                email: true,
+              }
+            }
+          }
+        });
+
+        // Broadcast to everyone else watching this episode in real-time
+        socket.to(`episode-${episodeId}`).emit('new-danmaku', danmaku);
+        console.log(`💬 [Socket.io] Broadcasted new danmaku for episode ${episodeId}: "${text}"`);
+      } catch (err: any) {
+        console.error('💥 [Socket.io Error] Failed to save danmaku:', err.message);
+      }
+    });
+
+    // ==============================================================================
+    // WATCH PARTY SYNC LOGIC
+    // ==============================================================================
 
     // Join Watch Party Room
     socket.on('join-room', (data: { roomId: string; username: string; movieId: string; episodeId: string }) => {

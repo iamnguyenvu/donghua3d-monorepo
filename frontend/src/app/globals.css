@@ -169,3 +169,24 @@ media-outlet video,
   margin: auto !important;
 }
 
+/* ==============================================================================
+   🔮 REAL-TIME DANMAKU (BULLET COMMENTS) ANIMATIONS
+   ============================================================================== */
+@keyframes danmakuScroll {
+  from {
+    left: 100%;
+    transform: translateX(0);
+  }
+  to {
+    left: 0;
+    transform: translateX(-100%);
+  }
+}
+
+.animate-danmaku-scroll {
+  position: absolute;
+  white-space: nowrap;
+  animation: danmakuScroll 8s linear forwards;
+  will-change: left, transform;
+}
+

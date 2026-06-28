@@ -56,6 +56,7 @@ model User {
   createdAt       DateTime           @default(now()) @db.Timestamptz
   ratings         Rating[]
   comments        Comment[]
+  danmakus        Danmaku[]
   watchHistories  WatchHistory[]
   personalTiers   PersonalTierList[]
   watchlist       Watchlist[]
@@ -91,6 +92,7 @@ model Movie {
   episodes      Episode[]
   ratings       Rating[]
   comments      Comment[]
+  danmakus      Danmaku[]
   personalTiers PersonalTierList[]
   leaderboard   GlobalTierLeaderboard?
   watchlist     Watchlist[]
@@ -133,6 +135,7 @@ model Episode {
   movie          Movie           @relation(fields: [movieId], references: [id], onDelete: Cascade)
   ratings        Rating[]
   comments       Comment[]
+  danmakus       Danmaku[]
   watchHistories WatchHistory[]
   sources        EpisodeSource[]
 
@@ -312,4 +315,23 @@ model MovieGenre {
 
   @@id([movieId, genreId])
   @@index([genreId], name: "idx_movie_genre")
+}
+
+// 14. Danmaku Model (Real-time bullet comments)
+model Danmaku {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId    String   @db.Uuid
+  movieId   String   @db.Uuid
+  episodeId String   @db.Uuid
+  text      String   @db.Text
+  time      Float    // offset in seconds in video player timeline
+  color     String   @default("#ffffff") @db.VarChar(50)
+  style     String   @default("scroll") @db.VarChar(50) // scroll, top, bottom
+  createdAt DateTime @default(now()) @db.Timestamptz
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  movie   Movie   @relation(fields: [movieId], references: [id], onDelete: Cascade)
+  episode Episode @relation(fields: [episodeId], references: [id], onDelete: Cascade)
+
+  @@index([episodeId, time])
 }
