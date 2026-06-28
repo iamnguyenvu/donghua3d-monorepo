@@ -14,7 +14,7 @@ import {
   SkipForward, SkipBack, Settings, Loader2, Sparkles,
   Lightbulb, ToggleLeft, ToggleRight, List
 } from 'lucide-react';
-import { io } from 'socket.io-client';
+import { io, Socket } from 'socket.io-client';
 import { danmakuApi, DanmakuPayload, authApi } from '../lib/api';
 
 interface PremiumPlayerProps {
@@ -98,11 +98,13 @@ export default function PremiumPlayer({
     top: number;
     idStr: string;
   }
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [visibleDanmakus, setVisibleDanmakus] = useState<VisibleDanmaku[]>([]);
   const [isDanmakuEnabled, setIsDanmakuEnabled] = useState<boolean>(true);
   const [danmakuInput, setDanmakuInput] = useState<string>('');
   const [danmakuColor, setDanmakuColor] = useState<string>('#ffffff');
-  const socketRef = useRef<any>(null);
+  const socketRef = useRef<Socket | null>(null);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const lastCheckedTimeRef = useRef<number>(-1);
 
   // Load Danmakus & Setup WebSocket Connection
@@ -256,7 +258,7 @@ export default function PremiumPlayer({
       }
 
       setDanmakuInput('');
-    } catch (err: any) {
+    } catch (err) {
       console.error('Error posting danmaku:', err);
     }
   };
@@ -592,14 +594,6 @@ function CustomControls({
     waiting = false 
   } = useMediaStore();
 
-  // Real-time Danmaku States inside controls overlay
-  interface VisibleDanmaku extends DanmakuPayload {
-    top: number;
-    idStr: string;
-  }
-  const [visibleDanmakus, setVisibleDanmakus] = useState<VisibleDanmaku[]>([]);
-  const lastCheckedTimeRef = useRef<number>(-1);
-
   // Trigger danmakus at correct currentTime playback points
   useEffect(() => {
     if (paused || !isDanmakuEnabled || danmakus.length === 0) return;
@@ -614,21 +608,23 @@ function CustomControls({
     );
 
     if (matches.length > 0) {
-      setVisibleDanmakus((prev) => {
-        if (prev.length > 30) return prev; // Limit maximum concurrency to avoid overlay cluttering
+      setTimeout(() => {
+        setVisibleDanmakus((prev) => {
+          if (prev.length > 30) return prev; // Limit maximum concurrency to avoid overlay cluttering
 
-        const newItems = matches.map((d, idx) => {
-          // Assign track channel index (0 to 7) to avoid vertical text overlaps
-          const top = (prev.length + idx) % 8;
-          return {
-            ...d,
-            top,
-            idStr: `${d.id}-${Date.now()}-${idx}`,
-          };
+          const newItems = matches.map((d, idx) => {
+            // Assign track channel index (0 to 7) to avoid vertical text overlaps
+            const top = (prev.length + idx) % 8;
+            return {
+              ...d,
+              top,
+              idStr: `${d.id}-${Date.now()}-${idx}`,
+            };
+          });
+
+          return [...prev, ...newItems];
         });
-
-        return [...prev, ...newItems];
-      });
+      }, 0);
     }
   }, [currentTime, paused, danmakus, isDanmakuEnabled]);
 

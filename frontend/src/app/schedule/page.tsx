@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { catalogApi, AiringMoviePayload } from '@/lib/api';
-import { Calendar, Bell, BellOff, Clock, Flame, Film, ArrowRight, Loader2, Sparkles } from 'lucide-react';
+import { Calendar, Bell, BellOff, Clock, Flame, Film, ArrowRight, Loader2 } from 'lucide-react';
 
 const DAYS_OF_WEEK = [
   { value: 1, label: 'Thứ Hai', shortLabel: 'T2' },
@@ -19,26 +19,27 @@ const DAYS_OF_WEEK = [
 export default function ReleaseCalendarPage() {
   const [schedule, setSchedule] = useState<AiringMoviePayload[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
-  const [selectedDay, setSelectedDay] = useState<number>(1);
-  const [subscriptions, setSubscriptions] = useState<string[]>([]);
-  const [currentDate, setCurrentDate] = useState<Date>(new Date());
-
-  // 1. Resolve current day of week (1=Mon, ..., 7=Sun) to auto-select today on load
-  useEffect(() => {
-    const today = new Date().getDay(); // 0=Sun, 1=Mon, ..., 6=Sat
-    const airingToday = today === 0 ? 7 : today;
-    setSelectedDay(airingToday);
-    
-    // Load subscription states from localStorage
-    const saved = localStorage.getItem('donghua3d_calendar_subs');
-    if (saved) {
-      try {
-        setSubscriptions(JSON.parse(saved));
-      } catch (e) {
-        console.error(e);
+  const [selectedDay, setSelectedDay] = useState<number>(() => {
+    if (typeof window !== 'undefined') {
+      const today = new Date().getDay(); // 0=Sun, 1=Mon, ..., 6=Sat
+      return today === 0 ? 7 : today;
+    }
+    return 1;
+  });
+  const [subscriptions, setSubscriptions] = useState<string[]>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('donghua3d_calendar_subs');
+      if (saved) {
+        try {
+          return JSON.parse(saved);
+        } catch (e) {
+          console.error(e);
+        }
       }
     }
-  }, []);
+    return [];
+  });
+  const [currentDate, setCurrentDate] = useState<Date>(new Date());
 
   // 2. Fetch Weekly Schedule data from the API
   useEffect(() => {

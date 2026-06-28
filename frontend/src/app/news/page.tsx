@@ -42,7 +42,9 @@ export default function NewsListPage() {
   }
 
   useEffect(() => {
-    loadNews();
+    setTimeout(() => {
+      loadNews();
+    }, 0);
   }, []);
 
   // 3. Trigger manual RSS sync (Admin only)
@@ -56,8 +58,8 @@ export default function NewsListPage() {
       } else {
         alert('💥 Đồng bộ thất bại. Vui lòng kiểm tra lại log hệ thống.');
       }
-    } catch (err: any) {
-      alert(`💥 Lỗi đồng bộ: ${err.message}`);
+    } catch (err) {
+      alert(`💥 Lỗi đồng bộ: ${err instanceof Error ? err.message : String(err)}`);
     }
     setSyncing(false);
   };
