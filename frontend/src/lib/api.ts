@@ -226,6 +226,22 @@ export interface MovieWithEpisodes extends MoviePayload {
   seriesMovies?: MoviePayload[]; // Related parts in the same series (for switcher panel)
 }
 
+export interface AiringMoviePayload {
+  id: string;
+  title: string;
+  slug: string;
+  posterUrl: string | null;
+  bannerUrl: string | null;
+  airingDay: number;
+  rating: number;
+  studio: string | null;
+  latestEpisode: {
+    episodeNumber: number;
+    title: string;
+    createdAt: string;
+  } | null;
+}
+
 export const catalogApi = {
   async getMovies(filters?: { year?: number; search?: string; sort?: string }): Promise<ApiResponse<MoviePayload[]>> {
     let query = '';
@@ -256,6 +272,10 @@ export const catalogApi = {
       method: 'POST',
       body: JSON.stringify({ progress, completed }),
     });
+  },
+
+  async getAiringSchedule(): Promise<ApiResponse<AiringMoviePayload[]>> {
+    return apiFetch<AiringMoviePayload[]>('/catalog/schedule');
   }
 };
 
@@ -746,5 +766,34 @@ export const adminApi = {
   // -------------------------------------------------------------
   async getScrapingLogs(): Promise<ApiResponse<ScrapingLogPayload[]>> {
     return apiFetch<ScrapingLogPayload[]>('/admin/scraping-logs');
+  }
+};
+
+export interface NewsPayload {
+  id: string;
+  title: string;
+  slug: string;
+  summary: string;
+  content: string;
+  imageUrl: string | null;
+  sourceUrl: string | null;
+  author: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export const newsApi = {
+  async getNewsList(): Promise<ApiResponse<NewsPayload[]>> {
+    return apiFetch<NewsPayload[]>('/news');
+  },
+
+  async getNewsItem(slug: string): Promise<ApiResponse<NewsPayload>> {
+    return apiFetch<NewsPayload>(`/news/${slug}`);
+  },
+
+  async syncNews(): Promise<ApiResponse<{ count: number }>> {
+    return apiFetch<{ count: number }>('/news/sync', {
+      method: 'POST'
+    });
   }
 };

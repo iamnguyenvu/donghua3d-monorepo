@@ -181,5 +181,8 @@ jobs:
             # Backfill any legacy records with newly introduced slugs
             docker compose exec -T backend node dist/scripts/backfill_movie_slugs.js
             
+            # Backfill weekly release days for interactive calendar
+            docker compose exec -T backend node dist/scripts/backfill_airing_days.js
+            
             # Prune obsolete images to reclaim server disk space
             docker image prune -f

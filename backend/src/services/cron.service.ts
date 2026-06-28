@@ -1,5 +1,6 @@
 import cron from 'node-cron';
 import { scraperService } from './scraper.service';
+import { newsScraperService } from './news-scraper.service';
 import { prisma } from '../db';
 
 export class CronService {
@@ -15,6 +16,22 @@ export class CronService {
     });
 
     console.log('🤖 [CronService] Hourly movie auto-scraper scheduled (runs at the start of every hour).');
+
+    // Schedule 2: Auto-News RSS sync running every 6 hours (0 */6 * * *)
+    cron.schedule('0 */6 * * *', async () => {
+      try {
+        await newsScraperService.syncNewsFromFeed();
+      } catch (err: any) {
+        console.error('❌ [CronService] Scheduled news RSS sync failed:', err.message);
+      }
+    });
+
+    console.log('🤖 [CronService] News RSS feed sync scheduled (runs every 6 hours).');
+
+    // Run an initial non-blocking news sync on startup to ensure seed data is active
+    newsScraperService.syncNewsFromFeed().catch((err: any) => {
+      console.error('❌ [CronService] Initial startup news RSS sync failed:', err.message);
+    });
   }
 
   /**

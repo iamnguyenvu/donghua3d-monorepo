@@ -253,6 +253,28 @@ export default function Header({ onSearchChange }: HeaderProps) {
                 )}
               </Link>
               <Link
+                href="/schedule"
+                className={`relative text-xs font-black uppercase tracking-wider no-underline transition-colors duration-200 py-2.5 ${
+                  pathname === '/schedule' ? 'text-white' : 'text-zinc-400 hover:text-white'
+                }`}
+              >
+                Lịch Chiếu
+                {pathname === '/schedule' && (
+                  <span className="absolute bottom-0 left-0 right-0 h-[2.5px] bg-violet-500 rounded-full" />
+                )}
+              </Link>
+              <Link
+                href="/news"
+                className={`relative text-xs font-black uppercase tracking-wider no-underline transition-colors duration-200 py-2.5 ${
+                  pathname === '/news' ? 'text-white' : 'text-zinc-400 hover:text-white'
+                }`}
+              >
+                Tin Tức
+                {pathname === '/news' && (
+                  <span className="absolute bottom-0 left-0 right-0 h-[2.5px] bg-violet-500 rounded-full" />
+                )}
+              </Link>
+              <Link
                 href="/watchlist"
                 className={`relative text-xs font-black uppercase tracking-wider no-underline transition-colors duration-200 py-2.5 ${
                   pathname === '/watchlist' ? 'text-white' : 'text-zinc-400 hover:text-white'
@@ -572,6 +594,24 @@ export default function Header({ onSearchChange }: HeaderProps) {
                 }`}
               >
                 Bảng Xếp Hạng
+              </Link>
+              <Link
+                href="/schedule"
+                onClick={() => setMobileMenuOpen(false)}
+                className={`text-xs font-black uppercase tracking-wider no-underline transition-colors duration-200 py-3.5 px-4 rounded-[4px] flex items-center justify-between ${
+                  pathname === '/schedule' ? 'text-white bg-violet-600/10 border-l-2 border-violet-500' : 'text-zinc-400 hover:text-white hover:bg-zinc-950/40'
+                }`}
+              >
+                Lịch Chiếu
+              </Link>
+              <Link
+                href="/news"
+                onClick={() => setMobileMenuOpen(false)}
+                className={`text-xs font-black uppercase tracking-wider no-underline transition-colors duration-200 py-3.5 px-4 rounded-[4px] flex items-center justify-between ${
+                  pathname === '/news' ? 'text-white bg-violet-600/10 border-l-2 border-violet-500' : 'text-zinc-400 hover:text-white hover:bg-zinc-950/40'
+                }`}
+              >
+                Tin Tức
               </Link>
               <Link
                 href="/watchlist"

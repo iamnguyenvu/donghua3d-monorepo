@@ -8,6 +8,75 @@ import redis from '../redis';
 
 const router = Router();
 
+// 0. GET /api/catalog/schedule - Fetch Weekly Release Schedule Calendar
+router.get('/schedule', async (_req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    const cacheKey = 'catalog_schedule';
+    const cachedData = await redis.get(cacheKey);
+
+    if (cachedData) {
+      res.status(200).json({
+        success: true,
+        data: JSON.parse(cachedData),
+      });
+      return;
+    }
+
+    const movies = await prisma.movie.findMany({
+      where: {
+        airingDay: {
+          not: null,
+        },
+      },
+      orderBy: [
+        { airingDay: 'asc' },
+        { title: 'asc' },
+      ],
+      select: {
+        id: true,
+        title: true,
+        slug: true,
+        posterUrl: true,
+        bannerUrl: true,
+        airingDay: true,
+        rating: true,
+        studio: true,
+        episodes: {
+          orderBy: { episodeNumber: 'desc' },
+          take: 1,
+          select: {
+            episodeNumber: true,
+            title: true,
+            createdAt: true,
+          },
+        },
+      },
+    });
+
+    const mapped = movies.map((m) => ({
+      id: m.id,
+      title: m.title,
+      slug: m.slug,
+      posterUrl: m.posterUrl,
+      bannerUrl: m.bannerUrl,
+      airingDay: m.airingDay,
+      rating: m.rating,
+      studio: m.studio,
+      latestEpisode: m.episodes[0] || null,
+    }));
+
+    // Cache the schedule list for 10 minutes to prevent database hammer
+    await redis.set(cacheKey, JSON.stringify(mapped), 'EX', 600);
+
+    res.status(200).json({
+      success: true,
+      data: mapped,
+    });
+  } catch (err) {
+    next(err);
+  }
+});
+
 // 1. GET /api/movies - Query Catalog List
 router.get('/movies', async (req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> => {
   try {

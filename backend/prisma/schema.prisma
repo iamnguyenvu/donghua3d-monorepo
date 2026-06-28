@@ -335,3 +335,19 @@ model Danmaku {
 
   @@index([episodeId, time])
 }
+
+// 15. News Model (Auto-scraped articles & updates)
+model News {
+  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  title       String   @db.VarChar(255)
+  slug        String   @unique @db.VarChar(255)
+  summary     String   @db.Text
+  content     String   @db.Text
+  imageUrl    String?  @db.VarChar(512)
+  sourceUrl   String?  @db.VarChar(512)
+  author      String   @default("Donghua3D Admin") @db.VarChar(100)
+  createdAt   DateTime @default(now()) @db.Timestamptz
+  updatedAt   DateTime @updatedAt @db.Timestamptz
+
+  @@index([createdAt(sort: Desc)], name: "idx_news_created_at")
+}
