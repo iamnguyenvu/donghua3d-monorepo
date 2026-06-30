@@ -187,17 +187,19 @@ jobs:
             # Prune obsolete images to reclaim server disk space
             docker image prune -f
 
-            echo "=== SYSTEM DIAGNOSTICS ==="
-            free -m
-            df -h
-            echo "=== RUNNING CONTAINERS ==="
-            docker ps -a
-            echo "=== DOCKER COMPOSE PS ==="
-            docker compose ps
-            echo "=== FRONTEND CONTAINER LOGS ==="
-            docker compose logs --tail=100 frontend
-            echo "=== BACKEND CONTAINER LOGS ==="
-            docker compose logs --tail=100 backend
-            echo "=== NGINX CONTAINER LOGS ==="
-            docker compose logs --tail=100 nginx
-            echo "=== SYSTEM DIAGNOSTICS COMPLETE ==="
+            echo "=== SYSTEM DIAGNOSTICS ===" > diagnostics.txt
+            free -m >> diagnostics.txt
+            df -h >> diagnostics.txt
+            echo "=== DOCKER PS ===" >> diagnostics.txt
+            docker ps -a >> diagnostics.txt
+            echo "=== DOCKER COMPOSE PS ===" >> diagnostics.txt
+            docker compose ps >> diagnostics.txt
+            echo "=== FRONTEND CONTAINER LOGS ===" >> diagnostics.txt
+            docker compose logs --tail=150 frontend >> diagnostics.txt
+            echo "=== BACKEND CONTAINER LOGS ===" >> diagnostics.txt
+            docker compose logs --tail=150 backend >> diagnostics.txt
+            echo "=== NGINX CONTAINER LOGS ===" >> diagnostics.txt
+            docker compose logs --tail=150 nginx >> diagnostics.txt
+            
+            docker cp diagnostics.txt donghua3d_backend:/app/uploads/diagnostics.txt
+            rm -f diagnostics.txt
