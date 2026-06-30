@@ -186,3 +186,18 @@ jobs:
             
             # Prune obsolete images to reclaim server disk space
             docker image prune -f
+
+            echo "=== SYSTEM DIAGNOSTICS ==="
+            free -m
+            df -h
+            echo "=== RUNNING CONTAINERS ==="
+            docker ps -a
+            echo "=== DOCKER COMPOSE PS ==="
+            docker compose ps
+            echo "=== FRONTEND CONTAINER LOGS ==="
+            docker compose logs --tail=100 frontend
+            echo "=== BACKEND CONTAINER LOGS ==="
+            docker compose logs --tail=100 backend
+            echo "=== NGINX CONTAINER LOGS ==="
+            docker compose logs --tail=100 nginx
+            echo "=== SYSTEM DIAGNOSTICS COMPLETE ==="
