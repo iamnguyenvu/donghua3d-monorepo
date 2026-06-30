@@ -20,6 +20,32 @@ function removeAccents(str: string): string {
     .replace(/Đ/g, 'D');
 }
 
+const getAiringDayText = (day: number | string | null | undefined) => {
+  if (!day) return null;
+  const d = typeof day === 'string' ? parseInt(day, 10) : day;
+  const daysMap = {
+    1: 'Thứ Hai',
+    2: 'Thứ Ba',
+    3: 'Thứ Tư',
+    4: 'Thứ Năm',
+    5: 'Thứ Sáu',
+    6: 'Thứ Bảy',
+    7: 'Chủ Nhật',
+  };
+  return daysMap[d as keyof typeof daysMap] || null;
+};
+
+const getTierStyle = (tier: string) => {
+  switch (tier.toUpperCase()) {
+    case 'S': return 'from-red-500/20 to-rose-600/20 text-red-400 border-red-500/30';
+    case 'A': return 'from-amber-500/20 to-orange-600/20 text-amber-400 border-amber-500/30';
+    case 'B': return 'from-yellow-500/20 to-amber-600/20 text-yellow-400 border-yellow-500/30';
+    case 'C': return 'from-cyan-500/20 to-blue-600/20 text-cyan-400 border-cyan-500/30';
+    case 'D': return 'from-zinc-500/20 to-slate-600/20 text-zinc-400 border-zinc-500/30';
+    default: return 'from-slate-700/20 to-slate-900/20 text-slate-400 border-slate-750';
+  }
+};
+
 export default function MovieClientPage({ 
   movie, reviews, ratingCount, relatedParts 
 }: { 
@@ -157,30 +183,61 @@ export default function MovieClientPage({
             </h1>
 
             {/* Premium Pill Metadata Grid */}
-            <div className="flex items-center gap-2 flex-wrap select-none">
-              <span className="border border-zinc-800 bg-zinc-950/60 text-violet-400 px-2.5 py-1.5 rounded-[4px] text-[10px] font-extrabold tracking-wider uppercase">
-                {movie.studio}
-              </span>
-              <span className="border border-zinc-800 bg-zinc-950/60 text-amber-400 px-2.5 py-1.5 rounded-[4px] text-[10px] font-extrabold tracking-wider uppercase flex items-center gap-1">
-                ⭐ {movie.rating > 0 ? movie.rating.toFixed(1) : '9.0'} / 10 {ratingCount > 0 && `(${ratingCount.toLocaleString()} lượt)`}
-              </span>
-              {movie.imdbRating && (
-                <span className="border border-zinc-800 bg-zinc-950/60 text-[#F5C518] px-2.5 py-1.5 rounded-[4px] text-[10px] font-extrabold tracking-wider uppercase flex items-center gap-1.5">
-                  <span className="bg-[#F5C518] text-black px-1 rounded-[2px] font-black">IMDb</span> {movie.imdbRating.toFixed(1)} / 10
+            <div className="flex flex-col gap-3">
+              <div className="flex items-center gap-2 flex-wrap select-none">
+                <span className="border border-zinc-800 bg-zinc-950/60 text-violet-400 px-2.5 py-1.5 rounded-[4px] text-[10px] font-extrabold tracking-wider uppercase">
+                  {movie.studio}
                 </span>
+                <span className="border border-zinc-800 bg-zinc-950/60 text-amber-400 px-2.5 py-1.5 rounded-[4px] text-[10px] font-extrabold tracking-wider uppercase flex items-center gap-1">
+                  ⭐ {movie.rating > 0 ? movie.rating.toFixed(1) : '9.0'} / 10 {ratingCount > 0 && `(${ratingCount.toLocaleString()} lượt)`}
+                </span>
+                {movie.imdbRating && (
+                  <span className="border border-zinc-800 bg-zinc-950/60 text-[#F5C518] px-2.5 py-1.5 rounded-[4px] text-[10px] font-extrabold tracking-wider uppercase flex items-center gap-1.5">
+                    <span className="bg-[#F5C518] text-black px-1 rounded-[2px] font-black">IMDb</span> {movie.imdbRating.toFixed(1)} / 10
+                  </span>
+                )}
+                <span className="border border-zinc-800 bg-zinc-950/60 text-zinc-300 px-2.5 py-1.5 rounded-[4px] text-[10px] font-extrabold tracking-wider uppercase">
+                  {movie.releaseYear}
+                </span>
+                <span className="border border-zinc-800 bg-zinc-950/60 text-zinc-300 px-2.5 py-1.5 rounded-[4px] text-[10px] font-extrabold tracking-wider uppercase">
+                  {movie.episodes?.length || 0} Tập
+                </span>
+                {movie.viewsCount !== undefined && (
+                  <span className="border border-zinc-800 bg-zinc-950/60 text-zinc-300 px-2.5 py-1.5 rounded-[4px] text-[10px] font-extrabold tracking-wider uppercase">
+                    👁️ {movie.viewsCount.toLocaleString()} lượt xem
+                  </span>
+                )}
+                <span className="border border-zinc-800 bg-zinc-950/60 text-zinc-300 px-2.5 py-1.5 rounded-[4px] text-[10px] font-extrabold tracking-wider uppercase">
+                  FULL HD 1080P
+                </span>
+                <span className="border border-zinc-800 bg-zinc-950/60 text-zinc-300 px-2.5 py-1.5 rounded-[4px] text-[10px] font-extrabold tracking-wider uppercase">
+                  HLS H.264
+                </span>
+                {getAiringDayText(movie.airingDay) && (
+                  <span className="border border-violet-800/80 bg-violet-950/65 text-violet-400 px-2.5 py-1.5 rounded-[4px] text-[10px] font-black tracking-wider uppercase animate-pulse shadow-[0_0_12px_rgba(139,92,246,0.2)]">
+                    📅 Lịch Chiếu: {getAiringDayText(movie.airingDay)} hàng tuần
+                  </span>
+                )}
+                <span className="text-zinc-500 text-[10px] font-bold uppercase tracking-wider ml-2 hidden sm:inline">
+                  Tên khác: <span className="text-zinc-300">{movie.altTitles[0] || 'N/A'}</span>
+                </span>
+              </div>
+
+              {/* Genre tags display */}
+              {movie.genres && movie.genres.length > 0 && (
+                <div className="flex items-center gap-2 flex-wrap select-none">
+                  <span className="text-[10px] text-zinc-500 font-black uppercase tracking-widest mr-1">Thể loại:</span>
+                  {movie.genres.map((mg) => (
+                    <Link
+                      key={mg.genre.id}
+                      href={`/genres/${mg.genre.slug}`}
+                      className="px-2.5 py-1 rounded-[4px] bg-[#0c0c10]/85 hover:bg-violet-650/15 border border-zinc-850 hover:border-violet-500/50 text-zinc-400 hover:text-violet-400 text-[10px] font-black uppercase tracking-wider no-underline transition-all duration-300"
+                    >
+                      {mg.genre.name}
+                    </Link>
+                  ))}
+                </div>
               )}
-              <span className="border border-zinc-800 bg-zinc-950/60 text-zinc-300 px-2.5 py-1.5 rounded-[4px] text-[10px] font-extrabold tracking-wider uppercase">
-                {movie.releaseYear}
-              </span>
-              <span className="border border-zinc-800 bg-zinc-950/60 text-zinc-300 px-2.5 py-1.5 rounded-[4px] text-[10px] font-extrabold tracking-wider uppercase">
-                FULL HD 1080P
-              </span>
-              <span className="border border-zinc-800 bg-zinc-950/60 text-zinc-300 px-2.5 py-1.5 rounded-[4px] text-[10px] font-extrabold tracking-wider uppercase">
-                HLS H.264
-              </span>
-              <span className="text-zinc-500 text-[10px] font-bold uppercase tracking-wider ml-2 hidden sm:inline">
-                Tên khác: <span className="text-zinc-300">{movie.altTitles[0] || 'N/A'}</span>
-              </span>
             </div>
 
             <p className="max-w-2xl text-xs md:text-sm text-zinc-400 leading-relaxed line-clamp-3" style={{ textShadow: '0 1px 3px rgba(0,0,0,0.9)' }}>
@@ -465,12 +522,14 @@ export default function MovieClientPage({
         <div className="lg:col-span-1 flex flex-col gap-8">
           {/* Movie Leaderboard Tier Placement card */}
           {movie.leaderboard && (
-            <div className="p-4 bg-zinc-950/40 border border-zinc-900 rounded-[4px] flex items-center gap-4 border-l-2 border-l-violet-500 shadow-md select-none">
-              <Award className="w-8 h-8 text-violet-500 flex-shrink-0" />
+            <div className={`p-5 bg-gradient-to-br ${getTierStyle(movie.leaderboard.globalTier)} border rounded-[4px] flex items-center gap-4.5 shadow-xl select-none transition-all duration-300 hover:scale-[1.02]`}>
+              <div className="w-12 h-12 rounded-[4px] bg-black/40 flex items-center justify-center border border-white/10 shadow-inner">
+                <Award className="w-6 h-6 text-white animate-pulse" />
+              </div>
               <div className="flex flex-col">
-                <span className="text-[10px] text-zinc-550 font-bold uppercase tracking-wider">Xếp Hạng BXH</span>
-                <span className="text-sm font-black text-white mt-0.5 uppercase tracking-wide">Xếp Hạng {movie.leaderboard.globalTier}-TIER</span>
-                <span className="text-[11px] text-zinc-500">Thứ hạng {movie.leaderboard.rank || 'N/A'} toàn mạng</span>
+                <span className="text-[10px] text-white/60 font-black uppercase tracking-wider">Đại Sảnh Thứ Hạng</span>
+                <span className="text-sm font-black text-white mt-0.5 uppercase tracking-wider">Xếp Hạng {movie.leaderboard.globalTier}-TIER</span>
+                <span className="text-[11px] text-white/80">Thứ hạng {movie.leaderboard.rank || 'N/A'} trên toàn mạng</span>
               </div>
             </div>
           )}

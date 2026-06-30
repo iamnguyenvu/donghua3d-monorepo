@@ -4,10 +4,10 @@ import React, { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useSearchParams } from 'next/navigation';
-import { Star, Play, Film, ArrowRight, Sparkles, Plus, Check, Loader2, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Star, Play, Film, ArrowRight, Sparkles, Plus, Check, Loader2, ChevronLeft, ChevronRight, Flame, MessageSquare } from 'lucide-react';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
-import { MoviePayload, watchlistApi, Tier, analyticsApi, catalogApi } from '../lib/api';
+import { MoviePayload, watchlistApi, Tier, analyticsApi, catalogApi, commentApi, RecentCommentPayload } from '../lib/api';
 
 // Helper to strip diacritics / accents for seamless Vietnamese unaccented search
 function removeAccents(str: string): string {
@@ -244,6 +244,27 @@ export default function HomeClient({ initialMovies = [] }: { initialMovies: Movi
       return timeB - timeA;
     }).slice(0, 12);
   }, [movies]);
+
+  // Independent list for Trending Sidebar sorted by Views
+  const trendingSidebarMovies = useMemo(() => {
+    return [...movies].sort((a, b) => (b.viewsCount || 0) - (a.viewsCount || 0)).slice(0, 5);
+  }, [movies]);
+
+  const [recentComments, setRecentComments] = useState<RecentCommentPayload[]>([]);
+
+  useEffect(() => {
+    async function fetchRecentComments() {
+      try {
+        const res = await commentApi.getRecentComments();
+        if (res.success && res.data) {
+          setRecentComments(res.data);
+        }
+      } catch (err) {
+        console.error('Failed to fetch recent comments:', err);
+      }
+    }
+    fetchRecentComments();
+  }, []);
 
   // Rotate Hero Carousel slide
   useEffect(() => {
@@ -665,158 +686,236 @@ export default function HomeClient({ initialMovies = [] }: { initialMovies: Movi
       )}
 
       {/* ==============================================================================
-         GRID CATALOG & SEARCH FILTERS
+         GRID CATALOG & SEARCH FILTERS WITH COMMUNITY SIDEBAR
          ============================================================================== */}
-      <main className="w-full max-w-[1440px] mx-auto px-4 sm:px-6 md:px-12 lg:px-16 mt-10">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 border-b border-zinc-900/60 pb-5 mb-8">
-          <div className="flex items-center gap-2">
-            <h2 className="text-lg font-black text-white tracking-wider uppercase border-l-2 border-violet-500 pl-3">
-              Thư Viện Donghua 3D
-            </h2>
-          </div>
-
-          {/* Quick Filters */}
-          <div className="flex items-center gap-4 flex-wrap">
+      <main className="w-full max-w-[1440px] mx-auto px-4 sm:px-6 md:px-12 lg:px-16 mt-10 grid grid-cols-1 lg:grid-cols-4 gap-8">
+        
+        {/* Left Side: Library Grid (3/4 width) */}
+        <div className="lg:col-span-3 flex flex-col">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 border-b border-zinc-900/60 pb-5 mb-8">
             <div className="flex items-center gap-2">
-              <span className="text-[10px] text-zinc-500 font-bold uppercase tracking-wider">Năm:</span>
-              <select
-                value={selectedYear}
-                onChange={(e) => setSelectedYear(e.target.value)}
-                className="bg-[#0c0c0f] border border-zinc-800/80 text-zinc-300 rounded-[4px] px-3 py-1.5 text-xs cursor-pointer outline-none focus:border-zinc-700 transition-all duration-300"
-              >
-                <option value="all">Tất cả năm</option>
-                <option value="2021">2021</option>
-                <option value="2020">2020</option>
-                <option value="2018">2018</option>
-              </select>
+              <h2 className="text-lg font-black text-white tracking-wider uppercase border-l-2 border-violet-500 pl-3">
+                Thư Viện Donghua 3D
+              </h2>
             </div>
 
-            <div className="flex items-center gap-2">
-              <span className="text-[10px] text-zinc-500 font-bold uppercase tracking-wider">Sắp xếp:</span>
-              <select
-                value={sortBy}
-                onChange={(e) => setSortBy(e.target.value)}
-                className="bg-[#0c0c0f] border border-zinc-800/80 text-zinc-300 rounded-[4px] px-3 py-1.5 text-xs cursor-pointer outline-none focus:border-zinc-700 transition-all duration-300"
-              >
-                <option value="rating">Điểm Đánh Giá</option>
-                <option value="year">Năm Phát Hành</option>
-                <option value="title">Tựa Đề A-Z</option>
-              </select>
+            {/* Quick Filters */}
+            <div className="flex items-center gap-4 flex-wrap">
+              <div className="flex items-center gap-2">
+                <span className="text-[10px] text-zinc-550 font-bold uppercase tracking-wider">Năm:</span>
+                <select
+                  value={selectedYear}
+                  onChange={(e) => setSelectedYear(e.target.value)}
+                  className="bg-[#0c0c0f] border border-zinc-800/80 text-zinc-350 rounded-[4px] px-3 py-1.5 text-xs cursor-pointer outline-none focus:border-zinc-700 transition-all duration-300"
+                >
+                  <option value="all">Tất cả năm</option>
+                  <option value="2021">2021</option>
+                  <option value="2020">2020</option>
+                  <option value="2018">2018</option>
+                </select>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <span className="text-[10px] text-zinc-550 font-bold uppercase tracking-wider">Sắp xếp:</span>
+                <select
+                  value={sortBy}
+                  onChange={(e) => setSortBy(e.target.value)}
+                  className="bg-[#0c0c0f] border border-zinc-800/80 text-zinc-350 rounded-[4px] px-3 py-1.5 text-xs cursor-pointer outline-none focus:border-zinc-700 transition-all duration-300"
+                >
+                  <option value="rating">Điểm Đánh Giá</option>
+                  <option value="year">Năm Phát Hành</option>
+                  <option value="title">Tựa Đề A-Z</option>
+                </select>
+              </div>
             </div>
           </div>
+
+          {/* Loading Spinner / Grid */}
+          {loading ? (
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 gap-6">
+              {[1, 2, 3, 4].map((idx) => (
+                <div key={idx} className="flex flex-col gap-3 animate-pulse">
+                  <div className="aspect-[2/3] rounded-[4px] bg-zinc-900 border border-zinc-800" />
+                  <div className="h-3 bg-zinc-900 rounded-[2px] w-3/4" />
+                  <div className="h-2.5 bg-zinc-900 rounded-[2px] w-1/2" />
+                </div>
+              ))}
+            </div>
+          ) : filteredMovies.length > 0 ? (
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 gap-x-4 gap-y-8">
+              {filteredMovies.map((movie) => (
+                <Link href={`/movies/${movie.slug || movie.id}`} key={movie.id} className="no-underline group flex flex-col gap-2">
+                  {/* Poster Frame */}
+                  <div className="relative overflow-hidden rounded-[6px] border border-zinc-900/60 aspect-[2/3] cursor-pointer transition-all duration-500 hover:scale-[1.04] hover:border-violet-500/50 hover:shadow-[0_0_25px_rgba(139,92,246,0.25)] bg-zinc-950 shadow-lg">
+                    <div className="relative w-full h-full">
+                      <Image
+                        src={movie.bannerUrl || movie.posterUrl || '/static/uploads/default_poster.jpg'}
+                        alt={movie.title}
+                        fill
+                        sizes="(max-width: 768px) 50vw, (max-width: 1200px) 25vw, 20vw"
+                        className="object-cover object-top transition-transform duration-700 ease-out group-hover:scale-110"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-[#050508]/90 via-[#050508]/15 to-transparent opacity-60 transition-opacity duration-300 group-hover:opacity-80" />
+                    </div>
+
+                    <div className="absolute inset-0 flex flex-col justify-end p-3 bg-[#050508]/60 backdrop-blur-[2px] opacity-0 group-hover:opacity-100 transition-all duration-350 ease-out z-20">
+                      <div className="flex items-center justify-center w-8 h-8 rounded-full bg-violet-600 text-white mx-auto mb-2.5 shadow-lg transform translate-y-4 group-hover:translate-y-0 transition-all duration-350 delay-75">
+                        <Play className="w-4 h-4 fill-white ml-0.5" />
+                      </div>
+                      <span className="text-[9px] font-black tracking-widest text-violet-400 uppercase text-center block">{movie.studio || 'Donghua'}</span>
+                      <span className="text-[10px] font-extrabold text-zinc-300 text-center block mt-0.5">{movie.releaseYear}</span>
+                    </div>
+
+                    <div className="absolute bottom-1.5 right-1.5 bg-black/80 backdrop-blur-md border border-amber-400/25 text-amber-400 px-1.5 py-1 rounded-[4px] text-[9px] font-extrabold flex items-center gap-0.5 z-10 shadow-md select-none">
+                      {movie.rating > 0 ? (
+                        <>
+                          <Star className="w-2.5 h-2.5 fill-amber-400 text-amber-400" />
+                          {movie.rating.toFixed(1)}
+                        </>
+                      ) : (
+                        <span className="text-[8px] tracking-wider font-extrabold text-amber-400 uppercase">1080P</span>
+                      )}
+                    </div>
+
+                    {movie.leaderboard && (
+                      movie.leaderboard.globalTier === 'S' ||
+                      (movie.leaderboard.s_tier_count || 0) +
+                      (movie.leaderboard.a_tier_count || 0) +
+                      (movie.leaderboard.b_tier_count || 0) +
+                      (movie.leaderboard.c_tier_count || 0) +
+                      (movie.leaderboard.d_tier_count || 0) +
+                      (movie.leaderboard.f_tier_count || 0) > 0
+                    ) && (
+                      <div className="absolute top-1.5 left-1.5 bg-black/80 backdrop-blur-md px-2 py-1 rounded-[4px] border border-zinc-800 text-[8px] font-extrabold tracking-wider z-10 shadow-md" style={{
+                        color: movie.leaderboard.globalTier === 'S' ? '#ff7f7f' : movie.leaderboard.globalTier === 'A' ? '#ffbf7f' : '#bfff7f'
+                      }}>
+                        {movie.leaderboard.globalTier}-TIER
+                      </div>
+                    )}
+
+                    {movie.episodeCount !== undefined && movie.episodeCount > 0 && (
+                      <div className="absolute top-1.5 right-1.5 bg-gradient-to-r from-orange-500 to-red-600 border border-red-400/50 text-white font-black px-2 py-0.5 rounded-[3px] text-[10px] uppercase tracking-wider shadow-[0_0_10px_rgba(239,68,68,0.5)] z-10 select-none">
+                        Tập {movie.episodeCount}
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="flex flex-col gap-0.5 mt-1 select-none">
+                    <h3 className="text-[12px] font-bold text-white group-hover:text-violet-400 transition-colors truncate leading-tight">
+                      {movie.title}
+                    </h3>
+                    {movie.altTitles?.[0] && (
+                      <p className="text-[10px] text-zinc-550 truncate leading-tight">
+                        {movie.altTitles[0]}
+                      </p>
+                    )}
+                    <div className="flex items-center justify-between text-[10px] text-zinc-550 mt-0.5 gap-1 flex-wrap">
+                      <span className="text-[10px] text-zinc-400 font-semibold whitespace-nowrap">
+                        {movie.releaseYear}
+                        {movie.viewsCount !== undefined && movie.viewsCount > 0 && (
+                          <>
+                            <span className="text-zinc-655 mx-1">•</span>
+                            <span>👁 {movie.viewsCount >= 1000 ? `${(movie.viewsCount / 1000).toFixed(1)}K` : movie.viewsCount}</span>
+                          </>
+                        )}
+                      </span>
+                      <span className="text-[9px] font-bold text-zinc-400 bg-zinc-900 px-1 rounded-[2px] uppercase truncate max-w-[70px]">{movie.studio || 'Donghua'}</span>
+                    </div>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-24 bg-zinc-950/40 border border-zinc-900 rounded-[4px] p-12 max-w-xl mx-auto">
+              <Film className="w-10 h-10 text-zinc-650 mx-auto mb-4 animate-pulse" />
+              <h3 className="text-sm font-bold text-white uppercase tracking-wider">Không tìm thấy bộ phim nào</h3>
+              <p className="text-xs text-zinc-550 mt-2 max-w-sm mx-auto leading-relaxed">
+                Hãy thử gõ lại từ khóa khác hoặc điều chỉnh các bộ lọc phát hành phim của bạn.
+              </p>
+            </div>
+          )}
         </div>
 
-        {/* Loading Spinner */}
-        {loading ? (
-          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-6">
-            {[1, 2, 3, 4, 5].map((idx) => (
-              <div key={idx} className="flex flex-col gap-3 animate-pulse">
-                <div className="aspect-[2/3] rounded-[4px] bg-zinc-900 border border-zinc-800" />
-                <div className="h-3 bg-zinc-900 rounded-[2px] w-3/4" />
-                <div className="h-2.5 bg-zinc-900 rounded-[2px] w-1/2" />
-              </div>
-            ))}
-          </div>
-        ) : filteredMovies.length > 0 ? (
-          <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-7 2xl:grid-cols-7 gap-x-4 gap-y-8">
-            {filteredMovies.map((movie) => (
-              <Link href={`/movies/${movie.slug || movie.id}`} key={movie.id} className="no-underline group flex flex-col gap-2">
-                {/* Poster Frame */}
-                <div className="relative overflow-hidden rounded-[6px] border border-zinc-900/60 aspect-[2/3] cursor-pointer transition-all duration-500 hover:scale-[1.04] hover:border-violet-500/50 hover:shadow-[0_0_25px_rgba(139,92,246,0.25)] bg-zinc-950 shadow-lg">
-                  {/* Poster Image */}
-                  <div className="relative w-full h-full">
+        {/* Right Side: Community Sidebar (1/4 width) */}
+        <div className="lg:col-span-1 flex flex-col gap-8 select-none">
+          {/* Widget 1: Đang Sôi Nổi (Hot Trending) */}
+          <div className="bg-[#09090d]/60 border border-zinc-900/80 rounded-[4px] p-4 flex flex-col gap-4 shadow-xl">
+            <h3 className="text-xs font-black text-white tracking-widest uppercase border-b border-zinc-900/60 pb-3 flex items-center gap-1.5">
+              <Flame className="w-4 h-4 text-violet-500 fill-violet-600/30 animate-pulse" />
+              Đang Sôi Nổi (Hot)
+            </h3>
+            <div className="flex flex-col gap-3">
+              {trendingSidebarMovies.map((movie, index) => (
+                <Link
+                  href={`/movies/${movie.slug || movie.id}`}
+                  key={`trending-side-${movie.id}`}
+                  className="flex items-center gap-3 p-1.5 rounded-[2px] bg-zinc-950/20 hover:bg-zinc-950/80 border border-transparent hover:border-zinc-850/60 transition-all duration-300 no-underline group"
+                >
+                  <div className="w-6 text-center text-sm font-sans font-black text-zinc-650 group-hover:text-violet-500 transition-colors">
+                    {index + 1}
+                  </div>
+                  <div className="w-9 h-12 bg-zinc-900 rounded-[2px] overflow-hidden flex-shrink-0 relative border border-zinc-850">
                     <Image
                       src={movie.bannerUrl || movie.posterUrl || '/static/uploads/default_poster.jpg'}
                       alt={movie.title}
                       fill
-                      sizes="(max-width: 768px) 50vw, (max-width: 1200px) 25vw, 20vw"
-                      className="object-cover object-top transition-transform duration-700 ease-out group-hover:scale-110"
+                      sizes="36px"
+                      className="object-cover object-top"
                     />
-                    {/* Gradient overlay for cinematic shadow depth */}
-                    <div className="absolute inset-0 bg-gradient-to-t from-[#050508]/90 via-[#050508]/15 to-transparent opacity-60 transition-opacity duration-300 group-hover:opacity-80" />
                   </div>
+                  <div className="flex flex-col min-w-0 flex-grow text-left">
+                    <span className="text-[11px] font-bold text-zinc-300 group-hover:text-violet-400 truncate transition-colors leading-tight">
+                      {movie.title}
+                    </span>
+                    <span className="text-[9px] font-medium text-zinc-550 mt-0.5">
+                      👁️ {(movie.viewsCount || 0).toLocaleString()} lượt xem
+                    </span>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </div>
 
-                  {/* Quick premium micro-info displaying on hover */}
-                  <div className="absolute inset-0 flex flex-col justify-end p-3 bg-[#050508]/60 backdrop-blur-[2px] opacity-0 group-hover:opacity-100 transition-all duration-350 ease-out z-20">
-                    <div className="flex items-center justify-center w-8 h-8 rounded-full bg-violet-600 text-white mx-auto mb-2.5 shadow-lg transform translate-y-4 group-hover:translate-y-0 transition-all duration-350 delay-75">
-                      <Play className="w-4 h-4 fill-white ml-0.5" />
+          {/* Widget 2: Luận Đạo Gần Đây (Recent comments) */}
+          <div className="bg-[#09090d]/60 border border-zinc-900/80 rounded-[4px] p-4 flex flex-col gap-4 shadow-xl">
+            <h3 className="text-xs font-black text-white tracking-widest uppercase border-b border-zinc-900/60 pb-3 flex items-center gap-1.5">
+              <MessageSquare className="w-4 h-4 text-violet-500 fill-violet-600/30 animate-pulse" />
+              Luận Đạo Gần Đây
+            </h3>
+            <div className="flex flex-col gap-3">
+              {recentComments.length > 0 ? (
+                recentComments.map((comment) => (
+                  <div
+                    key={`recent-comment-${comment.id}`}
+                    className="flex flex-col gap-2 p-3 bg-zinc-950/20 border border-zinc-900 rounded-[2px] hover:bg-zinc-950/60 transition-all duration-300"
+                  >
+                    <div className="flex items-center justify-between text-[9px] font-bold text-zinc-500">
+                      <span className="text-zinc-400 truncate max-w-[100px]">{comment.user?.email.split('@')[0]}</span>
+                      <span>{new Date(comment.createdAt).toLocaleDateString('vi-VN')}</span>
                     </div>
-                    <span className="text-[9px] font-black tracking-widest text-violet-400 uppercase text-center block">{movie.studio || 'Donghua'}</span>
-                    <span className="text-[10px] font-extrabold text-zinc-300 text-center block mt-0.5">{movie.releaseYear}</span>
-                  </div>
-
-                  {/* Rating Badge in bottom-right */}
-                  <div className="absolute bottom-1.5 right-1.5 bg-black/80 backdrop-blur-md border border-amber-400/25 text-amber-400 px-1.5 py-1 rounded-[4px] text-[9px] font-extrabold flex items-center gap-0.5 z-10 shadow-md select-none">
-                    {movie.rating > 0 ? (
-                      <>
-                        <Star className="w-2.5 h-2.5 fill-amber-400 text-amber-400" />
-                        {movie.rating.toFixed(1)}
-                      </>
-                    ) : (
-                      <span className="text-[8px] tracking-wider font-extrabold text-amber-400 uppercase">1080P</span>
+                    <p className="text-[10px] text-zinc-400 leading-relaxed line-clamp-2 italic">
+                      "{comment.content}"
+                    </p>
+                    {comment.movie && (
+                      <Link
+                        href={`/movies/${comment.movie.slug || comment.movie.id}`}
+                        className="text-[9px] text-violet-400 hover:text-violet-300 font-extrabold uppercase tracking-wide truncate no-underline text-left mt-0.5"
+                      >
+                        📍 {comment.movie.title}
+                        {comment.episode?.episodeNumber && ` - Tập ${comment.episode.episodeNumber}`}
+                      </Link>
                     )}
                   </div>
-
-                  {/* Global Tier Badge */}
-                  {movie.leaderboard && (
-                    movie.leaderboard.globalTier === 'S' ||
-                    (movie.leaderboard.s_tier_count || 0) +
-                    (movie.leaderboard.a_tier_count || 0) +
-                    (movie.leaderboard.b_tier_count || 0) +
-                    (movie.leaderboard.c_tier_count || 0) +
-                    (movie.leaderboard.d_tier_count || 0) +
-                    (movie.leaderboard.f_tier_count || 0) > 0
-                  ) && (
-                    <div className="absolute top-1.5 left-1.5 bg-black/80 backdrop-blur-md px-2 py-1 rounded-[4px] border border-zinc-800 text-[8px] font-extrabold tracking-wider z-10 shadow-md" style={{
-                      color: movie.leaderboard.globalTier === 'S' ? '#ff7f7f' : movie.leaderboard.globalTier === 'A' ? '#ffbf7f' : '#bfff7f'
-                    }}>
-                      {movie.leaderboard.globalTier}-TIER
-                    </div>
-                  )}
-
-                  {/* Episode Badge on Poster (High CTR Bright Red/Orange like competitors) */}
-                  {movie.episodeCount !== undefined && movie.episodeCount > 0 && (
-                    <div className="absolute top-1.5 right-1.5 bg-gradient-to-r from-orange-500 to-red-600 border border-red-400/50 text-white font-black px-2 py-0.5 rounded-[3px] text-[10px] uppercase tracking-wider shadow-[0_0_10px_rgba(239,68,68,0.5)] z-10 select-none">
-                      Tập {movie.episodeCount}
-                    </div>
-                  )}
+                ))
+              ) : (
+                <div className="text-center py-6 text-[10px] text-zinc-650 italic">
+                  Chưa có cuộc thảo luận nào gần đây.
                 </div>
+              )}
+            </div>
+          </div>
+        </div>
 
-                {/* Movie Info — dual-title + views + studio */}
-                <div className="flex flex-col gap-0.5 mt-1 select-none">
-                  <h3 className="text-[12px] font-bold text-white group-hover:text-violet-400 transition-colors truncate leading-tight">
-                    {movie.title}
-                  </h3>
-                  {movie.altTitles?.[0] && (
-                    <p className="text-[10px] text-zinc-500 truncate leading-tight">
-                      {movie.altTitles[0]}
-                    </p>
-                  )}
-                  <div className="flex items-center justify-between text-[10px] text-zinc-550 mt-0.5 gap-1 flex-wrap">
-                    <span className="text-[10px] text-zinc-400 font-semibold whitespace-nowrap">
-                      {movie.releaseYear}
-                      {movie.viewsCount !== undefined && movie.viewsCount > 0 && (
-                        <>
-                          <span className="text-zinc-600 mx-1">•</span>
-                          <span>👁 {movie.viewsCount >= 1000 ? `${(movie.viewsCount / 1000).toFixed(1)}K` : movie.viewsCount}</span>
-                        </>
-                      )}
-                    </span>
-                    <span className="text-[9px] font-bold text-zinc-400 bg-zinc-900 px-1 rounded-[2px] uppercase truncate max-w-[70px]">{movie.studio || 'Donghua'}</span>
-                  </div>
-                </div>
-              </Link>
-            ))}
-          </div>
-        ) : (
-          <div className="text-center py-24 bg-zinc-950/40 border border-zinc-900 rounded-[4px] p-12 max-w-xl mx-auto">
-            <Film className="w-10 h-10 text-zinc-650 mx-auto mb-4" />
-            <h3 className="text-sm font-bold text-white uppercase tracking-wider">Không tìm thấy bộ phim nào</h3>
-            <p className="text-xs text-zinc-500 mt-2 max-w-sm mx-auto leading-relaxed">
-              Hãy thử gõ lại từ khóa khác hoặc điều chỉnh các bộ lọc phát hành phim của bạn.
-            </p>
-          </div>
-        )}
       </main>
       <Footer />
     </div>

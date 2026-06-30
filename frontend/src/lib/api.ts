@@ -193,6 +193,7 @@ export interface MoviePayload {
   seriesId?: string;
   seriesLabel?: string;
   loreMetadata?: { title?: string; levels?: { name: string; desc?: string }[] } | null;
+  genres?: { genre: { id: string; name: string; slug: string } }[];
 }
 
 export interface EpisodePayload {
@@ -369,7 +370,16 @@ export interface DanmakuPayload {
   };
 }
 
+export interface RecentCommentPayload extends CommentPayload {
+  movie?: { id: string; title: string; slug?: string };
+  episode?: { id: string; episodeNumber: number };
+}
+
 export const commentApi = {
+  async getRecentComments(): Promise<ApiResponse<RecentCommentPayload[]>> {
+    return apiFetch<RecentCommentPayload[]>('/comments/recent');
+  },
+
   async getComments(movieId: string, episodeId?: string): Promise<ApiResponse<CommentPayload[]>> {
     const query = episodeId ? `?episodeId=${episodeId}` : '';
     return apiFetch<CommentPayload[]>(`/comments/movie/${movieId}${query}`);

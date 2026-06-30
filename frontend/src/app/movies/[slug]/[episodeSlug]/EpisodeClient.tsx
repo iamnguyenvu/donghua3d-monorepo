@@ -346,34 +346,24 @@ export default function EpisodePage({ slug, episodeNumber }: { slug: string; epi
           selectedServer={selectedServer}
           onSelectServer={setSelectedServer}
         />
-
-        {/* EPISODE DETAILS INFO */}
-        <div className="mt-8 border-b border-zinc-900/60 pb-6 select-none">
-          <div className="flex items-center gap-2 text-[10px] text-violet-400 font-black uppercase tracking-widest mb-1.5">
-            <span>{movie.title}</span>
-            <span className="text-zinc-700">|</span>
-            <span>Tập {episode.episodeNumber}</span>
-          </div>
-          <h1 className="text-xl md:text-2xl font-black text-white uppercase tracking-wider mb-2">
-            {cleanEpisodeTitle(episode.title, episode.episodeNumber)}
-          </h1>
-          <p className="text-xs text-zinc-400 leading-relaxed max-w-4xl mb-4">
-            {episode.description}
-          </p>
-
-          {/* Social Actions Panel */}
-          <div className="flex items-center gap-3">
+        
+        {/* Quick-action Toolbar beneath the player */}
+        <div className="mt-4 flex items-center justify-between gap-4 p-3 bg-[#09090d]/80 border border-zinc-900 rounded-[4px] shadow-lg select-none flex-wrap sm:flex-nowrap">
+          {/* Left Actions: Bookmark & Rate */}
+          <div className="flex items-center gap-2.5">
             <button
               onClick={async () => {
-                const newVal = !false; // Temporary toggle state for local UI until connected to backend
                 if (movie) {
+                  const currentVal = localStorage.getItem(`donghua3d_followed_${movie.id}`) === 'true';
+                  const newVal = !currentVal;
                   localStorage.setItem(`donghua3d_followed_${movie.id}`, newVal.toString());
                   alert(newVal ? `Đã thêm phim vào danh sách Theo dõi thành công!` : 'Đã bỏ theo dõi phim.');
+                  window.dispatchEvent(new Event('storage'));
                 }
               }}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-[2px] text-xs font-bold transition-all cursor-pointer outline-none border border-zinc-800 bg-zinc-950/80 hover:bg-zinc-900 text-zinc-300 hover:text-white shadow-sm"
+              className="flex items-center gap-2 px-4 py-2.5 rounded-[2px] bg-zinc-950 hover:bg-zinc-900 border border-zinc-850 hover:border-zinc-800 text-xs font-bold text-zinc-300 hover:text-white transition-all cursor-pointer outline-none"
             >
-              <Bookmark className="w-3.5 h-3.5" />
+              <Bookmark className="w-4 h-4 text-violet-400" />
               <span>Theo dõi phim</span>
             </button>
             <button
@@ -388,12 +378,102 @@ export default function EpisodePage({ slug, episodeNumber }: { slug: string; epi
                   }
                 }
               }}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-[2px] text-xs font-bold transition-all cursor-pointer outline-none border border-zinc-800 bg-zinc-950/80 hover:bg-zinc-900 text-amber-400 shadow-sm"
+              className="flex items-center gap-2 px-4 py-2.5 rounded-[2px] bg-zinc-950 hover:bg-zinc-900 border border-zinc-850 hover:border-zinc-800 text-xs font-bold text-amber-400 hover:text-amber-350 transition-all cursor-pointer outline-none"
             >
-              <Star className="w-3.5 h-3.5 fill-amber-400" />
-              <span>Đánh giá phim</span>
+              <Star className="w-4 h-4 fill-amber-400 text-amber-400" />
+              <span>Đánh giá</span>
             </button>
           </div>
+
+          {/* Middle Actions: Prev / Next Episode */}
+          <div className="flex items-center gap-2">
+            <button
+              onClick={handlePrevEpisode}
+              disabled={!prevEpisode}
+              className={`flex items-center gap-1.5 px-4 py-2.5 rounded-[2px] text-xs font-bold transition-all border outline-none cursor-pointer
+                ${prevEpisode 
+                  ? 'bg-zinc-950 hover:bg-zinc-900 border-zinc-850 hover:border-zinc-800 text-zinc-300 hover:text-white' 
+                  : 'bg-zinc-950/20 border-zinc-900/40 text-zinc-650 cursor-not-allowed opacity-50'
+                }
+              `}
+            >
+              <span>◀ Trước</span>
+            </button>
+            <button
+              onClick={handleNextEpisode}
+              disabled={!nextEpisode}
+              className={`flex items-center gap-1.5 px-4 py-2.5 rounded-[2px] text-xs font-bold transition-all border outline-none cursor-pointer
+                ${nextEpisode 
+                  ? 'bg-violet-600 hover:bg-violet-750 border-violet-550 text-white shadow-md hover:shadow-violet-600/20' 
+                  : 'bg-zinc-950/20 border-zinc-900/40 text-zinc-650 cursor-not-allowed opacity-50'
+                }
+              `}
+            >
+              <span>Tiếp ▶</span>
+            </button>
+          </div>
+
+          {/* Right Actions: Light Dimmer toggle & Server list */}
+          <div className="flex items-center gap-2.5">
+            <button
+              onClick={() => {
+                const overlayId = 'player-light-dimmer-overlay';
+                let overlay = document.getElementById(overlayId);
+                if (overlay) {
+                  overlay.remove();
+                } else {
+                  overlay = document.createElement('div');
+                  overlay.id = overlayId;
+                  overlay.style.position = 'fixed';
+                  overlay.style.top = '0';
+                  overlay.style.left = '0';
+                  overlay.style.width = '100vw';
+                  overlay.style.height = '100vh';
+                  overlay.style.backgroundColor = 'rgba(0, 0, 0, 0.9)';
+                  overlay.style.zIndex = '35';
+                  overlay.style.pointerEvents = 'none';
+                  overlay.style.transition = 'all 0.3s ease';
+                  document.body.appendChild(overlay);
+                  alert('Chế độ Tắt Đèn đã kích hoạt! Bấm lại nút này để bật đèn.');
+                }
+              }}
+              className="flex items-center gap-2 px-4 py-2.5 rounded-[2px] bg-zinc-950 hover:bg-zinc-900 border border-zinc-850 hover:border-zinc-800 text-xs font-bold text-zinc-300 hover:text-white transition-all cursor-pointer outline-none"
+            >
+              <span className="text-violet-400">💡</span>
+              <span>Tắt Đèn</span>
+            </button>
+            <div className="flex items-center bg-zinc-950 p-1 rounded-[2px] border border-zinc-850 gap-1">
+              {(episode.sources || []).map((src) => (
+                <button
+                  key={src.id}
+                  onClick={() => setSelectedServer(src.serverName)}
+                  className={`px-3 py-1.5 rounded-[2px] text-[10px] font-black uppercase tracking-wider transition-all cursor-pointer border-0 outline-none
+                    ${selectedServer === src.serverName
+                      ? 'bg-violet-600 text-white shadow-sm'
+                      : 'text-zinc-500 hover:text-zinc-300 bg-transparent'
+                    }
+                  `}
+                >
+                  {src.serverName}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* EPISODE DETAILS INFO */}
+        <div className="mt-8 border-b border-zinc-900/60 pb-6 select-none">
+          <div className="flex items-center gap-2 text-[10px] text-violet-400 font-black uppercase tracking-widest mb-1.5">
+            <span>{movie.title}</span>
+            <span className="text-zinc-700">|</span>
+            <span>Tập {episode.episodeNumber}</span>
+          </div>
+          <h1 className="text-xl md:text-2xl font-black text-white uppercase tracking-wider mb-2">
+            {cleanEpisodeTitle(episode.title, episode.episodeNumber)}
+          </h1>
+          <p className="text-xs text-zinc-400 leading-relaxed max-w-4xl">
+            {episode.description}
+          </p>
         </div>
 
         {/* ==============================================================================

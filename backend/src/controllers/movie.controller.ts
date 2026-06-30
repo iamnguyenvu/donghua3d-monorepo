@@ -189,6 +189,11 @@ router.get('/movies/:id', async (req: AuthenticatedRequest, res: Response, next:
           orderBy: { episodeNumber: 'asc' },
         },
         leaderboard: true,
+        genres: {
+          include: {
+            genre: true,
+          },
+        },
       },
     });
 

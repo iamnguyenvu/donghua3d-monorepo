@@ -6,6 +6,34 @@ import { cultivationService } from '../services/cultivation.service';
 
 const router = Router();
 
+// 0. GET /api/comments/recent - Fetch 5 most recent comments globally for homepage sidebar
+router.get('/recent', async (_req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    const comments = await prisma.comment.findMany({
+      take: 5,
+      orderBy: { createdAt: 'desc' },
+      include: {
+        user: {
+          select: { id: true, email: true },
+        },
+        movie: {
+          select: { id: true, title: true, slug: true },
+        },
+        episode: {
+          select: { id: true, episodeNumber: true },
+        },
+      },
+    });
+
+    res.status(200).json({
+      success: true,
+      data: comments,
+    });
+  } catch (err) {
+    next(err);
+  }
+});
+
 // 1. GET /api/comments - Fetch flat comment listings (Frontend handles tree nesting)
 router.get('/movie/:movieId', async (req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> => {
   try {

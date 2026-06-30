@@ -94,18 +94,10 @@ export default function PremiumPlayer({
 
   // Real-time Danmaku States
   const [danmakus, setDanmakus] = useState<DanmakuPayload[]>([]);
-  interface VisibleDanmaku extends DanmakuPayload {
-    top: number;
-    idStr: string;
-  }
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [visibleDanmakus, setVisibleDanmakus] = useState<VisibleDanmaku[]>([]);
   const [isDanmakuEnabled, setIsDanmakuEnabled] = useState<boolean>(true);
   const [danmakuInput, setDanmakuInput] = useState<string>('');
   const [danmakuColor, setDanmakuColor] = useState<string>('#ffffff');
   const socketRef = useRef<Socket | null>(null);
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const lastCheckedTimeRef = useRef<number>(-1);
 
   // Load Danmakus & Setup WebSocket Connection
   useEffect(() => {
@@ -582,6 +574,13 @@ function CustomControls({
   danmakus
 }: CustomControlsProps) {
   const remote = useMediaRemote();
+
+  interface VisibleDanmaku extends DanmakuPayload {
+    top: number;
+    idStr: string;
+  }
+  const [visibleDanmakus, setVisibleDanmakus] = useState<VisibleDanmaku[]>([]);
+  const lastCheckedTimeRef = useRef<number>(-1);
 
   // Subscribe to Vidstack player states using useMediaStore
   const { 
