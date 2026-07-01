@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { Film, Search, User, LogOut, Loader2, ChevronDown, Bell, Menu, X, Clock, Sparkles } from 'lucide-react';
@@ -15,6 +15,8 @@ export default function Header({ onSearchChange }: HeaderProps) {
   const router = useRouter();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [searchVal, setSearchVal] = useState('');
+  const [isSearchExpanded, setIsSearchExpanded] = useState(false);
+  const searchInputRef = useRef<HTMLInputElement>(null);
   const [moviesCache, setMoviesCache] = useState<MoviePayload[]>([]);
   const [genresCache, setGenresCache] = useState<{ id: string; name: string; slug: string; _count?: { movies: number } }[]>([]);
   const [isSearchFocused, setIsSearchFocused] = useState(false);
@@ -147,7 +149,24 @@ export default function Header({ onSearchChange }: HeaderProps) {
   };
 
   const handleSearchBlur = () => {
-    setTimeout(() => setIsSearchFocused(false), 200);
+    setTimeout(() => {
+      setIsSearchFocused(false);
+      if (searchVal.trim() === '') {
+        setIsSearchExpanded(false);
+      }
+    }, 200);
+  };
+
+  const handleSearchIconClick = (e: React.MouseEvent) => {
+    if (!(isSearchFocused || searchVal.trim() !== '' || isSearchExpanded)) {
+      e.preventDefault();
+      setIsSearchExpanded(true);
+      setTimeout(() => {
+        searchInputRef.current?.focus();
+      }, 50);
+    } else if (searchVal.trim() !== '') {
+      router.push(`/?search=${encodeURIComponent(searchVal.trim())}`);
+    }
   };
 
   const handleAuthSubmit = async (e: React.FormEvent) => {
@@ -226,9 +245,9 @@ export default function Header({ onSearchChange }: HeaderProps) {
                 DONGHUA<span className="text-violet-500">3D</span>
               </span>
             </Link>
-
-            {/* Navigation Tabs (Desktop only: hidden lg:flex) */}
-            <nav className="hidden lg:flex items-center gap-6 md:gap-8 select-none">
+            {/* Navigation Tabs (Desktop only) */}
+            {/* 1. Large Screens Nav (>= 1280px): Full inline links */}
+            <nav className="hidden xl:flex items-center gap-6 select-none">
               <Link
                 href="/"
                 onClick={handleLogoClick}
@@ -321,27 +340,147 @@ export default function Header({ onSearchChange }: HeaderProps) {
                 </div>
               </div>
             </nav>
+
+            {/* 2. Medium Screens Nav (1024px to 1279px): Condensed links with "Khám Phá" dropdown */}
+            <nav className="hidden lg:flex xl:hidden items-center gap-5 select-none">
+              <Link
+                href="/"
+                onClick={handleLogoClick}
+                className={`relative text-xs font-black uppercase tracking-wider no-underline transition-colors duration-200 py-2.5 ${
+                  pathname === '/' ? 'text-white' : 'text-zinc-400 hover:text-white'
+                }`}
+              >
+                Trang Chủ
+                {pathname === '/' && (
+                  <span className="absolute bottom-0 left-0 right-0 h-[2.5px] bg-violet-500 rounded-full" />
+                )}
+              </Link>
+              <Link
+                href="/leaderboard"
+                className={`relative text-xs font-black uppercase tracking-wider no-underline transition-colors duration-200 py-2.5 ${
+                  pathname === '/leaderboard' ? 'text-white' : 'text-zinc-400 hover:text-white'
+                }`}
+              >
+                Bảng Xếp Hạng
+                {pathname === '/leaderboard' && (
+                  <span className="absolute bottom-0 left-0 right-0 h-[2.5px] bg-violet-500 rounded-full" />
+                )}
+              </Link>
+
+              {/* Khám Phá Dropdown */}
+              <div className="relative group/discover cursor-pointer py-2.5">
+                <div className={`relative text-xs font-black uppercase tracking-wider no-underline transition-colors duration-200 flex items-center gap-1 ${
+                  (pathname === '/schedule' || pathname === '/news' || pathname === '/watchlist' || pathname.startsWith('/genres')) 
+                    ? 'text-white' 
+                    : 'text-zinc-400 group-hover/discover:text-white'
+                }`}>
+                  Khám Phá
+                  <ChevronDown className="w-3.5 h-3.5 transition-transform group-hover/discover:rotate-180" />
+                  {(pathname === '/schedule' || pathname === '/news' || pathname === '/watchlist' || pathname.startsWith('/genres')) && (
+                    <span className="absolute bottom-0 left-0 right-0 h-[2.5px] bg-violet-500 rounded-full" />
+                  )}
+                </div>
+                <div className="absolute left-0 top-full pt-2 w-96 opacity-0 invisible group-hover/discover:opacity-100 group-hover/discover:visible transition-all duration-300 transform translate-y-2 group-hover/discover:translate-y-0 z-50">
+                  <div className="bg-[#0c0c10]/95 backdrop-blur-xl border border-zinc-900 rounded-[4px] p-4 shadow-[0_10px_40px_rgba(0,0,0,0.8)] flex flex-col gap-3">
+                    {/* Primary Links in Discover */}
+                    <div className="grid grid-cols-3 gap-2 border-b border-zinc-900/60 pb-3">
+                      <Link 
+                        href="/schedule" 
+                        className={`px-2 py-2 text-center text-xs font-black rounded-[2px] uppercase tracking-wider transition-colors no-underline ${
+                          pathname === '/schedule' ? 'text-violet-400 bg-violet-600/10' : 'text-zinc-300 hover:text-white hover:bg-zinc-900'
+                        }`}
+                      >
+                        Lịch Chiếu
+                      </Link>
+                      <Link 
+                        href="/news" 
+                        className={`px-2 py-2 text-center text-xs font-black rounded-[2px] uppercase tracking-wider transition-colors no-underline ${
+                          pathname === '/news' ? 'text-violet-400 bg-violet-600/10' : 'text-zinc-300 hover:text-white hover:bg-zinc-900'
+                        }`}
+                      >
+                        Tin Tức
+                      </Link>
+                      <Link 
+                        href="/watchlist" 
+                        className={`px-2 py-2 text-center text-xs font-black rounded-[2px] uppercase tracking-wider transition-colors no-underline ${
+                          pathname === '/watchlist' ? 'text-violet-400 bg-violet-600/10' : 'text-zinc-300 hover:text-white hover:bg-zinc-900'
+                        }`}
+                      >
+                        Tủ Phim
+                      </Link>
+                    </div>
+                    {/* Genres Sub-section */}
+                    <div className="flex flex-col">
+                      <div className="px-1 mb-2 text-[9px] font-black uppercase tracking-wider text-zinc-500">
+                        Thể Loại Phim
+                      </div>
+                      <div className="grid grid-cols-3 gap-1.5">
+                        {genresCache.length > 0 ? (
+                          genresCache.map((g) => (
+                            <Link 
+                              key={g.id} 
+                              href={`/genres/${g.slug}`}
+                              className={`px-2 py-1.5 text-xs font-bold text-zinc-300 hover:text-white hover:bg-zinc-900 rounded-[2px] transition-colors no-underline flex items-center justify-between group/discover-genre ${
+                                pathname === `/genres/${g.slug}` ? 'text-violet-400 bg-violet-500/5' : ''
+                              }`}
+                            >
+                              <span className="truncate">{g.name}</span>
+                              {g._count?.movies !== undefined && (
+                                <span className="text-[8px] text-zinc-650 group-hover/discover-genre:text-violet-400 bg-zinc-950 px-1 py-0.5 rounded-[2px] transition-colors">
+                                  {g._count.movies}
+                                </span>
+                              )}
+                            </Link>
+                          ))
+                        ) : (
+                          <div className="col-span-3 text-center text-xs text-zinc-500 py-2">Đang tải...</div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </nav>
           </div>
 
           {/* Right Side: Search + Actions clustered together */}
           <div className="flex items-center gap-4 sm:gap-6 flex-shrink-0">
-            {/* Search Bar Input Container (Always Visible) */}
-            <form onSubmit={handleSearchSubmit} className="relative w-40 sm:w-48 lg:w-64 hidden md:block z-50">
-              <div className="relative flex items-center gap-3 px-4 py-2.5 rounded-[4px] bg-black/50 border border-zinc-800/80 focus-within:border-violet-500/80 focus-within:bg-black/85 transition-all duration-300 shadow-inner">
-                <Search className="w-4 h-4 text-zinc-400 flex-shrink-0 transition-colors" />
+            {/* Search Bar Input Container (Expandable) */}
+            <form 
+              onSubmit={handleSearchSubmit} 
+              className={`relative hidden md:block z-50 transition-all duration-300 ${
+                isSearchFocused || searchVal.trim() !== '' || isSearchExpanded 
+                  ? 'w-48 lg:w-64' 
+                  : 'w-10'
+              }`}
+            >
+              <div 
+                onClick={handleSearchIconClick}
+                className={`relative flex items-center gap-3 h-10 rounded-[4px] bg-black/50 border transition-all duration-300 shadow-inner cursor-pointer ${
+                  isSearchFocused || searchVal.trim() !== '' || isSearchExpanded 
+                    ? 'px-4 border-violet-500/80 bg-black/85' 
+                    : 'justify-center border-zinc-800/80 hover:border-zinc-750 hover:bg-[#0c0c10]/40'
+                }`}
+              >
+                <Search className={`w-4 h-4 text-zinc-400 flex-shrink-0 transition-colors ${!(isSearchFocused || searchVal.trim() !== '' || isSearchExpanded) ? 'hover:text-white' : ''}`} />
                 <input
+                  ref={searchInputRef}
                   type="text"
                   placeholder="Tìm kiếm phim..."
                   value={searchVal}
                   onChange={handleSearch}
                   onFocus={handleSearchFocus}
                   onBlur={handleSearchBlur}
-                  className="w-full bg-transparent text-zinc-100 placeholder-zinc-500 text-xs outline-none border-0 p-0 focus:ring-0 focus:outline-none"
+                  className={`bg-transparent text-zinc-100 placeholder-zinc-550 text-xs outline-none border-0 p-0 focus:ring-0 focus:outline-none transition-all duration-300 ${
+                    isSearchFocused || searchVal.trim() !== '' || isSearchExpanded 
+                      ? 'w-full opacity-100' 
+                      : 'w-0 opacity-0 pointer-events-none'
+                  }`}
                 />
                 
                 {/* Search Suggestions Dropdown */}
                 {isSearchFocused && (
-                  <div className="absolute top-full left-0 right-0 mt-2 bg-[#0c0c10]/95 backdrop-blur-xl border border-zinc-900 rounded-[4px] shadow-2xl z-50 overflow-hidden flex flex-col">
+                  <div className="absolute top-full left-0 right-0 mt-2 bg-[#0c0c10]/95 backdrop-blur-xl border border-zinc-900 rounded-[4px] shadow-2xl z-50 overflow-hidden flex flex-col cursor-default" onClick={(e) => e.stopPropagation()}>
                     {searchLoading ? (
                       <div className="p-4 flex justify-center"><Loader2 className="w-4 h-4 animate-spin text-violet-500" /></div>
                     ) : (
@@ -415,13 +554,14 @@ export default function Header({ onSearchChange }: HeaderProps) {
                   {/* ==============================================================================
                      POPOVER LỊCH SỬ XEM PHIM CAO CẤP TRÊN HEADER
                      ============================================================================== */}
+                  {/* History Watch Popover */}
                   <div className="relative group select-none hidden sm:block">
                     <button 
                       onClick={loadWatchHistory}
-                      className="flex items-center gap-1.5 text-zinc-400 hover:text-white text-xs font-bold bg-transparent border-0 cursor-pointer outline-none p-2 transition-colors"
+                      className="relative cursor-pointer hover:text-white text-zinc-400 p-2 bg-transparent border-0 outline-none flex items-center justify-center transition-colors"
+                      title="Lịch sử xem"
                     >
-                      <Clock className="w-4.5 h-4.5 text-violet-400" />
-                      <span>Lịch Sử</span>
+                      <Clock className="w-4.5 h-4.5 text-violet-400 transition-transform hover:scale-110 duration-200" />
                     </button>
 
                     {/* Dropdown Menu trượt xuất hiện mượt mà khi hover */}
@@ -470,7 +610,7 @@ export default function Header({ onSearchChange }: HeaderProps) {
                       className="flex items-center gap-2 sm:gap-3.5 cursor-pointer group" 
                       title="Hồ sơ"
                     >
-                      <div className="flex flex-col text-right hidden xs:flex">
+                      <div className="flex flex-col text-right hidden xl:flex">
                         <span className="text-[11px] sm:text-xs font-black text-white max-w-[80px] sm:max-w-[120px] truncate tracking-tight">{user.email.split('@')[0]}</span>
                         <span className="text-[8px] sm:text-[9px] text-amber-400 font-black uppercase tracking-widest mt-0.5">✨ {user.cultivationRank || 'Phàm Nhân'}</span>
                       </div>
