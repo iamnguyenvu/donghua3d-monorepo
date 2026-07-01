@@ -306,16 +306,27 @@ export default function Header({ onSearchChange }: HeaderProps) {
               </Link>
               
               {/* Thể Loại Dropdown */}
-              <div className="relative group/genre cursor-pointer py-2.5">
-                <div className={`relative text-xs font-black uppercase tracking-wider no-underline transition-colors duration-200 flex items-center gap-1 ${
-                  pathname.startsWith('/genres') ? 'text-white' : 'text-zinc-400 group-hover/genre:text-white'
-                }`}>
+              <div className="relative group/genre cursor-pointer py-2.5" onMouseEnter={() => {
+                if (searchInputRef.current) {
+                  searchInputRef.current.blur();
+                }
+                setIsSearchFocused(false);
+                if (searchVal.trim() === '') {
+                  setIsSearchExpanded(false);
+                }
+              }}>
+                <Link 
+                  href="/genres"
+                  className={`relative text-xs font-black uppercase tracking-wider no-underline transition-colors duration-200 flex items-center gap-1 ${
+                    pathname.startsWith('/genres') ? 'text-white' : 'text-zinc-400 group-hover/genre:text-white'
+                  }`}
+                >
                   Thể Loại
                   <ChevronDown className="w-3.5 h-3.5 transition-transform group-hover/genre:rotate-180" />
                   {pathname.startsWith('/genres') && (
                     <span className="absolute bottom-0 left-0 right-0 h-[2.5px] bg-violet-500 rounded-full" />
                   )}
-                </div>
+                </Link>
                 <div className="absolute left-0 top-full pt-2 w-96 opacity-0 invisible group-hover/genre:opacity-100 group-hover/genre:visible transition-all duration-300 transform translate-y-2 group-hover/genre:translate-y-0 z-50">
                   <div className="bg-[#0c0c10]/95 backdrop-blur-xl border border-zinc-900 rounded-[4px] p-4 shadow-[0_10px_40px_rgba(0,0,0,0.8)] grid grid-cols-2 gap-2">
                     {genresCache.length > 0 ? (
@@ -368,18 +379,29 @@ export default function Header({ onSearchChange }: HeaderProps) {
               </Link>
 
               {/* Khám Phá Dropdown */}
-              <div className="relative group/discover cursor-pointer py-2.5">
-                <div className={`relative text-xs font-black uppercase tracking-wider no-underline transition-colors duration-200 flex items-center gap-1 ${
-                  (pathname === '/schedule' || pathname === '/news' || pathname === '/watchlist' || pathname.startsWith('/genres')) 
-                    ? 'text-white' 
-                    : 'text-zinc-400 group-hover/discover:text-white'
-                }`}>
+              <div className="relative group/discover cursor-pointer py-2.5" onMouseEnter={() => {
+                if (searchInputRef.current) {
+                  searchInputRef.current.blur();
+                }
+                setIsSearchFocused(false);
+                if (searchVal.trim() === '') {
+                  setIsSearchExpanded(false);
+                }
+              }}>
+                <Link 
+                  href="/genres"
+                  className={`relative text-xs font-black uppercase tracking-wider no-underline transition-colors duration-200 flex items-center gap-1 ${
+                    (pathname === '/schedule' || pathname === '/news' || pathname === '/watchlist' || pathname.startsWith('/genres')) 
+                      ? 'text-white' 
+                      : 'text-zinc-400 group-hover/discover:text-white'
+                  }`}
+                >
                   Khám Phá
                   <ChevronDown className="w-3.5 h-3.5 transition-transform group-hover/discover:rotate-180" />
                   {(pathname === '/schedule' || pathname === '/news' || pathname === '/watchlist' || pathname.startsWith('/genres')) && (
                     <span className="absolute bottom-0 left-0 right-0 h-[2.5px] bg-violet-500 rounded-full" />
                   )}
-                </div>
+                </Link>
                 <div className="absolute left-0 top-full pt-2 w-96 opacity-0 invisible group-hover/discover:opacity-100 group-hover/discover:visible transition-all duration-300 transform translate-y-2 group-hover/discover:translate-y-0 z-50">
                   <div className="bg-[#0c0c10]/95 backdrop-blur-xl border border-zinc-900 rounded-[4px] p-4 shadow-[0_10px_40px_rgba(0,0,0,0.8)] flex flex-col gap-3">
                     {/* Primary Links in Discover */}
@@ -477,6 +499,28 @@ export default function Header({ onSearchChange }: HeaderProps) {
                       : 'w-0 opacity-0 pointer-events-none'
                   }`}
                 />
+
+                {(isSearchFocused || searchVal.trim() !== '' || isSearchExpanded) && (
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      if (searchVal !== '') {
+                        setSearchVal('');
+                        if (onSearchChange) onSearchChange('');
+                        searchInputRef.current?.focus();
+                      } else {
+                        setIsSearchExpanded(false);
+                        setIsSearchFocused(false);
+                        searchInputRef.current?.blur();
+                      }
+                    }}
+                    className="p-1 text-zinc-500 hover:text-white bg-transparent border-0 cursor-pointer outline-none transition-colors flex items-center justify-center flex-shrink-0"
+                    title="Đóng tìm kiếm"
+                  >
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                )}
                 
                 {/* Search Suggestions Dropdown */}
                 {isSearchFocused && (
