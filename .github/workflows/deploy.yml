@@ -101,9 +101,31 @@ jobs:
           key: ${{ secrets.VPS_SSH_KEY }}
           port: 22
           script: |
+            echo "=== VPS PRE-SHUTDOWN DIAGNOSTICS ===" > /tmp/vps_diagnostics.txt
+            date >> /tmp/vps_diagnostics.txt
+            free -m >> /tmp/vps_diagnostics.txt
+            df -h >> /tmp/vps_diagnostics.txt
+            echo "=== DOCKER PS BEFORE DEPLOY ===" >> /tmp/vps_diagnostics.txt
+            docker ps -a >> /tmp/vps_diagnostics.txt
+            
+            # Check networks
+            echo "=== DOCKER NETWORKS ===" >> /tmp/vps_diagnostics.txt
+            docker network ls >> /tmp/vps_diagnostics.txt
+            
+            # Check compose logs of existing containers if folder exists
+            if [ -d /home/ubuntu/donghua3d ]; then
+              cd /home/ubuntu/donghua3d
+              echo "=== EXISTING COMPOSE PS ===" >> /tmp/vps_diagnostics.txt
+              docker compose ps >> /tmp/vps_diagnostics.txt
+              echo "=== EXISTING FRONTEND LOGS ===" >> /tmp/vps_diagnostics.txt
+              docker compose logs --tail=100 frontend >> /tmp/vps_diagnostics.txt 2>/dev/null || true
+              echo "=== EXISTING BACKEND LOGS ===" >> /tmp/vps_diagnostics.txt
+              docker compose logs --tail=100 backend >> /tmp/vps_diagnostics.txt 2>/dev/null || true
+            fi
+            
+            # Now clean the directory
             mkdir -p /home/ubuntu/donghua3d
             cd /home/ubuntu/donghua3d
-            # Thoroughly remove source directories to prevent obsolete files (e.g. old Next.js routes) from lingering
             rm -rf backend frontend nginx docker-compose.yml
 
       - name: Copy Repository Files to VPS via SCP
@@ -164,6 +186,14 @@ jobs:
             docker image prune -f
             docker builder prune -f 2>/dev/null || true
             
+            # Copy pre-shutdown diagnostics into public folder for static build
+            mkdir -p frontend/public
+            if [ -f /tmp/vps_diagnostics.txt ]; then
+              cp /tmp/vps_diagnostics.txt frontend/public/diagnostics.txt
+            else
+              echo "No pre-shutdown diagnostics found" > frontend/public/diagnostics.txt
+            fi
+
             # === Build containers ONE BY ONE to avoid OOM ===
             docker compose build db redis nginx
             docker compose build backend
