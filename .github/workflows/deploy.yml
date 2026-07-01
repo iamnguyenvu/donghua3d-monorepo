@@ -238,7 +238,7 @@ jobs:
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git pull origin main
+          git checkout -B main origin/main
           mkdir -p ~/.ssh
           ssh-keyscan -H "${{ secrets.VPS_HOST }}" >> ~/.ssh/known_hosts
           echo "${{ secrets.VPS_SSH_KEY }}" > private_key.pem
@@ -252,4 +252,4 @@ jobs:
           ssh -i private_key.pem "${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}" "cat /home/ubuntu/donghua3d/diagnostics.txt 2>/dev/null || echo 'No post-deploy diagnostics found'" >> vps_diagnostics.log
           git add vps_diagnostics.log
           git commit -m "chore: update vps diagnostics log [skip ci]" || exit 0
-          git push origin HEAD:main
+          git push origin main
