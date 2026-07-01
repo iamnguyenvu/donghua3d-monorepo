@@ -58,6 +58,8 @@ jobs:
     name: Deploy to VPS Server via SSH
     needs: validate
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     
     steps:
       - name: Checkout repository
@@ -235,6 +237,7 @@ jobs:
             rm -f diagnostics.txt
 
       - name: Git Pull, Commit and Push Diagnostics
+        continue-on-error: true
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
