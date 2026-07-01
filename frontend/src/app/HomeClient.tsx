@@ -894,7 +894,7 @@ export default function HomeClient({ initialMovies = [] }: { initialMovies: Movi
                       <span>{new Date(comment.createdAt).toLocaleDateString('vi-VN')}</span>
                     </div>
                     <p className="text-[10px] text-zinc-400 leading-relaxed line-clamp-2 italic">
-                      "{comment.content}"
+                      &ldquo;{comment.content}&rdquo;
                     </p>
                     {comment.movie && (
                       <Link
