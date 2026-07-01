@@ -252,4 +252,4 @@ jobs:
           ssh -i private_key.pem "${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}" "cat /home/ubuntu/donghua3d/diagnostics.txt 2>/dev/null || echo 'No post-deploy diagnostics found'" >> vps_diagnostics.log
           git add vps_diagnostics.log
           git commit -m "chore: update vps diagnostics log [skip ci]" || exit 0
-          git push origin main
+          git push origin HEAD:main
