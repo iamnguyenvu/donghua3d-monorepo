@@ -233,3 +233,23 @@ jobs:
             
             docker cp diagnostics.txt donghua3d_backend:/app/uploads/diagnostics.txt
             rm -f diagnostics.txt
+
+      - name: Git Pull, Commit and Push Diagnostics
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git pull origin main
+          mkdir -p ~/.ssh
+          ssh-keyscan -H "${{ secrets.VPS_HOST }}" >> ~/.ssh/known_hosts
+          echo "${{ secrets.VPS_SSH_KEY }}" > private_key.pem
+          chmod 600 private_key.pem
+          ssh -i private_key.pem "${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}" "cat /tmp/vps_diagnostics.txt" > vps_diagnostics.log
+          echo "" >> vps_diagnostics.log
+          echo "==========================================================================" >> vps_diagnostics.log
+          echo "=== VPS POST-DEPLOYMENT DIAGNOSTICS ===" >> vps_diagnostics.log
+          echo "==========================================================================" >> vps_diagnostics.log
+          echo "" >> vps_diagnostics.log
+          ssh -i private_key.pem "${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}" "cat /home/ubuntu/donghua3d/diagnostics.txt 2>/dev/null || echo 'No post-deploy diagnostics found'" >> vps_diagnostics.log
+          git add vps_diagnostics.log
+          git commit -m "chore: update vps diagnostics log [skip ci]" || exit 0
+          git push origin main
