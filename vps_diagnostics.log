@@ -1,0 +1,151 @@
+=== VPS PRE-SHUTDOWN DIAGNOSTICS ===
+Wed Jul  1 16:02:44 UTC 2026
+               total        used        free      shared  buff/cache   available
+Mem:            3831        1090         541          22        2525        2741
+Swap:           4095           3        4092
+Filesystem       Size  Used Avail Use% Mounted on
+/dev/root         28G   14G   15G  49% /
+tmpfs            1.9G     0  1.9G   0% /dev/shm
+tmpfs            767M  1.4M  765M   1% /run
+efivarfs         128K  3.3K  120K   3% /sys/firmware/efi/efivars
+none             1.0M     0  1.0M   0% /run/credentials/systemd-journald.service
+none             1.0M     0  1.0M   0% /run/credentials/systemd-resolved.service
+tmpfs            1.9G  4.0K  1.9G   1% /tmp
+/dev/nvme0n1p13  989M  163M  760M  18% /boot
+/dev/nvme0n1p15  105M  6.3M   99M   7% /boot/efi
+none             1.0M     0  1.0M   0% /run/credentials/systemd-networkd.service
+none             1.0M     0  1.0M   0% /run/credentials/getty@tty1.service
+none             1.0M     0  1.0M   0% /run/credentials/serial-getty@ttyS0.service
+tmpfs            384M  8.0K  384M   1% /run/user/1000
+=== DOCKER PS BEFORE DEPLOY ===
+CONTAINER ID   IMAGE                COMMAND                  CREATED          STATUS                    PORTS                                                                          NAMES
+e88d23f3440c   nginx:1.25-alpine    "/docker-entrypoint.…"   18 minutes ago   Up 18 minutes             0.0.0.0:80->80/tcp, [::]:80->80/tcp, 0.0.0.0:443->443/tcp, [::]:443->443/tcp   donghua3d_nginx
+dc0dadc34299   donghua3d-frontend   "docker-entrypoint.s…"   18 minutes ago   Up 18 minutes             0.0.0.0:3000->3000/tcp, [::]:3000->3000/tcp                                    donghua3d_frontend
+601370a98b47   donghua3d-backend    "docker-entrypoint.s…"   18 minutes ago   Up 18 minutes             0.0.0.0:5000->5000/tcp, [::]:5000->5000/tcp                                    donghua3d_backend
+e6ac161f50bd   postgres:15-alpine   "docker-entrypoint.s…"   18 minutes ago   Up 18 minutes (healthy)   0.0.0.0:5432->5432/tcp, [::]:5432->5432/tcp                                    donghua3d_db
+f52c2c83acd3   redis:7-alpine       "docker-entrypoint.s…"   18 minutes ago   Up 18 minutes             0.0.0.0:6379->6379/tcp, [::]:6379->6379/tcp                                    donghua3d_redis
+=== DOCKER NETWORKS ===
+NETWORK ID     NAME                DRIVER    SCOPE
+dbe3f7cf3b3e   bridge              bridge    local
+6a22b419a641   donghua3d_default   bridge    local
+1f85bfbe182c   host                host      local
+a7196d33ede9   none                null      local
+=== EXISTING COMPOSE PS ===
+NAME                 IMAGE                COMMAND                  SERVICE    CREATED          STATUS                    PORTS
+donghua3d_backend    donghua3d-backend    "docker-entrypoint.s…"   backend    18 minutes ago   Up 18 minutes             0.0.0.0:5000->5000/tcp, [::]:5000->5000/tcp
+donghua3d_db         postgres:15-alpine   "docker-entrypoint.s…"   db         18 minutes ago   Up 18 minutes (healthy)   0.0.0.0:5432->5432/tcp, [::]:5432->5432/tcp
+donghua3d_frontend   donghua3d-frontend   "docker-entrypoint.s…"   frontend   18 minutes ago   Up 18 minutes             0.0.0.0:3000->3000/tcp, [::]:3000->3000/tcp
+donghua3d_nginx      nginx:1.25-alpine    "/docker-entrypoint.…"   nginx      18 minutes ago   Up 18 minutes             0.0.0.0:80->80/tcp, [::]:80->80/tcp, 0.0.0.0:443->443/tcp, [::]:443->443/tcp
+donghua3d_redis      redis:7-alpine       "docker-entrypoint.s…"   redis      18 minutes ago   Up 18 minutes             0.0.0.0:6379->6379/tcp, [::]:6379->6379/tcp
+=== EXISTING FRONTEND LOGS ===
+donghua3d_frontend  | ▲ Next.js 16.2.5
+donghua3d_frontend  | - Local:         http://localhost:3000
+donghua3d_frontend  | - Network:       http://0.0.0.0:3000
+donghua3d_frontend  | ✓ Ready in 0ms
+donghua3d_frontend  | ⨯ Error [TimeoutError]: The operation was aborted due to timeout
+donghua3d_frontend  |     at ignore-listed frames {
+donghua3d_frontend  |   code: 23,
+donghua3d_frontend  |   INDEX_SIZE_ERR: 1,
+donghua3d_frontend  |   DOMSTRING_SIZE_ERR: 2,
+donghua3d_frontend  |   HIERARCHY_REQUEST_ERR: 3,
+donghua3d_frontend  |   WRONG_DOCUMENT_ERR: 4,
+donghua3d_frontend  |   INVALID_CHARACTER_ERR: 5,
+donghua3d_frontend  |   NO_DATA_ALLOWED_ERR: 6,
+donghua3d_frontend  |   NO_MODIFICATION_ALLOWED_ERR: 7,
+donghua3d_frontend  |   NOT_FOUND_ERR: 8,
+donghua3d_frontend  |   NOT_SUPPORTED_ERR: 9,
+donghua3d_frontend  |   INUSE_ATTRIBUTE_ERR: 10,
+donghua3d_frontend  |   INVALID_STATE_ERR: 11,
+donghua3d_frontend  |   SYNTAX_ERR: 12,
+donghua3d_frontend  |   INVALID_MODIFICATION_ERR: 13,
+donghua3d_frontend  |   NAMESPACE_ERR: 14,
+donghua3d_frontend  |   INVALID_ACCESS_ERR: 15,
+donghua3d_frontend  |   VALIDATION_ERR: 16,
+donghua3d_frontend  |   TYPE_MISMATCH_ERR: 17,
+donghua3d_frontend  |   SECURITY_ERR: 18,
+donghua3d_frontend  |   NETWORK_ERR: 19,
+donghua3d_frontend  |   ABORT_ERR: 20,
+donghua3d_frontend  |   URL_MISMATCH_ERR: 21,
+donghua3d_frontend  |   QUOTA_EXCEEDED_ERR: 22,
+donghua3d_frontend  |   TIMEOUT_ERR: 23,
+donghua3d_frontend  |   INVALID_NODE_TYPE_ERR: 24,
+donghua3d_frontend  |   DATA_CLONE_ERR: 25
+donghua3d_frontend  | }
+donghua3d_frontend  | ⨯ Error [TimeoutError]: The operation was aborted due to timeout
+donghua3d_frontend  |     at ignore-listed frames {
+donghua3d_frontend  |   code: 23,
+donghua3d_frontend  |   INDEX_SIZE_ERR: 1,
+donghua3d_frontend  |   DOMSTRING_SIZE_ERR: 2,
+donghua3d_frontend  |   HIERARCHY_REQUEST_ERR: 3,
+donghua3d_frontend  |   WRONG_DOCUMENT_ERR: 4,
+donghua3d_frontend  |   INVALID_CHARACTER_ERR: 5,
+donghua3d_frontend  |   NO_DATA_ALLOWED_ERR: 6,
+donghua3d_frontend  |   NO_MODIFICATION_ALLOWED_ERR: 7,
+donghua3d_frontend  |   NOT_FOUND_ERR: 8,
+donghua3d_frontend  |   NOT_SUPPORTED_ERR: 9,
+donghua3d_frontend  |   INUSE_ATTRIBUTE_ERR: 10,
+donghua3d_frontend  |   INVALID_STATE_ERR: 11,
+donghua3d_frontend  |   SYNTAX_ERR: 12,
+donghua3d_frontend  |   INVALID_MODIFICATION_ERR: 13,
+donghua3d_frontend  |   NAMESPACE_ERR: 14,
+donghua3d_frontend  |   INVALID_ACCESS_ERR: 15,
+donghua3d_frontend  |   VALIDATION_ERR: 16,
+donghua3d_frontend  |   TYPE_MISMATCH_ERR: 17,
+donghua3d_frontend  |   SECURITY_ERR: 18,
+donghua3d_frontend  |   NETWORK_ERR: 19,
+donghua3d_frontend  |   ABORT_ERR: 20,
+donghua3d_frontend  |   URL_MISMATCH_ERR: 21,
+donghua3d_frontend  |   QUOTA_EXCEEDED_ERR: 22,
+donghua3d_frontend  |   TIMEOUT_ERR: 23,
+donghua3d_frontend  |   INVALID_NODE_TYPE_ERR: 24,
+donghua3d_frontend  |   DATA_CLONE_ERR: 25
+donghua3d_frontend  | }
+=== EXISTING BACKEND LOGS ===
+donghua3d_backend  | 
+donghua3d_backend  | > donghua3d-backend@1.0.0 start
+donghua3d_backend  | > node dist/index.js
+donghua3d_backend  | 
+donghua3d_backend  | 💬 [Socket.io] Watch Party Real-time Gateway enabled.
+donghua3d_backend  | ========================================================
+donghua3d_backend  |  🚀 DONGHUA3D EXPRESS RUNNING ON PORT 5000 [PRODUCTION]
+donghua3d_backend  |  API Endpoint: http://localhost:5000
+donghua3d_backend  | ========================================================
+donghua3d_backend  | 🤖 [CronService] Initializing scheduled tasks...
+donghua3d_backend  | 🤖 [CronService] Hourly movie auto-scraper scheduled (runs at the start of every hour).
+donghua3d_backend  | 🤖 [CronService] News RSS feed sync scheduled (runs every 6 hours).
+donghua3d_backend  | 📰 [News Scraper] Starting RSS Feed news sync...
+donghua3d_backend  | Connected to Redis at redis://redis:6379
+donghua3d_backend  | 📰 [News Scraper] Synced 3 articles successfully from Mock Backup Data.
+donghua3d_backend  | 🤖 [CronService] Starting scheduled daily scraping task...
+donghua3d_backend  | 🤖 [Scraper] Syncing latest updated movies page 1 (onlyExisting: true)...
+donghua3d_backend  | ⏭️ [Scraper] Bỏ qua phim mới slug "toi-muon-cham-dut-tro-choi-tinh-yeu-nay" (Không tồn tại trong DB, tránh cào phim rác)
+donghua3d_backend  | ⏭️ [Scraper] Bỏ qua phim mới slug "ngoanh-dau-lai-lau-nuoc-mat-cho-cau" (Không tồn tại trong DB, tránh cào phim rác)
+donghua3d_backend  | ⏭️ [Scraper] Bỏ qua phim mới slug "mai-moi-cho-doc-su" (Không tồn tại trong DB, tránh cào phim rác)
+donghua3d_backend  | ⏭️ [Scraper] Bỏ qua phim mới slug "ai-girl-ban-gai-nguoi-may" (Không tồn tại trong DB, tránh cào phim rác)
+donghua3d_backend  | ⏭️ [Scraper] Bỏ qua phim mới slug "enola-holmes-3" (Không tồn tại trong DB, tránh cào phim rác)
+donghua3d_backend  | ⏭️ [Scraper] Bỏ qua phim mới slug "van-tu-hanh" (Không tồn tại trong DB, tránh cào phim rác)
+donghua3d_backend  | ⏭️ [Scraper] Bỏ qua phim mới slug "sieu-sao-sieu-xit-2026" (Không tồn tại trong DB, tránh cào phim rác)
+donghua3d_backend  | ⏭️ [Scraper] Bỏ qua phim mới slug "dem-qua-toi-gan" (Không tồn tại trong DB, tránh cào phim rác)
+donghua3d_backend  | ⏭️ [Scraper] Bỏ qua phim mới slug "the-edge-of-horizon" (Không tồn tại trong DB, tránh cào phim rác)
+donghua3d_backend  | ⏭️ [Scraper] Bỏ qua phim mới slug "the-gioi-doi-khi" (Không tồn tại trong DB, tránh cào phim rác)
+donghua3d_backend  | ⏭️ [Scraper] Bỏ qua phim mới slug "am-anh-2026" (Không tồn tại trong DB, tránh cào phim rác)
+donghua3d_backend  | ⏭️ [Scraper] Bỏ qua phim mới slug "yeu-nu-thich-hang-hieu-2" (Không tồn tại trong DB, tránh cào phim rác)
+donghua3d_backend  | ⏭️ [Scraper] Bỏ qua phim mới slug "goc-toi-nhan-ban" (Không tồn tại trong DB, tránh cào phim rác)
+donghua3d_backend  | ⏭️ [Scraper] Bỏ qua phim mới slug "vo-von-hien-luong" (Không tồn tại trong DB, tránh cào phim rác)
+donghua3d_backend  | ⏭️ [Scraper] Bỏ qua phim mới slug "con-duong-hanh-y" (Không tồn tại trong DB, tránh cào phim rác)
+donghua3d_backend  | ⏭️ [Scraper] Bỏ qua phim mới slug "manh-ghep-bi-an" (Không tồn tại trong DB, tránh cào phim rác)
+donghua3d_backend  | ⏭️ [Scraper] Bỏ qua phim mới slug "y-chi-kim-cuong" (Không tồn tại trong DB, tránh cào phim rác)
+donghua3d_backend  | ⏭️ [Scraper] Bỏ qua phim mới slug "tam-tay-lua-dao" (Không tồn tại trong DB, tránh cào phim rác)
+donghua3d_backend  | ⏭️ [Scraper] Bỏ qua phim mới slug "the-gioi-em-va-toi" (Không tồn tại trong DB, tránh cào phim rác)
+donghua3d_backend  | ⏭️ [Scraper] Bỏ qua phim mới slug "fukami-nghich-ngom-ngoai-suc-tuong-tuong" (Không tồn tại trong DB, tránh cào phim rác)
+donghua3d_backend  | ⏭️ [Scraper] Bỏ qua phim mới slug "papa-zola-the-movie" (Không tồn tại trong DB, tránh cào phim rác)
+donghua3d_backend  | ⏭️ [Scraper] Bỏ qua phim mới slug "thien-huong" (Không tồn tại trong DB, tránh cào phim rác)
+donghua3d_backend  | ⏭️ [Scraper] Bỏ qua phim mới slug "tinh-yeu-co-phao-hoa" (Không tồn tại trong DB, tránh cào phim rác)
+donghua3d_backend  | ⏭️ [Scraper] Bỏ qua phim mới slug "chuyen-gia-tuoi-trung-nien" (Không tồn tại trong DB, tránh cào phim rác)
+donghua3d_backend  | 🤖 [CronService] Scheduled daily scraping completed successfully. Synced 0 movies.
+
+==========================================================================
+=== VPS POST-DEPLOYMENT DIAGNOSTICS ===
+==========================================================================
+
+No post-deploy diagnostics found
