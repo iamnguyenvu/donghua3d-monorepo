@@ -194,6 +194,8 @@ export interface MoviePayload {
   seriesLabel?: string;
   loreMetadata?: { title?: string; levels?: { name: string; desc?: string }[] } | null;
   genres?: { genre: { id: string; name: string; slug: string } }[];
+  status?: string;
+  totalEpisodes?: number | null;
 }
 
 export interface EpisodePayload {
@@ -244,13 +246,16 @@ export interface AiringMoviePayload {
 }
 
 export const catalogApi = {
-  async getMovies(filters?: { year?: number; search?: string; sort?: string }): Promise<ApiResponse<MoviePayload[]>> {
+  async getMovies(filters?: { year?: number; search?: string; sort?: string; status?: string; genre?: string; minRating?: number }): Promise<ApiResponse<MoviePayload[]>> {
     let query = '';
     if (filters) {
       const params = new URLSearchParams();
       if (filters.year) params.set('year', filters.year.toString());
       if (filters.search) params.set('search', filters.search);
       if (filters.sort) params.set('sort', filters.sort);
+      if (filters.status) params.set('status', filters.status);
+      if (filters.genre) params.set('genre', filters.genre);
+      if (filters.minRating) params.set('minRating', filters.minRating.toString());
       query = `?${params.toString()}`;
     }
     return apiFetch<MoviePayload[]>(`/catalog/movies${query}`);
@@ -258,6 +263,10 @@ export const catalogApi = {
 
   async getMovie(id: string): Promise<ApiResponse<MovieWithEpisodes>> {
     return apiFetch<MovieWithEpisodes>(`/catalog/movies/${id}`);
+  },
+
+  async getSimilarMovies(id: string): Promise<ApiResponse<MoviePayload[]>> {
+    return apiFetch<MoviePayload[]>(`/catalog/movies/${id}/similar`);
   },
 
   async getEpisode(id: string): Promise<ApiResponse<EpisodePayload>> {

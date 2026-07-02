@@ -73,6 +73,18 @@ export class ScraperService {
     return html.replace(/<[^>]*>/g, '').trim();
   }
 
+  private async fetchKKPhimEpisodes(slug: string): Promise<any[]> {
+    try {
+      const response = await fetch(`https://phimapi.com/phim/${slug}`);
+      if (!response.ok) return [];
+      const data = (await response.json()) as any;
+      return data.episodes || [];
+    } catch (e: any) {
+      console.log(`⚠️ [Scraper] KKPhim fetch failed for slug ${slug}: ${e.message}`);
+      return [];
+    }
+  }
+
   /**
    * Guess a realistic high-quality Chinese animation studio based on the movie name
    */
@@ -134,6 +146,29 @@ export class ScraperService {
         ? ophimMovie.thumb_url 
         : `https://img.ophim.live/uploads/movies/${ophimMovie.thumb_url}`;
 
+      // Parse status and totalEpisodes
+      const epCurrent = (ophimMovie.episode_current || '').trim();
+      let status = 'ongoing';
+      let totalEpisodes: number | null = null;
+
+      if (epCurrent.toLowerCase().includes('hoàn tất') || epCurrent.toLowerCase().includes('trọn bộ') || epCurrent.toLowerCase().includes('full')) {
+        status = 'completed';
+        const match = epCurrent.match(/\((\d+)\/(\d+)\)/);
+        if (match) {
+          totalEpisodes = parseInt(match[2], 10);
+        } else {
+          const numMatch = epCurrent.match(/(\d+)/);
+          if (numMatch) {
+            totalEpisodes = parseInt(numMatch[1], 10);
+          }
+        }
+      } else {
+        const slashMatch = epCurrent.match(/(\d+)\/(\d+)/);
+        if (slashMatch) {
+          totalEpisodes = parseInt(slashMatch[2], 10);
+        }
+      }
+
       if (!movie) {
         // Create new movie catalog
         console.log(`🤖 [Scraper] Movie not found. Creating catalog: "${normalizedTitle}"...`);
@@ -150,7 +185,9 @@ export class ScraperService {
             rating: 0.0, // Start with honest 0.0 until rated by community
             expertRating: 0.0,
             audienceRating: 0.0,
-            imdbRating: ophimMovie.imdb_rating ? parseFloat(ophimMovie.imdb_rating) : null
+            imdbRating: ophimMovie.imdb_rating ? parseFloat(ophimMovie.imdb_rating) : null,
+            status,
+            totalEpisodes
           }
         });
 
@@ -178,6 +215,8 @@ export class ScraperService {
             posterUrl,
             bannerUrl,
             studio: movie.studio === 'Unknown Studio' || !movie.studio ? this.guessStudio(ophimMovie.name, ophimMovie.origin_name) : movie.studio,
+            status,
+            totalEpisodes,
             updatedAt: new Date()
           }
         });
@@ -235,6 +274,34 @@ export class ScraperService {
               });
             }
             allEpsMap.get(episodeNumber).sources.push({ serverName, videoUrl });
+          }
+        }
+
+        // Sync KKPhim episodes as well if available
+        const kkEpisodes = await this.fetchKKPhimEpisodes(slug);
+        if (kkEpisodes && kkEpisodes.length > 0) {
+          console.log(`🤖 [Scraper] Merging KKPhim episodes...`);
+          for (const server of kkEpisodes) {
+            const serverName = `KKPhim - ${server.server_name}`;
+            for (const ep of server.server_data) {
+              const episodeNumber = parseInt(ep.name, 10);
+              if (isNaN(episodeNumber)) continue;
+
+              const videoUrl = ep.link_m3u8 || ep.link_embed;
+              if (!videoUrl) continue;
+
+              if (!allEpsMap.has(episodeNumber)) {
+                allEpsMap.set(episodeNumber, {
+                  episodeNumber,
+                  filename: ep.filename,
+                  sources: []
+                });
+              }
+              const alreadyHas = allEpsMap.get(episodeNumber).sources.some((s: any) => s.serverName === serverName || s.videoUrl === videoUrl);
+              if (!alreadyHas) {
+                allEpsMap.get(episodeNumber).sources.push({ serverName, videoUrl });
+              }
+            }
           }
         }
 

@@ -80,9 +80,9 @@ router.get('/schedule', async (_req: AuthenticatedRequest, res: Response, next: 
 // 1. GET /api/movies - Query Catalog List
 router.get('/movies', async (req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> => {
   try {
-    const { year, search, sort } = req.query;
+    const { year, search, sort, status, genre, minRating } = req.query;
 
-    const cacheKey = `movies_list:${year || 'all'}:${search || 'none'}:${sort || 'default'}`;
+    const cacheKey = `movies_list:${year || 'all'}:${search || 'none'}:${sort || 'default'}:${status || 'all'}:${genre || 'all'}:${minRating || '0'}`;
     const cachedData = await redis.get(cacheKey);
 
     if (cachedData) {
@@ -97,6 +97,23 @@ router.get('/movies', async (req: AuthenticatedRequest, res: Response, next: Nex
     if (year) {
       whereClause.releaseYear = parseInt(year as string, 10);
     }
+    if (status) {
+      whereClause.status = status as string;
+    }
+    if (genre) {
+      whereClause.genres = {
+        some: {
+          genre: {
+            slug: genre as string
+          }
+        }
+      };
+    }
+    if (minRating) {
+      whereClause.rating = {
+        gte: parseFloat(minRating as string)
+      };
+    }
     if (search) {
       const searchStr = search as string;
       whereClause.OR = [
@@ -110,6 +127,10 @@ router.get('/movies', async (req: AuthenticatedRequest, res: Response, next: Nex
       orderByClause = { releaseYear: 'desc' };
     } else if (sort === 'title') {
       orderByClause = { title: 'asc' };
+    } else if (sort === 'viewsCount' || sort === 'popularity') {
+      orderByClause = { viewsCount: 'desc' };
+    } else if (sort === 'updatedAt') {
+      orderByClause = { updatedAt: 'desc' };
     }
 
     const movies = await prisma.movie.findMany({
@@ -169,6 +190,59 @@ router.get('/sitemap-data', async (_req: AuthenticatedRequest, res: Response, ne
     res.status(200).json({
       success: true,
       data: movies,
+    });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// 1.8 GET /api/movies/:id/similar - Similar Movies
+router.get('/movies/:id/similar', async (req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    const { id } = req.params;
+    const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(id);
+
+    const movie = await prisma.movie.findFirst({
+      where: isUUID ? { id } : { slug: id },
+      include: {
+        genres: {
+          select: { genreId: true }
+        }
+      }
+    });
+
+    if (!movie) {
+      res.status(404).json({
+        success: false,
+        error: { code: 'NOT_FOUND', message: 'Bộ phim không tồn tại.' },
+      });
+      return;
+    }
+
+    const genreIds = movie.genres.map((g) => g.genreId);
+
+    const similarMovies = await prisma.movie.findMany({
+      where: {
+        id: { not: movie.id },
+        genres: {
+          some: {
+            genreId: { in: genreIds }
+          }
+        }
+      },
+      take: 6,
+      orderBy: { viewsCount: 'desc' },
+      include: {
+        leaderboard: true,
+        _count: {
+          select: { episodes: true }
+        }
+      }
+    });
+
+    res.status(200).json({
+      success: true,
+      data: similarMovies
     });
   } catch (err) {
     next(err);

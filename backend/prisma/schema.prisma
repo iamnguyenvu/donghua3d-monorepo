@@ -84,6 +84,8 @@ model Movie {
   imdbRating     Float?
   audioTrack     AudioTrack @default(VIETSUB)
   loreMetadata   Json?
+  status         String     @default("ongoing") @db.VarChar(20) // "ongoing", "completed", "upcoming"
+  totalEpisodes  Int?       // Tổng số tập dự kiến (ví dụ 180)
   createdAt      DateTime   @default(now()) @db.Timestamptz
   updatedAt      DateTime   @updatedAt @db.Timestamptz
 
@@ -101,6 +103,7 @@ model Movie {
   @@index([releaseYear(sort: Desc), rating(sort: Desc)], name: "idx_movie_release_rating")
   @@index([viewsCount(sort: Desc)], name: "idx_movie_popularity")
   @@index([audioTrack], name: "idx_movie_audio_track")
+  @@index([status], name: "idx_movie_status")
 }
 
 // 2b. MovieSeries Entity Model

@@ -18,6 +18,7 @@ import genreRouter from './controllers/genre.controller';
 import analyticsRouter from './controllers/analytics.controller';
 import danmakuRouter from './controllers/danmaku.controller';
 import newsRouter from './controllers/news.controller';
+import communityRouter from './controllers/community.controller';
 
 // Import Services & Gateways
 import { cronService } from './services/cron.service';
@@ -59,6 +60,7 @@ app.use('/genres', genreRouter);
 app.use('/analytics', analyticsRouter);
 app.use('/danmaku', danmakuRouter);
 app.use('/news', newsRouter);
+app.use('/community', communityRouter);
 
 // 3. Health check route
 app.get('/health', (_req, res) => {

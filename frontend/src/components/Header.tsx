@@ -272,6 +272,39 @@ export default function Header({ onSearchChange }: HeaderProps) {
                 )}
               </Link>
               <Link
+                href="/ongoing"
+                className={`relative text-xs font-black uppercase tracking-wider no-underline transition-colors duration-200 py-2.5 ${
+                  pathname === '/ongoing' ? 'text-white' : 'text-zinc-400 hover:text-white'
+                }`}
+              >
+                Đang Chiếu
+                {pathname === '/ongoing' && (
+                  <span className="absolute bottom-0 left-0 right-0 h-[2.5px] bg-violet-500 rounded-full" />
+                )}
+              </Link>
+              <Link
+                href="/completed"
+                className={`relative text-xs font-black uppercase tracking-wider no-underline transition-colors duration-200 py-2.5 ${
+                  pathname === '/completed' ? 'text-white' : 'text-zinc-400 hover:text-white'
+                }`}
+              >
+                Hoàn Thành
+                {pathname === '/completed' && (
+                  <span className="absolute bottom-0 left-0 right-0 h-[2.5px] bg-violet-500 rounded-full" />
+                )}
+              </Link>
+              <Link
+                href="/top-rated"
+                className={`relative text-xs font-black uppercase tracking-wider no-underline transition-colors duration-200 py-2.5 ${
+                  pathname === '/top-rated' ? 'text-white' : 'text-zinc-400 hover:text-white'
+                }`}
+              >
+                Đánh Giá Cao
+                {pathname === '/top-rated' && (
+                  <span className="absolute bottom-0 left-0 right-0 h-[2.5px] bg-violet-500 rounded-full" />
+                )}
+              </Link>
+              <Link
                 href="/schedule"
                 className={`relative text-xs font-black uppercase tracking-wider no-underline transition-colors duration-200 py-2.5 ${
                   pathname === '/schedule' ? 'text-white' : 'text-zinc-400 hover:text-white'
@@ -406,6 +439,30 @@ export default function Header({ onSearchChange }: HeaderProps) {
                   <div className="bg-[#0c0c10]/95 backdrop-blur-xl border border-zinc-900 rounded-[4px] p-4 shadow-[0_10px_40px_rgba(0,0,0,0.8)] flex flex-col gap-3">
                     {/* Primary Links in Discover */}
                     <div className="grid grid-cols-3 gap-2 border-b border-zinc-900/60 pb-3">
+                      <Link 
+                        href="/ongoing" 
+                        className={`px-2 py-2 text-center text-xs font-black rounded-[2px] uppercase tracking-wider transition-colors no-underline ${
+                          pathname === '/ongoing' ? 'text-violet-400 bg-violet-600/10' : 'text-zinc-300 hover:text-white hover:bg-zinc-900'
+                        }`}
+                      >
+                        Đang Chiếu
+                      </Link>
+                      <Link 
+                        href="/completed" 
+                        className={`px-2 py-2 text-center text-xs font-black rounded-[2px] uppercase tracking-wider transition-colors no-underline ${
+                          pathname === '/completed' ? 'text-violet-400 bg-violet-600/10' : 'text-zinc-300 hover:text-white hover:bg-zinc-900'
+                        }`}
+                      >
+                        Hoàn Thành
+                      </Link>
+                      <Link 
+                        href="/top-rated" 
+                        className={`px-2 py-2 text-center text-xs font-black rounded-[2px] uppercase tracking-wider transition-colors no-underline ${
+                          pathname === '/top-rated' ? 'text-violet-400 bg-violet-600/10' : 'text-zinc-300 hover:text-white hover:bg-zinc-900'
+                        }`}
+                      >
+                        Đánh Giá Cao
+                      </Link>
                       <Link 
                         href="/schedule" 
                         className={`px-2 py-2 text-center text-xs font-black rounded-[2px] uppercase tracking-wider transition-colors no-underline ${
@@ -778,6 +835,33 @@ export default function Header({ onSearchChange }: HeaderProps) {
                 }`}
               >
                 Bảng Xếp Hạng
+              </Link>
+              <Link
+                href="/ongoing"
+                onClick={() => setMobileMenuOpen(false)}
+                className={`text-xs font-black uppercase tracking-wider no-underline transition-colors duration-200 py-3.5 px-4 rounded-[4px] flex items-center justify-between ${
+                  pathname === '/ongoing' ? 'text-white bg-violet-600/10 border-l-2 border-violet-500' : 'text-zinc-400 hover:text-white hover:bg-zinc-950/40'
+                }`}
+              >
+                Đang Chiếu
+              </Link>
+              <Link
+                href="/completed"
+                onClick={() => setMobileMenuOpen(false)}
+                className={`text-xs font-black uppercase tracking-wider no-underline transition-colors duration-200 py-3.5 px-4 rounded-[4px] flex items-center justify-between ${
+                  pathname === '/completed' ? 'text-white bg-violet-600/10 border-l-2 border-violet-500' : 'text-zinc-400 hover:text-white hover:bg-zinc-950/40'
+                }`}
+              >
+                Hoàn Thành
+              </Link>
+              <Link
+                href="/top-rated"
+                onClick={() => setMobileMenuOpen(false)}
+                className={`text-xs font-black uppercase tracking-wider no-underline transition-colors duration-200 py-3.5 px-4 rounded-[4px] flex items-center justify-between ${
+                  pathname === '/top-rated' ? 'text-white bg-violet-600/10 border-l-2 border-violet-500' : 'text-zinc-400 hover:text-white hover:bg-zinc-950/40'
+                }`}
+              >
+                Đánh Giá Cao
               </Link>
               <Link
                 href="/schedule"

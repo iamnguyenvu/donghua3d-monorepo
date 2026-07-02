@@ -87,9 +87,10 @@ export default async function MoviePage({ params }: { params: Promise<{ slug: st
     .replace(/\s*\(.*\)/, '')
     .trim();
 
-  const [reviewRes, relatedRes] = await Promise.all([
+  const [reviewRes, relatedRes, similarRes] = await Promise.all([
     ratingApi.getReviews(movie.id).catch(() => ({ success: false, data: [] as ReviewPayload[], meta: { totalRatings: 0 } })),
-    catalogApi.getMovies({ search: baseTitle }).catch(() => ({ success: false, data: [] as MoviePayload[] }))
+    catalogApi.getMovies({ search: baseTitle }).catch(() => ({ success: false, data: [] as MoviePayload[] })),
+    catalogApi.getSimilarMovies(movie.id).catch(() => ({ success: false, data: [] as MoviePayload[] }))
   ]);
 
   const reviews = reviewRes.success && reviewRes.data ? reviewRes.data : [];
@@ -99,6 +100,8 @@ export default async function MoviePage({ params }: { params: Promise<{ slug: st
   if (relatedRes.success && relatedRes.data) {
     relatedParts = relatedRes.data.filter((m: MoviePayload) => m.id !== movie.id);
   }
+
+  const similarMovies = similarRes.success && similarRes.data ? similarRes.data : [];
 
   // Schema.org Structured Data (TVSeries)
   const episodeCount = movie.episodes ? movie.episodes.length : 0;
@@ -152,6 +155,7 @@ export default async function MoviePage({ params }: { params: Promise<{ slug: st
         reviews={reviews} 
         ratingCount={ratingCount} 
         relatedParts={relatedParts} 
+        similarMovies={similarMovies}
       />
     </>
   );

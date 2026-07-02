@@ -47,12 +47,13 @@ const getTierStyle = (tier: string) => {
 };
 
 export default function MovieClientPage({ 
-  movie, reviews, ratingCount, relatedParts 
+  movie, reviews, ratingCount, relatedParts, similarMovies = []
 }: { 
   movie: MovieWithEpisodes, 
   reviews: ReviewPayload[], 
   ratingCount: number, 
-  relatedParts: MoviePayload[] 
+  relatedParts: MoviePayload[],
+  similarMovies?: MoviePayload[]
 }) {
   // Watchlist integration
   const [watchlistIds, setWatchlistIds] = useState<Set<string>>(new Set());
@@ -200,8 +201,17 @@ export default function MovieClientPage({
                   {movie.releaseYear}
                 </span>
                 <span className="border border-zinc-800 bg-zinc-950/60 text-zinc-300 px-2.5 py-1.5 rounded-[4px] text-[10px] font-extrabold tracking-wider uppercase">
-                  {movie.episodes?.length || 0} Tập
+                  {movie.episodes?.length || 0} / {movie.totalEpisodes || '??'} Tập
                 </span>
+                {movie.status && (
+                  <span className={`border px-2.5 py-1.5 rounded-[4px] text-[10px] font-black tracking-wider uppercase ${
+                    movie.status === 'completed' 
+                      ? 'border-emerald-800/80 bg-emerald-950/60 text-emerald-400' 
+                      : 'border-rose-800/80 bg-rose-950/60 text-rose-400 animate-pulse'
+                  }`}>
+                    {movie.status === 'completed' ? 'Hoàn Thành' : 'Đang Chiếu'}
+                  </span>
+                )}
                 {movie.viewsCount !== undefined && (
                   <span className="border border-zinc-800 bg-zinc-950/60 text-zinc-300 px-2.5 py-1.5 rounded-[4px] text-[10px] font-extrabold tracking-wider uppercase">
                     👁️ {movie.viewsCount.toLocaleString()} lượt xem
@@ -343,6 +353,45 @@ export default function MovieClientPage({
                       </div>
                       <h4 className="text-xs font-black text-white group-hover:text-violet-400 line-clamp-2 mt-1.5 transition-colors leading-snug">
                         {part.title}
+                      </h4>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Similar Movies Section */}
+          {similarMovies.length > 0 && (
+            <div className="mb-6 pb-6 border-b border-zinc-900/60 select-none">
+              <h3 className="text-base font-black text-white tracking-wider uppercase border-l-2 border-violet-500 pl-3 mb-4">
+                Phim Cùng Thể Loại
+              </h3>
+              <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-zinc-850">
+                {similarMovies.map((sim) => (
+                  <Link
+                    key={sim.id}
+                    href={`/movies/${sim.slug || sim.id}`}
+                    className="flex items-center gap-3.5 p-3.5 bg-zinc-950/30 border border-zinc-900 hover:border-violet-500/40 hover:bg-violet-500/5 rounded-[4px] w-64 sm:w-72 lg:w-80 xl:w-96 flex-shrink-0 transition-all duration-300 group no-underline shadow-sm"
+                  >
+                    <div className="w-12 h-16 sm:w-14 sm:h-20 rounded-[2px] overflow-hidden bg-zinc-950 flex-shrink-0 relative border border-zinc-900/60">
+                      <Image
+                        src={sim.bannerUrl || sim.posterUrl || '/static/uploads/default_poster.jpg'}
+                        alt={sim.title}
+                        fill
+                        sizes="56px"
+                        className="object-cover object-top group-hover:scale-105 transition-all duration-300"
+                      />
+                    </div>
+                    <div className="flex flex-col min-w-0 flex-1">
+                      <div className="flex items-center gap-1.5 flex-wrap">
+                        <span className="bg-amber-500/10 text-amber-400 border border-amber-500/25 px-1.5 py-0.5 rounded-[2px] text-[8px] font-black uppercase tracking-wider">
+                          ⭐ {sim.rating > 0 ? sim.rating.toFixed(1) : '9.0'}
+                        </span>
+                        <span className="text-[9px] text-zinc-500 font-bold uppercase">{sim.releaseYear}</span>
+                      </div>
+                      <h4 className="text-xs font-black text-white group-hover:text-violet-400 line-clamp-2 mt-1.5 transition-colors leading-snug">
+                        {sim.title}
                       </h4>
                     </div>
                   </Link>
