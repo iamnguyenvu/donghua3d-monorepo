@@ -246,8 +246,7 @@ export default function Header({ onSearchChange }: HeaderProps) {
               </span>
             </Link>
             {/* Navigation Tabs (Desktop only) */}
-            {/* 1. Large Screens Nav (>= 1280px): Full inline links */}
-            <nav className="hidden xl:flex items-center gap-6 select-none">
+            <nav className="hidden lg:flex items-center gap-6 select-none">
               <Link
                 href="/"
                 onClick={handleLogoClick}
@@ -257,50 +256,6 @@ export default function Header({ onSearchChange }: HeaderProps) {
               >
                 Trang Chủ
                 {pathname === '/' && (
-                  <span className="absolute bottom-0 left-0 right-0 h-[2.5px] bg-violet-500 rounded-full" />
-                )}
-              </Link>
-              <Link
-                href="/leaderboard"
-                className={`relative text-xs font-black uppercase tracking-wider no-underline transition-colors duration-200 py-2.5 ${
-                  pathname === '/leaderboard' ? 'text-white' : 'text-zinc-400 hover:text-white'
-                }`}
-              >
-                Bảng Xếp Hạng
-                {pathname === '/leaderboard' && (
-                  <span className="absolute bottom-0 left-0 right-0 h-[2.5px] bg-violet-500 rounded-full" />
-                )}
-              </Link>
-              <Link
-                href="/ongoing"
-                className={`relative text-xs font-black uppercase tracking-wider no-underline transition-colors duration-200 py-2.5 ${
-                  pathname === '/ongoing' ? 'text-white' : 'text-zinc-400 hover:text-white'
-                }`}
-              >
-                Đang Chiếu
-                {pathname === '/ongoing' && (
-                  <span className="absolute bottom-0 left-0 right-0 h-[2.5px] bg-violet-500 rounded-full" />
-                )}
-              </Link>
-              <Link
-                href="/completed"
-                className={`relative text-xs font-black uppercase tracking-wider no-underline transition-colors duration-200 py-2.5 ${
-                  pathname === '/completed' ? 'text-white' : 'text-zinc-400 hover:text-white'
-                }`}
-              >
-                Hoàn Thành
-                {pathname === '/completed' && (
-                  <span className="absolute bottom-0 left-0 right-0 h-[2.5px] bg-violet-500 rounded-full" />
-                )}
-              </Link>
-              <Link
-                href="/top-rated"
-                className={`relative text-xs font-black uppercase tracking-wider no-underline transition-colors duration-200 py-2.5 ${
-                  pathname === '/top-rated' ? 'text-white' : 'text-zinc-400 hover:text-white'
-                }`}
-              >
-                Đánh Giá Cao
-                {pathname === '/top-rated' && (
                   <span className="absolute bottom-0 left-0 right-0 h-[2.5px] bg-violet-500 rounded-full" />
                 )}
               </Link>
@@ -312,90 +267,6 @@ export default function Header({ onSearchChange }: HeaderProps) {
               >
                 Lịch Chiếu
                 {pathname === '/schedule' && (
-                  <span className="absolute bottom-0 left-0 right-0 h-[2.5px] bg-violet-500 rounded-full" />
-                )}
-              </Link>
-              <Link
-                href="/news"
-                className={`relative text-xs font-black uppercase tracking-wider no-underline transition-colors duration-200 py-2.5 ${
-                  pathname === '/news' ? 'text-white' : 'text-zinc-400 hover:text-white'
-                }`}
-              >
-                Tin Tức
-                {pathname === '/news' && (
-                  <span className="absolute bottom-0 left-0 right-0 h-[2.5px] bg-violet-500 rounded-full" />
-                )}
-              </Link>
-              <Link
-                href="/watchlist"
-                className={`relative text-xs font-black uppercase tracking-wider no-underline transition-colors duration-200 py-2.5 ${
-                  pathname === '/watchlist' ? 'text-white' : 'text-zinc-400 hover:text-white'
-                }`}
-              >
-                Danh Sách Của Tôi
-                {pathname === '/watchlist' && (
-                  <span className="absolute bottom-0 left-0 right-0 h-[2.5px] bg-violet-500 rounded-full" />
-                )}
-              </Link>
-              
-              {/* Thể Loại Dropdown */}
-              <div className="relative group/genre cursor-pointer py-2.5" onMouseEnter={() => {
-                if (searchInputRef.current) {
-                  searchInputRef.current.blur();
-                }
-                setIsSearchFocused(false);
-                if (searchVal.trim() === '') {
-                  setIsSearchExpanded(false);
-                }
-              }}>
-                <Link 
-                  href="/genres"
-                  className={`relative text-xs font-black uppercase tracking-wider no-underline transition-colors duration-200 flex items-center gap-1 ${
-                    pathname.startsWith('/genres') ? 'text-white' : 'text-zinc-400 group-hover/genre:text-white'
-                  }`}
-                >
-                  Thể Loại
-                  <ChevronDown className="w-3.5 h-3.5 transition-transform group-hover/genre:rotate-180" />
-                  {pathname.startsWith('/genres') && (
-                    <span className="absolute bottom-0 left-0 right-0 h-[2.5px] bg-violet-500 rounded-full" />
-                  )}
-                </Link>
-                <div className="absolute left-0 top-full pt-2 w-96 opacity-0 invisible group-hover/genre:opacity-100 group-hover/genre:visible transition-all duration-300 transform translate-y-2 group-hover/genre:translate-y-0 z-50">
-                  <div className="bg-[#0c0c10]/95 backdrop-blur-xl border border-zinc-900 rounded-[4px] p-4 shadow-[0_10px_40px_rgba(0,0,0,0.8)] grid grid-cols-2 gap-2">
-                    {genresCache.length > 0 ? (
-                      genresCache.map((g) => (
-                        <Link 
-                          key={g.id} 
-                          href={`/genres/${g.slug}`}
-                          className="px-3 py-2 text-xs font-bold text-zinc-300 hover:text-white hover:bg-zinc-900 rounded-[2px] transition-colors no-underline flex items-center justify-between group/item"
-                        >
-                          <span>{g.name}</span>
-                          {g._count?.movies !== undefined && (
-                            <span className="text-[9px] text-zinc-600 group-hover/item:text-violet-400 bg-zinc-950 px-1.5 py-0.5 rounded-[2px]">
-                              {g._count.movies}
-                            </span>
-                          )}
-                        </Link>
-                      ))
-                    ) : (
-                      <div className="col-span-2 text-center text-xs text-zinc-500 py-2">Đang tải...</div>
-                    )}
-                  </div>
-                </div>
-              </div>
-            </nav>
-
-            {/* 2. Medium Screens Nav (1024px to 1279px): Condensed links with "Khám Phá" dropdown */}
-            <nav className="hidden lg:flex xl:hidden items-center gap-5 select-none">
-              <Link
-                href="/"
-                onClick={handleLogoClick}
-                className={`relative text-xs font-black uppercase tracking-wider no-underline transition-colors duration-200 py-2.5 ${
-                  pathname === '/' ? 'text-white' : 'text-zinc-400 hover:text-white'
-                }`}
-              >
-                Trang Chủ
-                {pathname === '/' && (
                   <span className="absolute bottom-0 left-0 right-0 h-[2.5px] bg-violet-500 rounded-full" />
                 )}
               </Link>
@@ -424,14 +295,14 @@ export default function Header({ onSearchChange }: HeaderProps) {
                 <Link 
                   href="/genres"
                   className={`relative text-xs font-black uppercase tracking-wider no-underline transition-colors duration-200 flex items-center gap-1 ${
-                    (pathname === '/schedule' || pathname === '/news' || pathname === '/watchlist' || pathname.startsWith('/genres')) 
+                    (pathname === '/ongoing' || pathname === '/completed' || pathname === '/top-rated' || pathname === '/news' || pathname === '/watchlist' || pathname.startsWith('/genres')) 
                       ? 'text-white' 
                       : 'text-zinc-400 group-hover/discover:text-white'
                   }`}
                 >
                   Khám Phá
                   <ChevronDown className="w-3.5 h-3.5 transition-transform group-hover/discover:rotate-180" />
-                  {(pathname === '/schedule' || pathname === '/news' || pathname === '/watchlist' || pathname.startsWith('/genres')) && (
+                  {(pathname === '/ongoing' || pathname === '/completed' || pathname === '/top-rated' || pathname === '/news' || pathname === '/watchlist' || pathname.startsWith('/genres')) && (
                     <span className="absolute bottom-0 left-0 right-0 h-[2.5px] bg-violet-500 rounded-full" />
                   )}
                 </Link>
