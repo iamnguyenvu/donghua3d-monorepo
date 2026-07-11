@@ -156,6 +156,10 @@ jobs:
             # Navigate to project working directory in user's home space
             cd /home/ubuntu/donghua3d
             
+            # Initialize diagnostics output file
+            echo "=== VPS DEPLOYMENT EXECUTION LOG ===" > diagnostics.txt
+            date >> diagnostics.txt
+            
             # Write dynamic server .env configuration safely
             cat <<EOF > backend/.env
             DATABASE_URL="$DATABASE_URL"
@@ -223,7 +227,7 @@ jobs:
             # Prune obsolete images to reclaim server disk space
             docker image prune -f
 
-            echo "=== SYSTEM DIAGNOSTICS ===" > diagnostics.txt
+            echo "=== SYSTEM DIAGNOSTICS ===" >> diagnostics.txt
             free -m >> diagnostics.txt
             df -h >> diagnostics.txt
             echo "=== DOCKER PS ===" >> diagnostics.txt
