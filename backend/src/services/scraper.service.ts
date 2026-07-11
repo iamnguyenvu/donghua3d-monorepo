@@ -273,9 +273,12 @@ export class ScraperService {
                 }
               }
             } else {
-              const episodeNumber = parseInt(cleanName, 10);
-              if (!isNaN(episodeNumber)) {
-                epNumbers.push(episodeNumber);
+              const numMatch = cleanName.match(/\d+/);
+              if (numMatch) {
+                const episodeNumber = parseInt(numMatch[0], 10);
+                if (!isNaN(episodeNumber)) {
+                  epNumbers.push(episodeNumber);
+                }
               }
             }
 
@@ -320,9 +323,12 @@ export class ScraperService {
                   }
                 }
               } else {
-                const episodeNumber = parseInt(cleanName, 10);
-                if (!isNaN(episodeNumber)) {
-                  epNumbers.push(episodeNumber);
+                const numMatch = cleanName.match(/\d+/);
+                if (numMatch) {
+                  const episodeNumber = parseInt(numMatch[0], 10);
+                  if (!isNaN(episodeNumber)) {
+                    epNumbers.push(episodeNumber);
+                  }
                 }
               }
 
