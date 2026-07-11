@@ -1,7 +1,7 @@
 === VPS PRE-SHUTDOWN DIAGNOSTICS ===
-Sat Jul 11 16:26:32 UTC 2026
+Sat Jul 11 16:34:17 UTC 2026
                total        used        free      shared  buff/cache   available
-Mem:            3831         891         640          22        2624        2939
+Mem:            3831         932         768          21        2454        2898
 Swap:           4095           0        4095
 Filesystem       Size  Used Avail Use% Mounted on
 /dev/root         28G   14G   15G  50% /
@@ -19,24 +19,24 @@ none             1.0M     0  1.0M   0% /run/credentials/serial-getty@ttyS0.servi
 tmpfs            384M  8.0K  384M   1% /run/user/1000
 === DOCKER PS BEFORE DEPLOY ===
 CONTAINER ID   IMAGE                COMMAND                  CREATED         STATUS                   PORTS                                                                          NAMES
-fd0891e78bf6   nginx:1.25-alpine    "/docker-entrypoint.…"   9 minutes ago   Up 9 minutes             0.0.0.0:80->80/tcp, [::]:80->80/tcp, 0.0.0.0:443->443/tcp, [::]:443->443/tcp   donghua3d_nginx
-ad50a75474d2   donghua3d-frontend   "docker-entrypoint.s…"   9 minutes ago   Up 9 minutes             0.0.0.0:3000->3000/tcp, [::]:3000->3000/tcp                                    donghua3d_frontend
-400bbf46d098   donghua3d-backend    "docker-entrypoint.s…"   9 minutes ago   Up 9 minutes             0.0.0.0:5000->5000/tcp, [::]:5000->5000/tcp                                    donghua3d_backend
-474b1e0ee5ca   postgres:15-alpine   "docker-entrypoint.s…"   9 minutes ago   Up 9 minutes (healthy)   0.0.0.0:5432->5432/tcp, [::]:5432->5432/tcp                                    donghua3d_db
-43820d9abef9   redis:7-alpine       "docker-entrypoint.s…"   9 minutes ago   Up 9 minutes             0.0.0.0:6379->6379/tcp, [::]:6379->6379/tcp                                    donghua3d_redis
+a407c1debbc5   nginx:1.25-alpine    "/docker-entrypoint.…"   4 minutes ago   Up 3 minutes             0.0.0.0:80->80/tcp, [::]:80->80/tcp, 0.0.0.0:443->443/tcp, [::]:443->443/tcp   donghua3d_nginx
+8dd19cff9c17   donghua3d-frontend   "docker-entrypoint.s…"   4 minutes ago   Up 3 minutes             0.0.0.0:3000->3000/tcp, [::]:3000->3000/tcp                                    donghua3d_frontend
+fe0885714788   donghua3d-backend    "docker-entrypoint.s…"   4 minutes ago   Up 3 minutes             0.0.0.0:5000->5000/tcp, [::]:5000->5000/tcp                                    donghua3d_backend
+989111aeaa42   postgres:15-alpine   "docker-entrypoint.s…"   4 minutes ago   Up 4 minutes (healthy)   0.0.0.0:5432->5432/tcp, [::]:5432->5432/tcp                                    donghua3d_db
+fa2afe9359da   redis:7-alpine       "docker-entrypoint.s…"   4 minutes ago   Up 4 minutes             0.0.0.0:6379->6379/tcp, [::]:6379->6379/tcp                                    donghua3d_redis
 === DOCKER NETWORKS ===
 NETWORK ID     NAME                DRIVER    SCOPE
 2a9f3132451b   bridge              bridge    local
-8692944d4cfc   donghua3d_default   bridge    local
+d6ee5c547df2   donghua3d_default   bridge    local
 1f85bfbe182c   host                host      local
 a7196d33ede9   none                null      local
 === EXISTING COMPOSE PS ===
 NAME                 IMAGE                COMMAND                  SERVICE    CREATED         STATUS                   PORTS
-donghua3d_backend    donghua3d-backend    "docker-entrypoint.s…"   backend    9 minutes ago   Up 9 minutes             0.0.0.0:5000->5000/tcp, [::]:5000->5000/tcp
-donghua3d_db         postgres:15-alpine   "docker-entrypoint.s…"   db         9 minutes ago   Up 9 minutes (healthy)   0.0.0.0:5432->5432/tcp, [::]:5432->5432/tcp
-donghua3d_frontend   donghua3d-frontend   "docker-entrypoint.s…"   frontend   9 minutes ago   Up 9 minutes             0.0.0.0:3000->3000/tcp, [::]:3000->3000/tcp
-donghua3d_nginx      nginx:1.25-alpine    "/docker-entrypoint.…"   nginx      9 minutes ago   Up 9 minutes             0.0.0.0:80->80/tcp, [::]:80->80/tcp, 0.0.0.0:443->443/tcp, [::]:443->443/tcp
-donghua3d_redis      redis:7-alpine       "docker-entrypoint.s…"   redis      9 minutes ago   Up 9 minutes             0.0.0.0:6379->6379/tcp, [::]:6379->6379/tcp
+donghua3d_backend    donghua3d-backend    "docker-entrypoint.s…"   backend    4 minutes ago   Up 3 minutes             0.0.0.0:5000->5000/tcp, [::]:5000->5000/tcp
+donghua3d_db         postgres:15-alpine   "docker-entrypoint.s…"   db         4 minutes ago   Up 4 minutes (healthy)   0.0.0.0:5432->5432/tcp, [::]:5432->5432/tcp
+donghua3d_frontend   donghua3d-frontend   "docker-entrypoint.s…"   frontend   4 minutes ago   Up 3 minutes             0.0.0.0:3000->3000/tcp, [::]:3000->3000/tcp
+donghua3d_nginx      nginx:1.25-alpine    "/docker-entrypoint.…"   nginx      4 minutes ago   Up 3 minutes             0.0.0.0:80->80/tcp, [::]:80->80/tcp, 0.0.0.0:443->443/tcp, [::]:443->443/tcp
+donghua3d_redis      redis:7-alpine       "docker-entrypoint.s…"   redis      4 minutes ago   Up 4 minutes             0.0.0.0:6379->6379/tcp, [::]:6379->6379/tcp
 === EXISTING FRONTEND LOGS ===
 donghua3d_frontend  | ▲ Next.js 16.2.5
 donghua3d_frontend  | - Local:         http://localhost:3000
