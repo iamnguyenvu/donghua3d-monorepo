@@ -764,6 +764,7 @@ function CustomControls({
     if (savedSpeed && remote) {
       const parsed = parseFloat(savedSpeed);
       if (!isNaN(parsed)) {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setPlaybackSpeed(parsed);
         remote.changePlaybackRate(parsed);
       }
