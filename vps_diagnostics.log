@@ -1,7 +1,7 @@
 === VPS PRE-SHUTDOWN DIAGNOSTICS ===
-Sat Jul 11 16:13:22 UTC 2026
+Sat Jul 11 16:26:32 UTC 2026
                total        used        free      shared  buff/cache   available
-Mem:            3831         789        2467          21         834        3041
+Mem:            3831         891         640          22        2624        2939
 Swap:           4095           0        4095
 Filesystem       Size  Used Avail Use% Mounted on
 /dev/root         28G   14G   15G  50% /
@@ -18,99 +18,31 @@ none             1.0M     0  1.0M   0% /run/credentials/getty@tty1.service
 none             1.0M     0  1.0M   0% /run/credentials/serial-getty@ttyS0.service
 tmpfs            384M  8.0K  384M   1% /run/user/1000
 === DOCKER PS BEFORE DEPLOY ===
-CONTAINER ID   IMAGE                COMMAND                  CREATED      STATUS                    PORTS                                                                          NAMES
-76daa24524a7   nginx:1.25-alpine    "/docker-entrypoint.…"   4 days ago   Up 31 minutes             0.0.0.0:80->80/tcp, [::]:80->80/tcp, 0.0.0.0:443->443/tcp, [::]:443->443/tcp   donghua3d_nginx
-2c0435640802   donghua3d-frontend   "docker-entrypoint.s…"   4 days ago   Up 31 minutes             0.0.0.0:3000->3000/tcp, [::]:3000->3000/tcp                                    donghua3d_frontend
-75772dcbbd4d   donghua3d-backend    "docker-entrypoint.s…"   4 days ago   Up 31 minutes             0.0.0.0:5000->5000/tcp, [::]:5000->5000/tcp                                    donghua3d_backend
-6c987cd00942   postgres:15-alpine   "docker-entrypoint.s…"   4 days ago   Up 31 minutes (healthy)   0.0.0.0:5432->5432/tcp, [::]:5432->5432/tcp                                    donghua3d_db
-be11a76bfb25   redis:7-alpine       "docker-entrypoint.s…"   4 days ago   Up 31 minutes             0.0.0.0:6379->6379/tcp, [::]:6379->6379/tcp                                    donghua3d_redis
+CONTAINER ID   IMAGE                COMMAND                  CREATED         STATUS                   PORTS                                                                          NAMES
+fd0891e78bf6   nginx:1.25-alpine    "/docker-entrypoint.…"   9 minutes ago   Up 9 minutes             0.0.0.0:80->80/tcp, [::]:80->80/tcp, 0.0.0.0:443->443/tcp, [::]:443->443/tcp   donghua3d_nginx
+ad50a75474d2   donghua3d-frontend   "docker-entrypoint.s…"   9 minutes ago   Up 9 minutes             0.0.0.0:3000->3000/tcp, [::]:3000->3000/tcp                                    donghua3d_frontend
+400bbf46d098   donghua3d-backend    "docker-entrypoint.s…"   9 minutes ago   Up 9 minutes             0.0.0.0:5000->5000/tcp, [::]:5000->5000/tcp                                    donghua3d_backend
+474b1e0ee5ca   postgres:15-alpine   "docker-entrypoint.s…"   9 minutes ago   Up 9 minutes (healthy)   0.0.0.0:5432->5432/tcp, [::]:5432->5432/tcp                                    donghua3d_db
+43820d9abef9   redis:7-alpine       "docker-entrypoint.s…"   9 minutes ago   Up 9 minutes             0.0.0.0:6379->6379/tcp, [::]:6379->6379/tcp                                    donghua3d_redis
 === DOCKER NETWORKS ===
 NETWORK ID     NAME                DRIVER    SCOPE
 2a9f3132451b   bridge              bridge    local
-b76b1b540f6e   donghua3d_default   bridge    local
+8692944d4cfc   donghua3d_default   bridge    local
 1f85bfbe182c   host                host      local
 a7196d33ede9   none                null      local
 === EXISTING COMPOSE PS ===
-NAME                 IMAGE                COMMAND                  SERVICE    CREATED      STATUS                    PORTS
-donghua3d_backend    donghua3d-backend    "docker-entrypoint.s…"   backend    4 days ago   Up 31 minutes             0.0.0.0:5000->5000/tcp, [::]:5000->5000/tcp
-donghua3d_db         postgres:15-alpine   "docker-entrypoint.s…"   db         4 days ago   Up 31 minutes (healthy)   0.0.0.0:5432->5432/tcp, [::]:5432->5432/tcp
-donghua3d_frontend   donghua3d-frontend   "docker-entrypoint.s…"   frontend   4 days ago   Up 31 minutes             0.0.0.0:3000->3000/tcp, [::]:3000->3000/tcp
-donghua3d_nginx      nginx:1.25-alpine    "/docker-entrypoint.…"   nginx      4 days ago   Up 31 minutes             0.0.0.0:80->80/tcp, [::]:80->80/tcp, 0.0.0.0:443->443/tcp, [::]:443->443/tcp
-donghua3d_redis      redis:7-alpine       "docker-entrypoint.s…"   redis      4 days ago   Up 31 minutes             0.0.0.0:6379->6379/tcp, [::]:6379->6379/tcp
+NAME                 IMAGE                COMMAND                  SERVICE    CREATED         STATUS                   PORTS
+donghua3d_backend    donghua3d-backend    "docker-entrypoint.s…"   backend    9 minutes ago   Up 9 minutes             0.0.0.0:5000->5000/tcp, [::]:5000->5000/tcp
+donghua3d_db         postgres:15-alpine   "docker-entrypoint.s…"   db         9 minutes ago   Up 9 minutes (healthy)   0.0.0.0:5432->5432/tcp, [::]:5432->5432/tcp
+donghua3d_frontend   donghua3d-frontend   "docker-entrypoint.s…"   frontend   9 minutes ago   Up 9 minutes             0.0.0.0:3000->3000/tcp, [::]:3000->3000/tcp
+donghua3d_nginx      nginx:1.25-alpine    "/docker-entrypoint.…"   nginx      9 minutes ago   Up 9 minutes             0.0.0.0:80->80/tcp, [::]:80->80/tcp, 0.0.0.0:443->443/tcp, [::]:443->443/tcp
+donghua3d_redis      redis:7-alpine       "docker-entrypoint.s…"   redis      9 minutes ago   Up 9 minutes             0.0.0.0:6379->6379/tcp, [::]:6379->6379/tcp
 === EXISTING FRONTEND LOGS ===
 donghua3d_frontend  | ▲ Next.js 16.2.5
 donghua3d_frontend  | - Local:         http://localhost:3000
 donghua3d_frontend  | - Network:       http://0.0.0.0:3000
 donghua3d_frontend  | ✓ Ready in 0ms
-donghua3d_frontend  | ▲ Next.js 16.2.5
-donghua3d_frontend  | - Local:         http://localhost:3000
-donghua3d_frontend  | - Network:       http://0.0.0.0:3000
-donghua3d_frontend  | ✓ Ready in 0ms
-donghua3d_frontend  | ▲ Next.js 16.2.5
-donghua3d_frontend  | - Local:         http://localhost:3000
-donghua3d_frontend  | - Network:       http://0.0.0.0:3000
-donghua3d_frontend  | ✓ Ready in 0ms
-donghua3d_frontend  | ▲ Next.js 16.2.5
-donghua3d_frontend  | - Local:         http://localhost:3000
-donghua3d_frontend  | - Network:       http://0.0.0.0:3000
-donghua3d_frontend  | ✓ Ready in 0ms
-donghua3d_frontend  | ▲ Next.js 16.2.5
-donghua3d_frontend  | - Local:         http://localhost:3000
-donghua3d_frontend  | - Network:       http://0.0.0.0:3000
-donghua3d_frontend  | ✓ Ready in 0ms
 === EXISTING BACKEND LOGS ===
-donghua3d_backend  | 🤖 [Scraper] Merging KKPhim episodes...
-donghua3d_backend  | 🤖 [Scraper] Fetching data for movie slug: "muc-than-ky"...
-donghua3d_backend  | 🤖 [Scraper] Movie found: "Mục Thần Ký". Updating metadata...
-donghua3d_backend  | 🤖 [Scraper] Syncing episodes across 1 servers...
-donghua3d_backend  | 🤖 [Scraper] Merging KKPhim episodes...
-donghua3d_backend  | ⏭️ [Scraper] Bỏ qua phim mới slug "luyen-khi-muoi-van-nam" (Không tồn tại trong DB, tránh cào phim rác)
-donghua3d_backend  | ⏭️ [Scraper] Bỏ qua phim mới slug "van-gioi-doc-ton" (Không tồn tại trong DB, tránh cào phim rác)
-donghua3d_backend  | ⏭️ [Scraper] Bỏ qua phim mới slug "de-su-truong-an" (Không tồn tại trong DB, tránh cào phim rác)
-donghua3d_backend  | ⏭️ [Scraper] Bỏ qua phim mới slug "moi-gioi-dai-cat" (Không tồn tại trong DB, tránh cào phim rác)
-donghua3d_backend  | ⏭️ [Scraper] Bỏ qua phim mới slug "dung-tren-dau-gio" (Không tồn tại trong DB, tránh cào phim rác)
-donghua3d_backend  | ⏭️ [Scraper] Bỏ qua phim mới slug "hoan-sa-luc" (Không tồn tại trong DB, tránh cào phim rác)
-donghua3d_backend  | ⏭️ [Scraper] Bỏ qua phim mới slug "co-thanh-chieu-kinh-bien" (Không tồn tại trong DB, tránh cào phim rác)
-donghua3d_backend  | ⏭️ [Scraper] Bỏ qua phim mới slug "quy-nhan-mang-nhieu-diem-lanh" (Không tồn tại trong DB, tránh cào phim rác)
-donghua3d_backend  | ⏭️ [Scraper] Bỏ qua phim mới slug "hoa-hong-ruc-lua" (Không tồn tại trong DB, tránh cào phim rác)
-donghua3d_backend  | ⏭️ [Scraper] Bỏ qua phim mới slug "cho-hoang-va-xuong" (Không tồn tại trong DB, tránh cào phim rác)
-donghua3d_backend  | ⏭️ [Scraper] Bỏ qua phim mới slug "tia-sang-cua-ngay-mai" (Không tồn tại trong DB, tránh cào phim rác)
-donghua3d_backend  | ⏭️ [Scraper] Bỏ qua phim mới slug "van-tu-hanh" (Không tồn tại trong DB, tránh cào phim rác)
-donghua3d_backend  | 🤖 [CronService] Scheduled daily scraping completed successfully. Synced 2 movies.
-donghua3d_backend  | prisma:error Error in PostgreSQL connection: Error { kind: Db, cause: Some(DbError { severity: "FATAL", parsed_severity: Some(Fatal), code: SqlState(E57P01), message: "terminating connection due to administrator command", detail: None, hint: None, position: None, where_: None, schema: None, table: None, column: None, datatype: None, constraint: None, file: Some("postgres.c"), line: Some(3211), routine: Some("ProcessInterrupts") }) }
-donghua3d_backend  | prisma:error Error in PostgreSQL connection: Error { kind: Db, cause: Some(DbError { severity: "FATAL", parsed_severity: Some(Fatal), code: SqlState(E57P01), message: "terminating connection due to administrator command", detail: None, hint: None, position: None, where_: None, schema: None, table: None, column: None, datatype: None, constraint: None, file: Some("postgres.c"), line: Some(3211), routine: Some("ProcessInterrupts") }) }
-donghua3d_backend  | prisma:error Error in PostgreSQL connection: Error { kind: Db, cause: Some(DbError { severity: "FATAL", parsed_severity: Some(Fatal), code: SqlState(E57P01), message: "terminating connection due to administrator command", detail: None, hint: None, position: None, where_: None, schema: None, table: None, column: None, datatype: None, constraint: None, file: Some("postgres.c"), line: Some(3211), routine: Some("ProcessInterrupts") }) }
-donghua3d_backend  | prisma:error Error in PostgreSQL connection: Error { kind: Db, cause: Some(DbError { severity: "FATAL", parsed_severity: Some(Fatal), code: SqlState(E57P01), message: "terminating connection due to administrator command", detail: None, hint: None, position: None, where_: None, schema: None, table: None, column: None, datatype: None, constraint: None, file: Some("postgres.c"), line: Some(3211), routine: Some("ProcessInterrupts") }) }
-donghua3d_backend  | prisma:error Error in PostgreSQL connection: Error { kind: Db, cause: Some(DbError { severity: "FATAL", parsed_severity: Some(Fatal), code: SqlState(E57P01), message: "terminating connection due to administrator command", detail: None, hint: None, position: None, where_: None, schema: None, table: None, column: None, datatype: None, constraint: None, file: Some("postgres.c"), line: Some(3211), routine: Some("ProcessInterrupts") }) }
-donghua3d_backend  | Redis connection error: Error: connect ECONNREFUSED 172.18.0.6:6379
-donghua3d_backend  |     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16) {
-donghua3d_backend  |   errno: -111,
-donghua3d_backend  |   code: 'ECONNREFUSED',
-donghua3d_backend  |   syscall: 'connect',
-donghua3d_backend  |   address: '172.18.0.6',
-donghua3d_backend  |   port: 6379
-donghua3d_backend  | }
-donghua3d_backend  | Redis connection error: Error: connect ECONNREFUSED 172.18.0.6:6379
-donghua3d_backend  |     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16) {
-donghua3d_backend  |   errno: -111,
-donghua3d_backend  |   code: 'ECONNREFUSED',
-donghua3d_backend  |   syscall: 'connect',
-donghua3d_backend  |   address: '172.18.0.6',
-donghua3d_backend  |   port: 6379
-donghua3d_backend  | }
-donghua3d_backend  | Redis connection error: Error: connect ECONNREFUSED 172.18.0.6:6379
-donghua3d_backend  |     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16) {
-donghua3d_backend  |   errno: -111,
-donghua3d_backend  |   code: 'ECONNREFUSED',
-donghua3d_backend  |   syscall: 'connect',
-donghua3d_backend  |   address: '172.18.0.6',
-donghua3d_backend  |   port: 6379
-donghua3d_backend  | }
-donghua3d_backend  | npm error path /app
-donghua3d_backend  | npm error command failed
-donghua3d_backend  | npm error signal SIGTERM
-donghua3d_backend  | npm error command sh -c node dist/index.js
-donghua3d_backend  | npm error A complete log of this run can be found in: /root/.npm/_logs/2026-07-10T06_14_41_906Z-debug-0.log
 donghua3d_backend  | 
 donghua3d_backend  | > donghua3d-backend@1.0.0 start
 donghua3d_backend  | > node dist/index.js
@@ -126,39 +58,6 @@ donghua3d_backend  | 🤖 [CronService] News RSS feed sync scheduled (runs every
 donghua3d_backend  | 📰 [News Scraper] Starting RSS Feed news sync...
 donghua3d_backend  | Connected to Redis at redis://redis:6379
 donghua3d_backend  | 📰 [News Scraper] Synced 3 articles successfully from Mock Backup Data.
-donghua3d_backend  | 🤖 [CronService] Starting scheduled daily scraping task...
-donghua3d_backend  | 🤖 [Scraper] Syncing latest updated movies page 1 (onlyExisting: true)...
-donghua3d_backend  | ⏭️ [Scraper] Bỏ qua phim mới slug "bong-ma-bao-thu" (Không tồn tại trong DB, tránh cào phim rác)
-donghua3d_backend  | ⏭️ [Scraper] Bỏ qua phim mới slug "goc-toi-nhan-ban" (Không tồn tại trong DB, tránh cào phim rác)
-donghua3d_backend  | ⏭️ [Scraper] Bỏ qua phim mới slug "nhung-ban-di-chuc-phan-1" (Không tồn tại trong DB, tránh cào phim rác)
-donghua3d_backend  | ⏭️ [Scraper] Bỏ qua phim mới slug "ranh-gioi-dinh-menh" (Không tồn tại trong DB, tránh cào phim rác)
-donghua3d_backend  | ⏭️ [Scraper] Bỏ qua phim mới slug "vo-than-chua-te" (Không tồn tại trong DB, tránh cào phim rác)
-donghua3d_backend  | ⏭️ [Scraper] Bỏ qua phim mới slug "bittersweet-love" (Không tồn tại trong DB, tránh cào phim rác)
-donghua3d_backend  | ⏭️ [Scraper] Bỏ qua phim mới slug "mua-khong-ten" (Không tồn tại trong DB, tránh cào phim rác)
-donghua3d_backend  | ⏭️ [Scraper] Bỏ qua phim mới slug "vinh-sinh-phan-5" (Không tồn tại trong DB, tránh cào phim rác)
-donghua3d_backend  | ⏭️ [Scraper] Bỏ qua phim mới slug "are-the-sexy-buttocks-not-good" (Không tồn tại trong DB, tránh cào phim rác)
-donghua3d_backend  | ⏭️ [Scraper] Bỏ qua phim mới slug "100-ngay-tro-thanh-vua" (Không tồn tại trong DB, tránh cào phim rác)
-donghua3d_backend  | 🤖 [Scraper] Fetching data for movie slug: "pham-nhan-tu-tien"...
-donghua3d_backend  | 🤖 [Scraper] Movie found: "Phàm Nhân Tu Tiên". Updating metadata...
-donghua3d_backend  | 🤖 [Scraper] Syncing episodes across 1 servers...
-donghua3d_backend  | 🤖 [Scraper] Merging KKPhim episodes...
-donghua3d_backend  | 🤖 [Scraper] Fetching data for movie slug: "muc-than-ky"...
-donghua3d_backend  | 🤖 [Scraper] Movie found: "Mục Thần Ký". Updating metadata...
-donghua3d_backend  | 🤖 [Scraper] Syncing episodes across 1 servers...
-donghua3d_backend  | 🤖 [Scraper] Merging KKPhim episodes...
-donghua3d_backend  | ⏭️ [Scraper] Bỏ qua phim mới slug "luyen-khi-muoi-van-nam" (Không tồn tại trong DB, tránh cào phim rác)
-donghua3d_backend  | ⏭️ [Scraper] Bỏ qua phim mới slug "van-gioi-doc-ton" (Không tồn tại trong DB, tránh cào phim rác)
-donghua3d_backend  | ⏭️ [Scraper] Bỏ qua phim mới slug "de-su-truong-an" (Không tồn tại trong DB, tránh cào phim rác)
-donghua3d_backend  | ⏭️ [Scraper] Bỏ qua phim mới slug "moi-gioi-dai-cat" (Không tồn tại trong DB, tránh cào phim rác)
-donghua3d_backend  | ⏭️ [Scraper] Bỏ qua phim mới slug "dung-tren-dau-gio" (Không tồn tại trong DB, tránh cào phim rác)
-donghua3d_backend  | ⏭️ [Scraper] Bỏ qua phim mới slug "hoan-sa-luc" (Không tồn tại trong DB, tránh cào phim rác)
-donghua3d_backend  | ⏭️ [Scraper] Bỏ qua phim mới slug "co-thanh-chieu-kinh-bien" (Không tồn tại trong DB, tránh cào phim rác)
-donghua3d_backend  | ⏭️ [Scraper] Bỏ qua phim mới slug "quy-nhan-mang-nhieu-diem-lanh" (Không tồn tại trong DB, tránh cào phim rác)
-donghua3d_backend  | ⏭️ [Scraper] Bỏ qua phim mới slug "hoa-hong-ruc-lua" (Không tồn tại trong DB, tránh cào phim rác)
-donghua3d_backend  | ⏭️ [Scraper] Bỏ qua phim mới slug "cho-hoang-va-xuong" (Không tồn tại trong DB, tránh cào phim rác)
-donghua3d_backend  | ⏭️ [Scraper] Bỏ qua phim mới slug "tia-sang-cua-ngay-mai" (Không tồn tại trong DB, tránh cào phim rác)
-donghua3d_backend  | ⏭️ [Scraper] Bỏ qua phim mới slug "van-tu-hanh" (Không tồn tại trong DB, tránh cào phim rác)
-donghua3d_backend  | 🤖 [CronService] Scheduled daily scraping completed successfully. Synced 2 movies.
 
 ==========================================================================
 === VPS POST-DEPLOYMENT DIAGNOSTICS ===
