@@ -151,6 +151,43 @@ export default function PremiumPlayer({
   const localPlayerRef = useRef<any>(null);
   const activePlayerRef = playerRef || localPlayerRef;
 
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [isControlsVisible, setIsControlsVisible] = useState(true);
+  const controlsTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const remote = useMediaRemote();
+
+  const showControls = useCallback(() => {
+    setIsControlsVisible(true);
+    if (controlsTimeoutRef.current) {
+      clearTimeout(controlsTimeoutRef.current);
+    }
+    controlsTimeoutRef.current = setTimeout(() => {
+      setIsControlsVisible(false);
+    }, 2500);
+  }, []);
+
+  const handleMouseMove = useCallback(() => {
+    showControls();
+  }, [showControls]);
+
+  const handleMouseLeave = useCallback(() => {
+    if (isPlaying) {
+      if (controlsTimeoutRef.current) {
+        clearTimeout(controlsTimeoutRef.current);
+      }
+      setIsControlsVisible(false);
+    }
+  }, [isPlaying]);
+
+  // Clean up timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (controlsTimeoutRef.current) {
+        clearTimeout(controlsTimeoutRef.current);
+      }
+    };
+  }, []);
+
   const lastSrcRef = useRef<string>('');
   const pendingSeekRef = useRef<number | null>(null);
   const pendingPlayRef = useRef<boolean>(false);
@@ -279,6 +316,43 @@ export default function PremiumPlayer({
   }, [activeSrc, activePlayerRef]);
 
   const handleLoadedMetadata = () => {
+    // 1. Re-apply playback speed from localStorage or defaults
+    const savedSpeed = localStorage.getItem('donghua3d_playback_speed');
+    if (savedSpeed) {
+      const parsed = parseFloat(savedSpeed);
+      if (!isNaN(parsed)) {
+        setTimeout(() => {
+          if (activePlayerRef.current) {
+            activePlayerRef.current.playbackRate = parsed;
+          }
+          remote.changePlaybackRate(parsed);
+          console.log('Restored playback speed on metadata loaded:', parsed);
+        }, 150);
+      }
+    }
+
+    // 2. Re-apply volume & muted
+    const savedVolume = localStorage.getItem('donghua3d_volume');
+    if (savedVolume) {
+      const v = parseFloat(savedVolume);
+      if (!isNaN(v)) {
+        setTimeout(() => {
+          remote.changeVolume(v);
+        }, 150);
+      }
+    }
+    const savedMuted = localStorage.getItem('donghua3d_muted');
+    if (savedMuted === 'true') {
+      setTimeout(() => {
+        remote.mute();
+      }, 150);
+    } else if (savedMuted === 'false') {
+      setTimeout(() => {
+        remote.unmute();
+      }, 150);
+    }
+
+    // 3. Existing seek behavior
     if (pendingSeekRef.current !== null && activePlayerRef.current) {
       const targetTime = pendingSeekRef.current;
       const shouldPlay = pendingPlayRef.current;
@@ -294,7 +368,7 @@ export default function PremiumPlayer({
             });
           }
         }
-      }, 150);
+      }, 200);
     }
   };
 
@@ -312,7 +386,11 @@ export default function PremiumPlayer({
         />
       )}
 
-      <div className={`relative aspect-video w-full rounded-[4px] overflow-hidden border border-zinc-900/60 bg-black shadow-2xl group select-none ${isCinemaMode ? 'max-w-7xl max-h-[85vh] border-violet-500/30 shadow-[0_0_80px_rgba(139,92,246,0.25)]' : ''}`}>
+      <div 
+        onMouseMove={handleMouseMove}
+        onMouseLeave={handleMouseLeave}
+        className={`relative aspect-video w-full rounded-[4px] overflow-hidden border border-zinc-900/60 bg-black shadow-2xl group select-none ${isCinemaMode ? 'max-w-7xl max-h-[85vh] border-violet-500/30 shadow-[0_0_80px_rgba(139,92,246,0.25)]' : ''} ${!isControlsVisible && isPlaying ? 'cursor-none' : ''}`}
+      >
         <MediaPlayer
           ref={activePlayerRef}
           src={activeSrc}
@@ -322,9 +400,20 @@ export default function PremiumPlayer({
           playsInline
           crossOrigin="anonymous"
           currentTime={initialProgress}
-          onPlay={onPlay}
-          onPause={onPause}
-          onEnded={onEnded}
+          onPlay={() => {
+            setIsPlaying(true);
+            showControls();
+            if (onPlay) onPlay();
+          }}
+          onPause={() => {
+            setIsPlaying(false);
+            showControls();
+            if (onPause) onPause();
+          }}
+          onEnded={() => {
+            setIsPlaying(false);
+            if (onEnded) onEnded();
+          }}
           onSeeked={() => {
             if (onSeek && activePlayerRef?.current) {
               onSeek(activePlayerRef.current.currentTime);
@@ -411,6 +500,7 @@ export default function PremiumPlayer({
             isDanmakuEnabled={isDanmakuEnabled}
             setIsDanmakuEnabled={setIsDanmakuEnabled}
             danmakus={danmakus}
+            isControlsVisible={isControlsVisible}
           />
         </MediaPlayer>
 
@@ -548,6 +638,7 @@ interface CustomControlsProps {
   isDanmakuEnabled: boolean;
   setIsDanmakuEnabled: (val: boolean) => void;
   danmakus: DanmakuPayload[];
+  isControlsVisible: boolean;
 }
 
 function CustomControls({
@@ -571,7 +662,9 @@ function CustomControls({
   onSelectServer,
   isDanmakuEnabled,
   setIsDanmakuEnabled,
-  danmakus
+  danmakus,
+  episodeId,
+  isControlsVisible
 }: CustomControlsProps) {
   const remote = useMediaRemote();
 
@@ -627,9 +720,6 @@ function CustomControls({
     }
   }, [currentTime, paused, danmakus, isDanmakuEnabled]);
 
-  // Local State to track mouse inactivity for hiding cursor
-  const [isMouseInactive, setIsMouseInactive] = useState(false);
-
   // Community & Interactive Toolbar Local States
   const [autoSkipIntro, setAutoSkipIntro] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
@@ -668,52 +758,12 @@ function CustomControls({
     }
   };
 
-  // Monitor mouse activity to auto-hide cursor in fullscreen mode
-  useEffect(() => {
-    if (!fullscreen) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setIsMouseInactive(false);
-      return;
-    }
-
-    let timeoutId: NodeJS.Timeout;
-
-    const handleMouseMove = () => {
-      setIsMouseInactive(false);
-      clearTimeout(timeoutId);
-      timeoutId = setTimeout(() => {
-        setIsMouseInactive(true);
-      }, 2500); // 2.5s of inactivity -> hide
-    };
-
-    window.addEventListener('mousemove', handleMouseMove);
-    handleMouseMove();
-
-    return () => {
-      window.removeEventListener('mousemove', handleMouseMove);
-      clearTimeout(timeoutId);
-    };
-  }, [fullscreen]);
-
-  // Dynamically toggle cursor-none class on the parent media-player element
-  useEffect(() => {
-    const playerEl = document.querySelector('media-player');
-    if (playerEl) {
-      if (fullscreen && isMouseInactive) {
-        playerEl.classList.add('cursor-none');
-      } else {
-        playerEl.classList.remove('cursor-none');
-      }
-    }
-  }, [fullscreen, isMouseInactive]);
-
-  // Load saved configurations from localStorage on mount (hydration-safe)
+  // Load saved configurations from localStorage when episode changes
   useEffect(() => {
     const savedSpeed = localStorage.getItem('donghua3d_playback_speed');
     if (savedSpeed && remote) {
       const parsed = parseFloat(savedSpeed);
       if (!isNaN(parsed)) {
-        // eslint-disable-next-line react-hooks/set-state-in-effect
         setPlaybackSpeed(parsed);
         remote.changePlaybackRate(parsed);
       }
@@ -738,7 +788,7 @@ function CustomControls({
     } else if (savedMuted === 'false' && remote) {
       remote.unmute();
     }
-  }, [remote]);
+  }, [episodeId, remote]);
 
   // Declared skipping functions with useCallback before useEffect keydown
   const handleSkipIntro = useCallback(() => {
@@ -985,22 +1035,26 @@ function CustomControls({
       {/* 1. Large Hover Central Play/Pause Trigger Zone */}
       <div 
         onClick={togglePlay}
-        className="absolute inset-0 z-10 flex items-center justify-center cursor-pointer bg-black/10 group-hover:bg-black/35 transition-all duration-300"
+        className={`absolute inset-0 z-10 flex items-center justify-center cursor-pointer transition-all duration-300 ${
+          isControlsVisible || paused ? 'bg-black/35' : 'bg-transparent pointer-events-none'
+        }`}
       >
         {/* Buffering/Loading Spinner */}
         {waiting && (
-          <div className="absolute p-4 rounded-full bg-black/60 backdrop-blur-md shadow-2xl border border-violet-500/20">
+          <div className="absolute p-4 rounded-full bg-black/60 backdrop-blur-md shadow-2xl border border-violet-500/20 pointer-events-auto">
             <Loader2 className="w-12 h-12 text-violet-500 animate-spin" />
           </div>
         )}
 
         {/* Large Central Pause icon on active hover */}
         {!waiting && (
-          <div className="opacity-0 scale-75 group-hover:scale-100 p-5 rounded-full bg-transparent hover:bg-black/55 backdrop-blur-sm border border-transparent hover:border-white/10 hover:scale-110 active:scale-90 transition-all duration-300">
+          <div className={`p-5 rounded-full bg-transparent hover:bg-black/55 backdrop-blur-sm border border-transparent hover:border-white/10 hover:scale-110 active:scale-90 transition-all duration-300 pointer-events-auto ${
+            isControlsVisible || paused ? 'opacity-100 scale-100' : 'opacity-0 scale-75 pointer-events-none'
+          }`}>
             {paused ? (
-              <Play className="w-8 h-8 fill-white text-white translate-x-0.5 opacity-0 hover:opacity-100" />
+              <Play className="w-8 h-8 fill-white text-white translate-x-0.5" />
             ) : (
-              <Pause className="w-8 h-8 fill-white text-white opacity-0" />
+              <Pause className="w-8 h-8 fill-white text-white" />
             )}
           </div>
         )}
@@ -1010,7 +1064,9 @@ function CustomControls({
       {showIntroSkip && !autoSkipIntro && (
         <button
           onClick={handleSkipIntro}
-          className="absolute bottom-28 left-8 z-20 flex items-center gap-2 py-2.5 px-5 rounded-[4px] bg-[#0c0c10]/85 border border-violet-500/40 text-white font-extrabold font-sans text-xs tracking-wider uppercase shadow-[0_0_20px_rgba(139,92,246,0.3)] hover:bg-violet-600 hover:border-violet-400 active:scale-95 transition-all duration-200 animate-pulse cursor-pointer outline-none"
+          className={`absolute bottom-28 left-8 z-20 flex items-center gap-2 py-2.5 px-5 rounded-[4px] bg-[#0c0c10]/85 border border-violet-500/40 text-white font-extrabold font-sans text-xs tracking-wider uppercase shadow-[0_0_20px_rgba(139,92,246,0.3)] hover:bg-violet-600 hover:border-violet-400 active:scale-95 transition-all duration-200 animate-pulse cursor-pointer outline-none transition-opacity duration-350 ${
+            isControlsVisible || paused ? 'opacity-100 visible' : 'opacity-0 invisible pointer-events-none'
+          }`}
         >
           <SkipForward className="w-3.5 h-3.5" />
           Bỏ Qua Giới Thiệu (S)
@@ -1020,7 +1076,9 @@ function CustomControls({
       {showOutroSkip && (
         <button
           onClick={handleSkipOutro}
-          className="absolute bottom-28 right-8 z-20 flex items-center gap-2 py-2.5 px-5 rounded-[4px] bg-[#0c0c10]/85 border border-violet-500/40 text-white font-extrabold font-sans text-xs tracking-wider uppercase shadow-[0_0_20px_rgba(139,92,246,0.3)] hover:bg-violet-600 hover:border-violet-400 active:scale-95 transition-all duration-200 animate-pulse cursor-pointer outline-none"
+          className={`absolute bottom-28 right-8 z-20 flex items-center gap-2 py-2.5 px-5 rounded-[4px] bg-[#0c0c10]/85 border border-violet-500/40 text-white font-extrabold font-sans text-xs tracking-wider uppercase shadow-[0_0_20px_rgba(139,92,246,0.3)] hover:bg-violet-600 hover:border-violet-400 active:scale-95 transition-all duration-200 animate-pulse cursor-pointer outline-none transition-opacity duration-350 ${
+            isControlsVisible || paused ? 'opacity-100 visible' : 'opacity-0 invisible pointer-events-none'
+          }`}
         >
           <SkipForward className="w-3.5 h-3.5" />
           Bỏ Qua Kết Thúc (E)
@@ -1029,7 +1087,11 @@ function CustomControls({
 
       {/* 3. Bottom Glassmorphic Control Bar */}
       <div 
-        className="absolute inset-x-0 bottom-0 z-20 bg-gradient-to-t from-black via-black/80 to-transparent p-6 pt-12 flex flex-col gap-4 opacity-0 translate-y-3 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-350"
+        className={`absolute inset-x-0 bottom-0 z-20 bg-gradient-to-t from-black via-black/80 to-transparent p-6 pt-12 flex flex-col gap-4 transition-all duration-350 ${
+          isControlsVisible || paused || showSettings || showEpisodes
+            ? 'opacity-100 translate-y-0 visible' 
+            : 'opacity-0 translate-y-3 invisible pointer-events-none'
+        }`}
         onClick={(e) => e.stopPropagation()} // Prevent trigger play/pause when clicking controls
       >
         {/* Timeline Slider with buffer and hover glow */}
