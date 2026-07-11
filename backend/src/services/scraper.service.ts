@@ -260,20 +260,43 @@ export class ScraperService {
         for (const server of data.episodes) {
           const serverName = server.server_name;
           for (const ep of server.server_data) {
-            const episodeNumber = parseInt(ep.name, 10);
-            if (isNaN(episodeNumber)) continue;
+            const cleanName = (ep.name || '').trim();
+            const rangeMatch = cleanName.match(/^(\d+)-(\d+)$/);
+            let epNumbers: number[] = [];
+
+            if (rangeMatch) {
+              const start = parseInt(rangeMatch[1], 10);
+              const end = parseInt(rangeMatch[2], 10);
+              if (!isNaN(start) && !isNaN(end) && start <= end) {
+                for (let num = start; num <= end; num++) {
+                  epNumbers.push(num);
+                }
+              }
+            } else {
+              const episodeNumber = parseInt(cleanName, 10);
+              if (!isNaN(episodeNumber)) {
+                epNumbers.push(episodeNumber);
+              }
+            }
 
             const videoUrl = ep.link_m3u8 || ep.link_embed;
-            if (!videoUrl) continue;
+            if (!videoUrl || epNumbers.length === 0) continue;
 
-            if (!allEpsMap.has(episodeNumber)) {
-              allEpsMap.set(episodeNumber, {
-                episodeNumber,
-                filename: ep.filename,
-                sources: []
-              });
+            for (const episodeNumber of epNumbers) {
+              if (!allEpsMap.has(episodeNumber)) {
+                allEpsMap.set(episodeNumber, {
+                  episodeNumber,
+                  filename: ep.filename,
+                  sources: []
+                });
+              }
+              const exists = allEpsMap.get(episodeNumber).sources.some(
+                (s: any) => s.serverName === serverName && s.videoUrl === videoUrl
+              );
+              if (!exists) {
+                allEpsMap.get(episodeNumber).sources.push({ serverName, videoUrl });
+              }
             }
-            allEpsMap.get(episodeNumber).sources.push({ serverName, videoUrl });
           }
         }
 
@@ -284,26 +307,55 @@ export class ScraperService {
           for (const server of kkEpisodes) {
             const serverName = `KKPhim - ${server.server_name}`;
             for (const ep of server.server_data) {
-              const episodeNumber = parseInt(ep.name, 10);
-              if (isNaN(episodeNumber)) continue;
+              const cleanName = (ep.name || '').trim();
+              const rangeMatch = cleanName.match(/^(\d+)-(\d+)$/);
+              let epNumbers: number[] = [];
+
+              if (rangeMatch) {
+                const start = parseInt(rangeMatch[1], 10);
+                const end = parseInt(rangeMatch[2], 10);
+                if (!isNaN(start) && !isNaN(end) && start <= end) {
+                  for (let num = start; num <= end; num++) {
+                    epNumbers.push(num);
+                  }
+                }
+              } else {
+                const episodeNumber = parseInt(cleanName, 10);
+                if (!isNaN(episodeNumber)) {
+                  epNumbers.push(episodeNumber);
+                }
+              }
 
               const videoUrl = ep.link_m3u8 || ep.link_embed;
-              if (!videoUrl) continue;
+              if (!videoUrl || epNumbers.length === 0) continue;
 
-              if (!allEpsMap.has(episodeNumber)) {
-                allEpsMap.set(episodeNumber, {
-                  episodeNumber,
-                  filename: ep.filename,
-                  sources: []
-                });
-              }
-              const alreadyHas = allEpsMap.get(episodeNumber).sources.some((s: any) => s.serverName === serverName || s.videoUrl === videoUrl);
-              if (!alreadyHas) {
-                allEpsMap.get(episodeNumber).sources.push({ serverName, videoUrl });
+              for (const episodeNumber of epNumbers) {
+                if (!allEpsMap.has(episodeNumber)) {
+                  allEpsMap.set(episodeNumber, {
+                    episodeNumber,
+                    filename: ep.filename,
+                    sources: []
+                  });
+                }
+                const alreadyHas = allEpsMap.get(episodeNumber).sources.some(
+                  (s: any) => s.serverName === serverName || s.videoUrl === videoUrl
+                );
+                if (!alreadyHas) {
+                  allEpsMap.get(episodeNumber).sources.push({ serverName, videoUrl });
+                }
               }
             }
           }
         }
+
+        // Clear all existing sources for this movie's episodes to ensure a clean sync
+        await prisma.episodeSource.deleteMany({
+          where: {
+            episode: {
+              movieId: movie.id
+            }
+          }
+        });
 
         for (const epData of allEpsMap.values()) {
           const { episodeNumber, filename, sources } = epData;
