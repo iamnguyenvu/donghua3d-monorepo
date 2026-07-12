@@ -220,18 +220,6 @@ jobs:
             # Backfill weekly release days for interactive calendar
             docker compose exec -T backend node dist/scripts/backfill_airing_days.js
             
-            # Re-sync Bad Guys seasons with range-aware episode mapper and merged KKPhim
-            echo "=== RE-SYNCING BAD GUYS SEASONS ===" >> diagnostics.txt
-            docker compose exec -T backend node dist/scripts/backfill_and_sync_all.js >> diagnostics.txt 2>&1
-            
-            # Scan for any other movies with potential gaps/sync issues
-            echo "=== SCANNING FOR STALE/GAP MOVIES ===" >> diagnostics.txt
-            docker compose exec -T backend node dist/scripts/detect_stale_movies.js >> diagnostics.txt 2>&1
-            
-            # Backfill and sync all stale/gap movies detected in the catalog
-            echo "=== RUNNING BACKFILL FOR STALE/GAP MOVIES ===" >> diagnostics.txt
-            docker compose exec -T backend node dist/scripts/backfill_stale_movies.js >> diagnostics.txt 2>&1
-            
             # Prune obsolete images to reclaim server disk space
             docker image prune -f
 
