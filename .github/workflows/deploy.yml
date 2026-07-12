@@ -228,6 +228,10 @@ jobs:
             echo "=== SCANNING FOR STALE/GAP MOVIES ===" >> diagnostics.txt
             docker compose exec -T backend node dist/scripts/detect_stale_movies.js >> diagnostics.txt 2>&1
             
+            # Backfill and sync all stale/gap movies detected in the catalog
+            echo "=== RUNNING BACKFILL FOR STALE/GAP MOVIES ===" >> diagnostics.txt
+            docker compose exec -T backend node dist/scripts/backfill_stale_movies.js >> diagnostics.txt 2>&1
+            
             # Prune obsolete images to reclaim server disk space
             docker image prune -f
 
