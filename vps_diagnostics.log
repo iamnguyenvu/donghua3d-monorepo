@@ -1,7 +1,7 @@
 === VPS PRE-SHUTDOWN DIAGNOSTICS ===
-Sun Jul 12 03:49:56 UTC 2026
+Sun Jul 12 03:57:26 UTC 2026
                total        used        free      shared  buff/cache   available
-Mem:            3831         739        2605          20         743        3091
+Mem:            3831         931         584          23        2642        2900
 Swap:           4095           0        4095
 Filesystem       Size  Used Avail Use% Mounted on
 /dev/root         28G   14G   15G  50% /
@@ -10,7 +10,7 @@ tmpfs            767M  1.4M  765M   1% /run
 efivarfs         128K  3.3K  120K   3% /sys/firmware/efi/efivars
 none             1.0M     0  1.0M   0% /run/credentials/systemd-journald.service
 none             1.0M     0  1.0M   0% /run/credentials/systemd-resolved.service
-tmpfs            1.9G  4.0K  1.9G   1% /tmp
+tmpfs            1.9G  8.0K  1.9G   1% /tmp
 /dev/nvme0n1p13  989M  163M  760M  18% /boot
 /dev/nvme0n1p15  105M  6.3M   99M   7% /boot/efi
 none             1.0M     0  1.0M   0% /run/credentials/systemd-networkd.service
@@ -18,83 +18,31 @@ none             1.0M     0  1.0M   0% /run/credentials/getty@tty1.service
 none             1.0M     0  1.0M   0% /run/credentials/serial-getty@ttyS0.service
 tmpfs            384M  8.0K  384M   1% /run/user/1000
 === DOCKER PS BEFORE DEPLOY ===
-CONTAINER ID   IMAGE                COMMAND                  CREATED        STATUS                    PORTS                                                                          NAMES
-a134004573a7   nginx:1.25-alpine    "/docker-entrypoint.…"   11 hours ago   Up 10 minutes             0.0.0.0:80->80/tcp, [::]:80->80/tcp, 0.0.0.0:443->443/tcp, [::]:443->443/tcp   donghua3d_nginx
-af3eb8cec03e   donghua3d-frontend   "docker-entrypoint.s…"   11 hours ago   Up 10 minutes             0.0.0.0:3000->3000/tcp, [::]:3000->3000/tcp                                    donghua3d_frontend
-013a38d36638   donghua3d-backend    "docker-entrypoint.s…"   11 hours ago   Up 10 minutes             0.0.0.0:5000->5000/tcp, [::]:5000->5000/tcp                                    donghua3d_backend
-8739b9f4a3d5   postgres:15-alpine   "docker-entrypoint.s…"   11 hours ago   Up 10 minutes (healthy)   0.0.0.0:5432->5432/tcp, [::]:5432->5432/tcp                                    donghua3d_db
-8fc23e27a630   redis:7-alpine       "docker-entrypoint.s…"   11 hours ago   Up 10 minutes             0.0.0.0:6379->6379/tcp, [::]:6379->6379/tcp                                    donghua3d_redis
+CONTAINER ID   IMAGE                COMMAND                  CREATED         STATUS                   PORTS                                                                          NAMES
+1d52551f7b91   nginx:1.25-alpine    "/docker-entrypoint.…"   3 minutes ago   Up 3 minutes             0.0.0.0:80->80/tcp, [::]:80->80/tcp, 0.0.0.0:443->443/tcp, [::]:443->443/tcp   donghua3d_nginx
+f5fece32dce5   donghua3d-frontend   "docker-entrypoint.s…"   3 minutes ago   Up 3 minutes             0.0.0.0:3000->3000/tcp, [::]:3000->3000/tcp                                    donghua3d_frontend
+ebc2ba4b94b9   donghua3d-backend    "docker-entrypoint.s…"   3 minutes ago   Up 3 minutes             0.0.0.0:5000->5000/tcp, [::]:5000->5000/tcp                                    donghua3d_backend
+00f797b107cd   postgres:15-alpine   "docker-entrypoint.s…"   3 minutes ago   Up 3 minutes (healthy)   0.0.0.0:5432->5432/tcp, [::]:5432->5432/tcp                                    donghua3d_db
+1ce3bcda4185   redis:7-alpine       "docker-entrypoint.s…"   3 minutes ago   Up 3 minutes             0.0.0.0:6379->6379/tcp, [::]:6379->6379/tcp                                    donghua3d_redis
 === DOCKER NETWORKS ===
 NETWORK ID     NAME                DRIVER    SCOPE
 c33c89728f14   bridge              bridge    local
-ecfc7f83dd59   donghua3d_default   bridge    local
+1138616052b7   donghua3d_default   bridge    local
 1f85bfbe182c   host                host      local
 a7196d33ede9   none                null      local
 === EXISTING COMPOSE PS ===
-NAME                 IMAGE                COMMAND                  SERVICE    CREATED        STATUS                    PORTS
-donghua3d_backend    donghua3d-backend    "docker-entrypoint.s…"   backend    11 hours ago   Up 10 minutes             0.0.0.0:5000->5000/tcp, [::]:5000->5000/tcp
-donghua3d_db         postgres:15-alpine   "docker-entrypoint.s…"   db         11 hours ago   Up 10 minutes (healthy)   0.0.0.0:5432->5432/tcp, [::]:5432->5432/tcp
-donghua3d_frontend   donghua3d-frontend   "docker-entrypoint.s…"   frontend   11 hours ago   Up 10 minutes             0.0.0.0:3000->3000/tcp, [::]:3000->3000/tcp
-donghua3d_nginx      nginx:1.25-alpine    "/docker-entrypoint.…"   nginx      11 hours ago   Up 10 minutes             0.0.0.0:80->80/tcp, [::]:80->80/tcp, 0.0.0.0:443->443/tcp, [::]:443->443/tcp
-donghua3d_redis      redis:7-alpine       "docker-entrypoint.s…"   redis      11 hours ago   Up 10 minutes             0.0.0.0:6379->6379/tcp, [::]:6379->6379/tcp
+NAME                 IMAGE                COMMAND                  SERVICE    CREATED         STATUS                   PORTS
+donghua3d_backend    donghua3d-backend    "docker-entrypoint.s…"   backend    3 minutes ago   Up 3 minutes             0.0.0.0:5000->5000/tcp, [::]:5000->5000/tcp
+donghua3d_db         postgres:15-alpine   "docker-entrypoint.s…"   db         3 minutes ago   Up 3 minutes (healthy)   0.0.0.0:5432->5432/tcp, [::]:5432->5432/tcp
+donghua3d_frontend   donghua3d-frontend   "docker-entrypoint.s…"   frontend   3 minutes ago   Up 3 minutes             0.0.0.0:3000->3000/tcp, [::]:3000->3000/tcp
+donghua3d_nginx      nginx:1.25-alpine    "/docker-entrypoint.…"   nginx      3 minutes ago   Up 3 minutes             0.0.0.0:80->80/tcp, [::]:80->80/tcp, 0.0.0.0:443->443/tcp, [::]:443->443/tcp
+donghua3d_redis      redis:7-alpine       "docker-entrypoint.s…"   redis      3 minutes ago   Up 3 minutes             0.0.0.0:6379->6379/tcp, [::]:6379->6379/tcp
 === EXISTING FRONTEND LOGS ===
 donghua3d_frontend  | ▲ Next.js 16.2.5
 donghua3d_frontend  | - Local:         http://localhost:3000
 donghua3d_frontend  | - Network:       http://0.0.0.0:3000
 donghua3d_frontend  | ✓ Ready in 0ms
-donghua3d_frontend  | ▲ Next.js 16.2.5
-donghua3d_frontend  | - Local:         http://localhost:3000
-donghua3d_frontend  | - Network:       http://0.0.0.0:3000
-donghua3d_frontend  | ✓ Ready in 0ms
 === EXISTING BACKEND LOGS ===
-donghua3d_backend  | 
-donghua3d_backend  | > donghua3d-backend@1.0.0 start
-donghua3d_backend  | > node dist/index.js
-donghua3d_backend  | 
-donghua3d_backend  | 💬 [Socket.io] Watch Party Real-time Gateway enabled.
-donghua3d_backend  | ========================================================
-donghua3d_backend  |  🚀 DONGHUA3D EXPRESS RUNNING ON PORT 5000 [PRODUCTION]
-donghua3d_backend  |  API Endpoint: http://localhost:5000
-donghua3d_backend  | ========================================================
-donghua3d_backend  | 🤖 [CronService] Initializing scheduled tasks...
-donghua3d_backend  | 🤖 [CronService] Hourly movie auto-scraper scheduled (runs at the start of every hour).
-donghua3d_backend  | 🤖 [CronService] News RSS feed sync scheduled (runs every 6 hours).
-donghua3d_backend  | 📰 [News Scraper] Starting RSS Feed news sync...
-donghua3d_backend  | Connected to Redis at redis://redis:6379
-donghua3d_backend  | 📰 [News Scraper] Synced 3 articles successfully from Mock Backup Data.
-donghua3d_backend  | prisma:error Error in PostgreSQL connection: Error { kind: Db, cause: Some(DbError { severity: "FATAL", parsed_severity: Some(Fatal), code: SqlState(E57P01), message: "terminating connection due to administrator command", detail: None, hint: None, position: None, where_: None, schema: None, table: None, column: None, datatype: None, constraint: None, file: Some("postgres.c"), line: Some(3211), routine: Some("ProcessInterrupts") }) }
-donghua3d_backend  | prisma:error Error in PostgreSQL connection: Error { kind: Db, cause: Some(DbError { severity: "FATAL", parsed_severity: Some(Fatal), code: SqlState(E57P01), message: "terminating connection due to administrator command", detail: None, hint: None, position: None, where_: None, schema: None, table: None, column: None, datatype: None, constraint: None, file: Some("postgres.c"), line: Some(3211), routine: Some("ProcessInterrupts") }) }
-donghua3d_backend  | prisma:error Error in PostgreSQL connection: Error { kind: Db, cause: Some(DbError { severity: "FATAL", parsed_severity: Some(Fatal), code: SqlState(E57P01), message: "terminating connection due to administrator command", detail: None, hint: None, position: None, where_: None, schema: None, table: None, column: None, datatype: None, constraint: None, file: Some("postgres.c"), line: Some(3211), routine: Some("ProcessInterrupts") }) }
-donghua3d_backend  | prisma:error Error in PostgreSQL connection: Error { kind: Db, cause: Some(DbError { severity: "FATAL", parsed_severity: Some(Fatal), code: SqlState(E57P01), message: "terminating connection due to administrator command", detail: None, hint: None, position: None, where_: None, schema: None, table: None, column: None, datatype: None, constraint: None, file: Some("postgres.c"), line: Some(3211), routine: Some("ProcessInterrupts") }) }
-donghua3d_backend  | Redis connection error: Error: connect ECONNREFUSED 172.18.0.3:6379
-donghua3d_backend  |     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16) {
-donghua3d_backend  |   errno: -111,
-donghua3d_backend  |   code: 'ECONNREFUSED',
-donghua3d_backend  |   syscall: 'connect',
-donghua3d_backend  |   address: '172.18.0.3',
-donghua3d_backend  |   port: 6379
-donghua3d_backend  | }
-donghua3d_backend  | Redis connection error: Error: connect ECONNREFUSED 172.18.0.3:6379
-donghua3d_backend  |     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16) {
-donghua3d_backend  |   errno: -111,
-donghua3d_backend  |   code: 'ECONNREFUSED',
-donghua3d_backend  |   syscall: 'connect',
-donghua3d_backend  |   address: '172.18.0.3',
-donghua3d_backend  |   port: 6379
-donghua3d_backend  | }
-donghua3d_backend  | Redis connection error: Error: connect ECONNREFUSED 172.18.0.3:6379
-donghua3d_backend  |     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16) {
-donghua3d_backend  |   errno: -111,
-donghua3d_backend  |   code: 'ECONNREFUSED',
-donghua3d_backend  |   syscall: 'connect',
-donghua3d_backend  |   address: '172.18.0.3',
-donghua3d_backend  |   port: 6379
-donghua3d_backend  | }
-donghua3d_backend  | npm error path /app
-donghua3d_backend  | npm error command failed
-donghua3d_backend  | npm error signal SIGTERM
-donghua3d_backend  | npm error command sh -c node dist/index.js
-donghua3d_backend  | npm error A complete log of this run can be found in: /root/.npm/_logs/2026-07-11T16_45_34_214Z-debug-0.log
 donghua3d_backend  | 
 donghua3d_backend  | > donghua3d-backend@1.0.0 start
 donghua3d_backend  | > node dist/index.js
