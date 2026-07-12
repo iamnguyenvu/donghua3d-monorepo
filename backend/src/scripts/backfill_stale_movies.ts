@@ -12,12 +12,20 @@ const targetSlugs = [
   'au-la-ai-luc'
 ];
 
+const slugMappings: Record<string, string> = {
+  'thuong-nguyen-o': 'thuong-nguyen-do',
+  'linh-lung-phan-2': 'ling-cage-season-2',
+  'thieu-nien-ca-hanh-phan-4': 'youths-and-golden-coffin-4',
+  'au-la-ai-luc': 'dau-la-dai-luc'
+};
+
 async function run() {
   console.log('🏁 [Manual Backfill] Starting sync for stale/gap movies...');
   for (const slug of targetSlugs) {
+    const remoteSlug = slugMappings[slug] || slug;
     try {
-      console.log(`\n🤖 [Manual Backfill] Syncing: "${slug}"...`);
-      const res = await scraperService.syncMovieBySlug(slug);
+      console.log(`\n🤖 [Manual Backfill] Syncing: "${slug}" (remote slug: "${remoteSlug}")...`);
+      const res = await scraperService.syncMovieBySlug(remoteSlug);
       if (res.success) {
         console.log(`✅ [Manual Backfill] Success for "${slug}": ${res.message}`);
       } else {

@@ -73,14 +73,48 @@ export class ScraperService {
     return html.replace(/<[^>]*>/g, '').trim();
   }
 
-  private async fetchKKPhimEpisodes(slug: string): Promise<any[]> {
+  private async fetchKKPhimEpisodes(slug: string, title?: string): Promise<any[]> {
     try {
+      // 1. Try direct fetch
       const response = await fetch(`https://phimapi.com/phim/${slug}`);
-      if (!response.ok) return [];
-      const data = (await response.json()) as any;
-      return data.episodes || [];
+      if (response.ok) {
+        const data = (await response.json()) as any;
+        if (data.episodes && data.episodes.length > 0) {
+          return data.episodes;
+        }
+      }
+
+      // 2. Try fallback search if title is provided
+      if (title) {
+        console.log(`🔍 [Scraper] KKPhim slug ${slug} not found. Searching by title "${title}"...`);
+        const searchRes = await fetch(`https://phimapi.com/v1/api/tim-kiem?keyword=${encodeURIComponent(title)}`);
+        if (searchRes.ok) {
+          const searchData = (await searchRes.json()) as any;
+          const items = searchData.data?.items || searchData.items || [];
+          if (items.length > 0) {
+            const cleanTitle = title.toLowerCase().trim();
+            const matchedItem = items.find((item: any) => {
+              const nameLower = (item.name || '').toLowerCase().trim();
+              const originLower = (item.origin_name || '').toLowerCase().trim();
+              return nameLower.includes(cleanTitle) || cleanTitle.includes(nameLower) ||
+                     originLower.includes(cleanTitle) || cleanTitle.includes(originLower);
+            });
+
+            if (matchedItem && matchedItem.slug) {
+              console.log(`🎯 [Scraper] Found matching KKPhim slug: "${matchedItem.slug}" for title "${title}"`);
+              const fallbackResponse = await fetch(`https://phimapi.com/phim/${matchedItem.slug}`);
+              if (fallbackResponse.ok) {
+                const data = (await fallbackResponse.json()) as any;
+                return data.episodes || [];
+              }
+            }
+          }
+        }
+      }
+
+      return [];
     } catch (e: any) {
-      console.log(`⚠️ [Scraper] KKPhim fetch failed for slug ${slug}: ${e.message}`);
+      console.log(`⚠️ [Scraper] KKPhim fetch/fallback failed for slug ${slug}: ${e.message}`);
       return [];
     }
   }
@@ -304,7 +338,7 @@ export class ScraperService {
         }
 
         // Sync KKPhim episodes as well if available
-        const kkEpisodes = await this.fetchKKPhimEpisodes(slug);
+        const kkEpisodes = await this.fetchKKPhimEpisodes(slug, movie.title);
         if (kkEpisodes && kkEpisodes.length > 0) {
           console.log(`🤖 [Scraper] Merging KKPhim episodes...`);
           for (const server of kkEpisodes) {
