@@ -201,6 +201,32 @@ export default function PremiumPlayer({
     }
   }, []);
 
+  // React 19 Custom Elements / Detached Video Element Fix Hook
+  useEffect(() => {
+    const interval = setInterval(() => {
+      try {
+        const player = activePlayerRef.current;
+        if (player && player.provider && player.provider.video) {
+          const video = player.provider.video;
+          const outlet = document.querySelector('media-outlet');
+          if (outlet && video.parentElement !== outlet) {
+            console.log("React 19 Fix: Appending detached video element back to media-outlet");
+            outlet.appendChild(video);
+            video.style.setProperty('position', 'absolute', 'important');
+            video.style.setProperty('top', '0', 'important');
+            video.style.setProperty('left', '0', 'important');
+            video.style.setProperty('width', '100%', 'important');
+            video.style.setProperty('height', '100%', 'important');
+            video.style.setProperty('object-fit', 'contain', 'important');
+          }
+        }
+      } catch (err) {
+        // Silent catch
+      }
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [activePlayerRef]);
+
   // Show Resume Prompt if initialProgress is significant and not in a Watch Party
   useEffect(() => {
     if (initialProgress > 10 && !isWatchParty) {
