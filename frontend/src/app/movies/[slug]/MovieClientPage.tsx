@@ -60,6 +60,7 @@ export default function MovieClientPage({
   const [watchlistActionLoading, setWatchlistActionLoading] = useState(false);
   const [episodeLayout, setEpisodeLayout] = useState<'grid' | 'compact'>('grid');
   const [activeTab, setActiveTab] = useState<'episodes' | 'lore'>('episodes');
+  const [partsLayout, setPartsLayout] = useState<'grid' | 'compact'>('grid');
   const [sortAsc, setSortAsc] = useState(true);
   const [episodeSearchQuery, setEpisodeSearchQuery] = useState('');
 
@@ -316,6 +317,95 @@ export default function MovieClientPage({
         
         {/* LEFT COLUMN: LIST OF EPISODES (2/3 Grid) */}
         <div className="lg:col-span-2 flex flex-col gap-6">
+          {/* Related Seasons / Parts Section (At the top of the left column) */}
+          {relatedParts.length > 0 && (
+            <div className="mb-6 pb-6 border-b border-zinc-900/60 select-none">
+              <div className="flex items-center justify-between border-b border-zinc-900/60 pb-4 mb-4 gap-4">
+                <h3 className="text-base font-black text-white tracking-wider uppercase border-l-2 border-violet-500 pl-3">
+                  Các Phần Khác Của Series Này
+                </h3>
+                <div className="flex items-center bg-zinc-950/80 p-1 rounded-[4px] border border-zinc-900 h-9">
+                  <button
+                    onClick={() => setPartsLayout('grid')}
+                    className={`px-3 py-1.5 rounded-[3px] text-[10px] font-black uppercase tracking-wider transition-all cursor-pointer border-0 outline-none ${
+                      partsLayout === 'grid'
+                        ? 'bg-violet-600 text-white shadow-sm'
+                        : 'text-zinc-500 hover:text-zinc-300 bg-transparent'
+                    }`}
+                  >
+                    Chi Tiết
+                  </button>
+                  <button
+                    onClick={() => setPartsLayout('compact')}
+                    className={`px-3 py-1.5 rounded-[3px] text-[10px] font-black uppercase tracking-wider transition-all cursor-pointer border-0 outline-none ${
+                      partsLayout === 'compact'
+                        ? 'bg-violet-600 text-white shadow-sm'
+                        : 'text-zinc-500 hover:text-zinc-300 bg-transparent'
+                    }`}
+                  >
+                    Rút Gọn
+                  </button>
+                </div>
+              </div>
+
+              {partsLayout === 'grid' ? (
+                <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-zinc-850">
+                  {relatedParts.map((part) => (
+                    <Link
+                      key={part.id}
+                      href={`/movies/${part.slug || part.id}`}
+                      className="flex items-center gap-3.5 p-3.5 bg-zinc-950/30 border border-zinc-900 hover:border-violet-500/40 hover:bg-violet-500/5 rounded-[4px] w-64 sm:w-72 lg:w-80 xl:w-96 flex-shrink-0 transition-all duration-300 group no-underline shadow-sm"
+                    >
+                      <div className="w-12 h-16 sm:w-14 sm:h-20 rounded-[2px] overflow-hidden bg-zinc-950 flex-shrink-0 relative border border-zinc-900/60">
+                        <Image
+                          src={part.bannerUrl || part.posterUrl || '/static/uploads/default_poster.jpg'}
+                          alt={part.title}
+                          fill
+                          sizes="56px"
+                          className="object-cover object-top group-hover:scale-105 transition-all duration-300"
+                        />
+                      </div>
+                      <div className="flex flex-col min-w-0 flex-1">
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                          {part.seriesLabel ? (
+                            <span className="bg-violet-600/15 text-violet-400 border border-violet-500/25 px-1.5 py-0.5 rounded-[2px] text-[8px] font-black uppercase tracking-wider">
+                              {part.seriesLabel}
+                            </span>
+                          ) : (
+                            <span className="bg-zinc-800/40 text-zinc-400 border border-zinc-800/60 px-1.5 py-0.5 rounded-[2px] text-[8px] font-black uppercase tracking-wider">
+                              Phần Khác
+                            </span>
+                          )}
+                          <span className="text-[9px] text-zinc-500 font-bold uppercase">{part.releaseYear}</span>
+                        </div>
+                        <h4 className="text-xs font-black text-white group-hover:text-violet-400 line-clamp-2 mt-1.5 transition-colors leading-snug">
+                          {part.title}
+                        </h4>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              ) : (
+                <div className="flex flex-wrap gap-2.5">
+                  {relatedParts.map((part) => (
+                    <Link
+                      key={part.id}
+                      href={`/movies/${part.slug || part.id}`}
+                      className="px-4 py-2.5 rounded-[4px] bg-[#0c0c0f]/80 hover:bg-violet-600/15 border border-zinc-900 hover:border-violet-500/50 text-zinc-300 hover:text-violet-400 text-xs font-bold uppercase tracking-wider no-underline transition-all duration-300 flex items-center gap-2"
+                    >
+                      {part.seriesLabel && (
+                        <span className="bg-violet-600/20 text-violet-400 px-1.5 py-0.5 rounded-[2px] text-[9px] font-black uppercase">
+                          {part.seriesLabel}
+                        </span>
+                      )}
+                      <span>{part.title}</span>
+                    </Link>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
           {movie.loreMetadata && (
             <div className="flex items-center gap-6 border-b border-zinc-900/60 pb-0 mb-2">
               <button
@@ -416,22 +506,10 @@ export default function MovieClientPage({
                           </div>
                         </div>
 
-                        <div className="p-4 flex flex-col gap-1 select-none">
-                          <span className="text-[9px] text-violet-500 font-black uppercase tracking-widest">Tập {ep.episodeNumber}</span>
-                          {(() => {
-                            const cleanTitle = cleanEpisodeTitle(ep.title, ep.episodeNumber);
-                            const isTitleDuplicated = cleanTitle.toLowerCase() === `tập ${ep.episodeNumber}` || 
-                                                      cleanTitle.toLowerCase() === `tập 0${ep.episodeNumber}`;
-                            if (isTitleDuplicated) return null;
-                            return (
-                              <h3 className="text-xs font-bold text-white group-hover:text-violet-400 transition-colors truncate mt-0.5">
-                                {cleanTitle}
-                              </h3>
-                            );
-                          })()}
-                          <p className="text-[11px] text-zinc-500 line-clamp-2 leading-relaxed mt-0.5">
-                            {ep.description}
-                          </p>
+                        <div className="p-4 flex flex-col select-none">
+                          <span className="text-xs sm:text-[13px] font-black uppercase tracking-widest text-violet-500 group-hover:text-violet-400 transition-colors">
+                            Tập {ep.episodeNumber}
+                          </span>
                         </div>
                       </Link>
                     ))
@@ -490,50 +568,7 @@ export default function MovieClientPage({
             </div>
           )}
 
-          {/* Related Seasons / Parts Section (Moved below episodes list) */}
-          {relatedParts.length > 0 && (
-            <div className="mt-8 pt-6 border-t border-zinc-900/60 select-none">
-              <h3 className="text-base font-black text-white tracking-wider uppercase border-l-2 border-violet-500 pl-3 mb-4">
-                Các Phần Khác Của Series Này
-              </h3>
-              <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-zinc-850">
-                {relatedParts.map((part) => (
-                  <Link
-                    key={part.id}
-                    href={`/movies/${part.slug || part.id}`}
-                    className="flex items-center gap-3.5 p-3.5 bg-zinc-950/30 border border-zinc-900 hover:border-violet-500/40 hover:bg-violet-500/5 rounded-[4px] w-64 sm:w-72 lg:w-80 xl:w-96 flex-shrink-0 transition-all duration-300 group no-underline shadow-sm"
-                  >
-                    <div className="w-12 h-16 sm:w-14 sm:h-20 rounded-[2px] overflow-hidden bg-zinc-950 flex-shrink-0 relative border border-zinc-900/60">
-                      <Image
-                        src={part.bannerUrl || part.posterUrl || '/static/uploads/default_poster.jpg'}
-                        alt={part.title}
-                        fill
-                        sizes="56px"
-                        className="object-cover object-top group-hover:scale-105 transition-all duration-300"
-                      />
-                    </div>
-                    <div className="flex flex-col min-w-0 flex-1">
-                      <div className="flex items-center gap-1.5 flex-wrap">
-                        {part.seriesLabel ? (
-                          <span className="bg-violet-600/15 text-violet-400 border border-violet-500/25 px-1.5 py-0.5 rounded-[2px] text-[8px] font-black uppercase tracking-wider">
-                            {part.seriesLabel}
-                          </span>
-                        ) : (
-                          <span className="bg-zinc-800/40 text-zinc-400 border border-zinc-800/60 px-1.5 py-0.5 rounded-[2px] text-[8px] font-black uppercase tracking-wider">
-                            Phần Khác
-                          </span>
-                        )}
-                        <span className="text-[9px] text-zinc-500 font-bold uppercase">{part.releaseYear}</span>
-                      </div>
-                      <h4 className="text-xs font-black text-white group-hover:text-violet-400 line-clamp-2 mt-1.5 transition-colors leading-snug">
-                        {part.title}
-                      </h4>
-                    </div>
-                  </Link>
-                ))}
-              </div>
-            </div>
-          )}
+
 
           {/* Similar Movies Section (Moved below episodes list) */}
           {similarMovies.length > 0 && (

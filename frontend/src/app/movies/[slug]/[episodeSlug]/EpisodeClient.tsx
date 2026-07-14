@@ -311,7 +311,7 @@ export default function EpisodePage({ slug, episodeNumber }: { slug: string; epi
       {/* ==============================================================================
          CINEMATIC WATCH PLAYER BLOCK (Layout 02 Netflix Style - Custom Vidstack Player)
          ============================================================================== */}
-      <main className="w-full px-6 md:px-12 lg:px-16 mt-28">
+      <main className="w-full max-w-[1440px] mx-auto px-4 sm:px-6 md:px-12 lg:px-16 mt-28">
         <nav className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-wider mb-5 transition-colors select-none flex-wrap">
           <Link href="/" className="text-zinc-500 hover:text-violet-400 transition-colors flex items-center gap-1 no-underline">
             Trang Chủ
